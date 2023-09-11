@@ -10,15 +10,12 @@ import javax.persistence.*;
 public class Report extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(nullable = false)
     private Room room;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(nullable = false)
     private User reportedUser;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(nullable = false)
     private User reporter;
 
     @Column(nullable = false)
