@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    username: root
+    password: 1234
+    url: jdbc:mysql://localhost:3306/chillibubble
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
+    properties:
+      hibernate:
+        ddl-auto: true
+        format_sql: true
+  sql:
+    init:
+      data-locations: classpath*:data.sql
+      mode: always
+      platform: mysql
+
+logging:
+  level:
+    sql: trace
