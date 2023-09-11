@@ -12,7 +12,6 @@ import javax.persistence.ManyToOne;
 public class Company extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(nullable = false)
     private Building building;
 
     @Column(nullable = false)

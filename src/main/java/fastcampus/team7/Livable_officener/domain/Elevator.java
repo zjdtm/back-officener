@@ -11,7 +11,6 @@ import javax.persistence.*;
 public class Elevator extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(nullable = false)
     private Building building;
 
     @Column(nullable = false)
