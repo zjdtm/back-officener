@@ -2,7 +2,8 @@ package fastcampus.team7.Livable_officener.global.config;
 
 import fastcampus.team7.Livable_officener.global.handler.CustomTextWebSocketHandler;
 import fastcampus.team7.Livable_officener.global.interceptor.CustomHandshakeInterceptor;
-import fastcampus.team7.Livable_officener.repository.TestRoomRepository;
+import fastcampus.team7.Livable_officener.repository.ChatRoomRepository;
+import fastcampus.team7.Livable_officener.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +18,8 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
 
-    private final TestRoomRepository testRoomRepository;
+    private final ChatRoomRepository chatRoomRepository;
+    private final ChatService chatService;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
@@ -31,11 +33,11 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Bean
     public WebSocketHandler customTextWebSocketHandler() {
-        return new CustomTextWebSocketHandler(testRoomRepository);
+        return new CustomTextWebSocketHandler(chatService);
     }
 
     @Bean
     public HandshakeInterceptor customHandshakeInterceptor() {
-        return new CustomHandshakeInterceptor(testRoomRepository);
+        return new CustomHandshakeInterceptor(chatRoomRepository);
     }
 }
