@@ -2,7 +2,7 @@ package fastcampus.team7.Livable_officener.global.interceptor;
 
 import fastcampus.team7.Livable_officener.domain.Room;
 import fastcampus.team7.Livable_officener.domain.User;
-import fastcampus.team7.Livable_officener.repository.ChatRoomRepository;
+import fastcampus.team7.Livable_officener.repository.XChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -14,7 +14,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CustomHandshakeInterceptor extends HttpSessionHandshakeInterceptor {
 
-    private final ChatRoomRepository chatRoomRepository;
+    private final XChatRoomRepository roomRepository;
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request,
@@ -32,7 +32,7 @@ public class CustomHandshakeInterceptor extends HttpSessionHandshakeInterceptor 
 
     private Room getRoom(ServerHttpRequest request) {
         Long roomId = getRoomId(request);
-        return chatRoomRepository.findById(roomId)
+        return roomRepository.findById(roomId)
                 // TODO NotFoundRoomException 정의
                 .orElseThrow(IllegalArgumentException::new);
     }
