@@ -2,11 +2,14 @@ package fastcampus.team7.Livable_officener.domain;
 
 import fastcampus.team7.Livable_officener.global.constant.FoodTag;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
-import lombok.Getter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 @Getter
 @Entity
 public class Room extends BaseEntity {
@@ -49,5 +52,4 @@ public class Room extends BaseEntity {
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
     private RoomStatus status;
-
 }
