@@ -5,7 +5,9 @@ import fastcampus.team7.Livable_officener.domain.Room;
 import fastcampus.team7.Livable_officener.domain.RoomParticipant;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.SendChatDTO;
+import fastcampus.team7.Livable_officener.global.constant.Role;
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
+import fastcampus.team7.Livable_officener.global.exception.UserIsNotHostException;
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotMemberException;
 import fastcampus.team7.Livable_officener.repository.ChatRepository;
 import fastcampus.team7.Livable_officener.repository.XChatRoomParticipantRepository;
@@ -44,7 +46,15 @@ public class ChatService {
     }
 
     private RoomParticipant getRoomParticipant(Long roomId, Long userId) {
-        return roomParticipantRepository.findByRoomIdAndUserId(roomId, userId)
+        RoomParticipant roomParticipant = roomParticipantRepository.findByRoomIdAndUserId(roomId, userId)
                 .orElseThrow(UserIsNotMemberException::new);
+        validateIfRoomParticipantIsHost(roomParticipant.getRole());
+        return roomParticipant;
+    }
+
+    private static void validateIfRoomParticipantIsHost(Role role) {
+        if (role != Role.HOST) {
+            throw new UserIsNotHostException("참여마감하기");
+        }
     }
 }

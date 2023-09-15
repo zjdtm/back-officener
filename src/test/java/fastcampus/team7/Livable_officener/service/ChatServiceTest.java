@@ -1,8 +1,11 @@
 package fastcampus.team7.Livable_officener.service;
 
 import fastcampus.team7.Livable_officener.domain.Room;
+import fastcampus.team7.Livable_officener.domain.RoomParticipant;
 import fastcampus.team7.Livable_officener.domain.User;
+import fastcampus.team7.Livable_officener.global.constant.Role;
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
+import fastcampus.team7.Livable_officener.global.exception.UserIsNotHostException;
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotMemberException;
 import fastcampus.team7.Livable_officener.repository.XChatRoomParticipantRepository;
 import fastcampus.team7.Livable_officener.repository.XChatRoomRepository;
@@ -62,5 +65,29 @@ class ChatServiceTest {
         assertThatThrownBy(() ->
                 sut.closeToTakePartIn(roomId, user))
                 .isInstanceOf(UserIsNotMemberException.class);
+    }
+
+    @Test
+    void 참여마감시_호스트가아니면_예외발생() {
+        // given
+        Long roomId = 1L;
+        User user = mock(User.class);
+        Room room = mock(Room.class);
+        RoomParticipant roomParticipant = mock(RoomParticipant.class);
+
+        given(user.getId())
+                .willReturn(1L);
+        given(roomRepository.findById(anyLong()))
+                .willReturn(Optional.of(room));
+        given(roomParticipantRepository.findByRoomIdAndUserId(anyLong(), anyLong()))
+                .willReturn(Optional.of(roomParticipant));
+        given(roomParticipant.getRole())
+                .willReturn(Role.GUEST);
+
+        // when, then
+        assertThatThrownBy(() ->
+                sut.closeToTakePartIn(roomId, user))
+                .isInstanceOf(UserIsNotHostException.class)
+                .hasMessage("'참여마감하기' 요청은 호스트만 가능합니다.");
     }
 }
