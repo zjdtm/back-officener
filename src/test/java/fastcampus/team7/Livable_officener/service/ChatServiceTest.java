@@ -42,9 +42,7 @@ class ChatServiceTest {
                 .willReturn(Optional.empty());
 
         // when, then
-        assertThatThrownBy(() ->
-                sut.closeToTakePartIn(roomIdNotExist, user))
-                .isInstanceOf(NotFoundRoomException.class);
+        assertThrowsWhenCloseParticipation(roomIdNotExist, user, NotFoundRoomException.class);
     }
 
     @Test
@@ -62,9 +60,7 @@ class ChatServiceTest {
                 .willReturn(Optional.empty());
 
         // when, then
-        assertThatThrownBy(() ->
-                sut.closeToTakePartIn(roomId, user))
-                .isInstanceOf(UserIsNotMemberException.class);
+        assertThrowsWhenCloseParticipation(roomId, user, UserIsNotMemberException.class);
     }
 
     @Test
@@ -85,9 +81,24 @@ class ChatServiceTest {
                 .willReturn(Role.GUEST);
 
         // when, then
-        assertThatThrownBy(() ->
+        assertThrowsWhenCloseParticipation(
+                roomId, user,
+                UserIsNotHostException.class,
+                "'참여마감하기' 요청은 호스트만 가능합니다.");
+    }
+
+    private void assertThrowsWhenCloseParticipation(Long roomId, User user, Class<? extends Throwable> ex) {
+        assertThrowsWhenCloseParticipation(roomId, user, ex, null);
+    }
+
+    private void assertThrowsWhenCloseParticipation(Long roomId, User user,
+                                                    Class<? extends Throwable> ex,
+                                                    String message) {
+        var ast = assertThatThrownBy(() ->
                 sut.closeToTakePartIn(roomId, user))
-                .isInstanceOf(UserIsNotHostException.class)
-                .hasMessage("'참여마감하기' 요청은 호스트만 가능합니다.");
+                .isInstanceOf(ex);
+        if (message != null) {
+            ast.hasMessage(message);
+        }
     }
 }
