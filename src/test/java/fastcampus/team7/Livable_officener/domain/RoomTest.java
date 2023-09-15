@@ -5,6 +5,7 @@ import fastcampus.team7.Livable_officener.global.exception.NotActiveRoomExceptio
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RoomTest {
@@ -20,5 +21,20 @@ class RoomTest {
         // when, then
         assertThatThrownBy(room::closeParticipation)
                 .isInstanceOf(NotActiveRoomException.class);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = RoomStatus.class, names = "ACTIVE")
+    void 참여마감시_활성상태면_참여마감상태로변경(RoomStatus status) {
+        // given
+        Room room = Room.builder()
+                .status(status)
+                .build();
+
+        // when
+        room.closeParticipation();
+
+        // then
+        assertThat(room.getStatus()).isSameAs(RoomStatus.CLOSED);
     }
 }
