@@ -23,6 +23,7 @@ public class ChatService {
 
     private final ChatRepository chatRepository;
     private final XChatRoomRepository roomRepository;
+    private final XChatRoomParticipantRepository roomParticipantRepository;
 
     @Transactional
     public void send(SendChatDTO dto) throws IOException {
@@ -34,10 +35,16 @@ public class ChatService {
 
     public void closeToTakePartIn(Long roomId, User user) {
         Room room = getRoom(roomId);
+        RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
     }
 
     private Room getRoom(Long roomId) {
         return roomRepository.findById(roomId)
                 .orElseThrow(NotFoundRoomException::new);
+    }
+
+    private RoomParticipant getRoomParticipant(Long roomId, Long userId) {
+        return roomParticipantRepository.findByRoomIdAndUserId(roomId, userId)
+                .orElseThrow(UserIsNotMemberException::new);
     }
 }
