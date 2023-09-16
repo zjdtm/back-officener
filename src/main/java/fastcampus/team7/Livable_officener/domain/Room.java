@@ -1,13 +1,18 @@
 package fastcampus.team7.Livable_officener.domain;
 
+import fastcampus.team7.Livable_officener.global.constant.BankName;
 import fastcampus.team7.Livable_officener.global.constant.FoodTag;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+@Builder
 @Getter
+@RequiredArgsConstructor
 @Entity
 public class Room extends BaseEntity {
 
@@ -25,7 +30,7 @@ public class Room extends BaseEntity {
     private FoodTag tag;
 
     @Column(nullable = false)
-    private String bankName;
+    private BankName bankName;
 
     @Column(nullable = false)
     private String accountNumber;
