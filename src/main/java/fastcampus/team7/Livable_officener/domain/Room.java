@@ -1,5 +1,6 @@
 package fastcampus.team7.Livable_officener.domain;
 
+import fastcampus.team7.Livable_officener.global.constant.BankName;
 import fastcampus.team7.Livable_officener.global.constant.FoodTag;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
 import fastcampus.team7.Livable_officener.global.exception.NotActiveRoomException;
@@ -29,7 +30,7 @@ public class Room extends BaseEntity {
     private FoodTag tag;
 
     @Column(nullable = false)
-    private String bankName;
+    private BankName bankName;
 
     @Column(nullable = false)
     private String accountNumber;
