@@ -22,7 +22,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
-import java.util.Set;
+import java.util.Collection;
 
 @RequiredArgsConstructor
 @Service
@@ -31,11 +31,11 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final XChatRoomRepository roomRepository;
     private final XChatRoomParticipantRepository roomParticipantRepository;
-    private final WebSocketSessionManager wsSessionManager;
+    private final WebSocketSessionManager webSocketSessionManager;
 
     @Transactional
     public void send(SendChatDTO dto) throws IOException {
-        for (WebSocketSession connectedSession : dto.getSessionSet()) {
+        for (WebSocketSession connectedSession : dto.getWebSocketSessions()) {
             connectedSession.sendMessage(dto.getMessage());
         }
         chatRepository.save(Chat.from(dto));
@@ -71,8 +71,8 @@ public class ChatService {
     }
 
     private void sendCloseSystemMessage(Room room, User user) throws IOException {
-        Set<WebSocketSession> sessionSetOfRoom = wsSessionManager.getSessionSetOfRoom(room.getId());
+        Collection<WebSocketSession> webSocketSessions = webSocketSessionManager.getWebSocketSessions(room.getId());
         TextMessage textMessage = new TextMessage(SystemMessage.CLOSE.getContent(user.getName()));
-        send(new SendChatDTO(room, user, textMessage, ChatType.CLOSE, sessionSetOfRoom));
+        send(new SendChatDTO(room, user, textMessage, ChatType.CLOSE, webSocketSessions));
     }
 }

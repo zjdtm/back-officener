@@ -14,19 +14,19 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
-import java.util.Set;
+import java.util.Collection;
 
 @Slf4j
 @RequiredArgsConstructor
 public class CustomTextWebSocketHandler extends TextWebSocketHandler {
 
-    private final WebSocketSessionManager wsSessionManager;
+    private final WebSocketSessionManager webSocketSessionManager;
     private final ChatService chatService;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
         Room room = getRoom(session);
-        wsSessionManager.addSessionToRoom(room.getId(), session);
+        webSocketSessionManager.addSessionToRoom(room.getId(), session);
 
         User sender = getSender(session);
         log.info("클라이언트 연결 roomId: {}, senderId: {}, sessionId: {}", room.getId(), sender.getId(), session.getId());
@@ -36,19 +36,20 @@ public class CustomTextWebSocketHandler extends TextWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
         Room room = getRoom(session);
         User sender = getSender(session);
-        Set<WebSocketSession> sessionSet = wsSessionManager.getSessionSetOfRoom(room.getId());
+        Collection<WebSocketSession> webSocketSessions = webSocketSessionManager.getWebSocketSessions(room.getId());
         log.info("roomId: {}, senderId: {}, content: {}", room.getId(), sender.getId(), message.getPayload());
 
-        chatService.send(new SendChatDTO(room, sender, message, ChatType.TALK, sessionSet));
+        chatService.send(new SendChatDTO(room, sender, message, ChatType.TALK, webSocketSessions));
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         Room room = getRoom(session);
-        wsSessionManager.removeSessionFromRoom(room.getId(), session);
+        webSocketSessionManager.removeSessionFromRoom(room.getId(), session);
 
         User sender = getSender(session);
-        log.info("클라이언트 연결 해제 roomId: {}, senderId: {}, sessionId: {}", room.getId(), sender.getId(), session.getId());
+        log.info("클라이언트 연결 해제 roomId: {}, senderId: {}, sessionId: {}",
+                room.getId(), sender.getId(), session.getId());
     }
 
     private Room getRoom(WebSocketSession session) {

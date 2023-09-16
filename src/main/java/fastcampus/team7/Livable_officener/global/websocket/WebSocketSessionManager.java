@@ -3,28 +3,27 @@ package fastcampus.team7.Livable_officener.global.websocket;
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
 import org.springframework.web.socket.WebSocketSession;
 
-import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 public class WebSocketSessionManager {
-    private static final Comparator<WebSocketSession> WS_COMP = Comparator.comparing(WebSocketSession::getId);
 
-    private final Map<Long, Set<WebSocketSession>> roomIdToSessionSet = new ConcurrentHashMap<>();
+    private final Map<Long, Collection<WebSocketSession>> roomIdToSessions = new ConcurrentHashMap<>();
 
     public void addSessionToRoom(Long roomId, WebSocketSession session) {
-        Set<WebSocketSession> wsSessionSet = getSessionSetOfRoom(roomId);
-        if (wsSessionSet == null) {
-            wsSessionSet = new ConcurrentSkipListSet<>(WS_COMP);
-            roomIdToSessionSet.put(roomId, wsSessionSet);
+        Collection<WebSocketSession> sessions = getWebSocketSessions(roomId);
+        if (sessions == null) {
+            sessions = Collections.synchronizedList(new ArrayList<>());
+            roomIdToSessions.put(roomId, sessions);
         }
-        wsSessionSet.add(session);
+        sessions.add(session);
     }
 
-    public Set<WebSocketSession> getSessionSetOfRoom(Long roomId) {
-        var ret = roomIdToSessionSet.get(roomId);
+    public Collection<WebSocketSession> getWebSocketSessions(Long roomId) {
+        var ret = roomIdToSessions.get(roomId);
         if (ret == null) {
             throw new NotFoundRoomException();
         }
@@ -32,7 +31,7 @@ public class WebSocketSessionManager {
     }
 
     public void removeSessionFromRoom(Long roomId, WebSocketSession session) {
-        Set<WebSocketSession> wsSessionSet = getSessionSetOfRoom(roomId);
-        wsSessionSet.remove(session);
+        Collection<WebSocketSession> sessions = getWebSocketSessions(roomId);
+        sessions.remove(session);
     }
 }
