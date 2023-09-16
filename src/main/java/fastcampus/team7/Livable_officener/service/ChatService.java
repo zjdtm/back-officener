@@ -35,6 +35,7 @@ public class ChatService {
         chatRepository.save(Chat.from(dto));
     }
 
+    @Transactional
     public void closeParticipation(Long roomId, User user) {
         Room room = getRoom(roomId);
         RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
