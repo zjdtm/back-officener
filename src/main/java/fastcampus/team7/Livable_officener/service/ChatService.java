@@ -38,7 +38,7 @@ public class ChatService {
     @Transactional
     public void closeParticipation(Long roomId, User user) {
         Room room = getRoom(roomId);
-        RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
+        validateIfUserIsHost(roomId, user.getId());
         room.closeParticipation();
     }
 
@@ -47,11 +47,14 @@ public class ChatService {
                 .orElseThrow(NotFoundRoomException::new);
     }
 
-    private RoomParticipant getRoomParticipant(Long roomId, Long userId) {
-        RoomParticipant roomParticipant = roomParticipantRepository.findByRoomIdAndUserId(roomId, userId)
-                .orElseThrow(UserIsNotMemberException::new);
+    private void validateIfUserIsHost(Long roomId, Long userId) {
+        RoomParticipant roomParticipant = getRoomParticipant(roomId, userId);
         validateIfRoomParticipantIsHost(roomParticipant.getRole());
-        return roomParticipant;
+    }
+
+    private RoomParticipant getRoomParticipant(Long roomId, Long userId) {
+        return roomParticipantRepository.findByRoomIdAndUserId(roomId, userId)
+                .orElseThrow(UserIsNotMemberException::new);
     }
 
     private static void validateIfRoomParticipantIsHost(Role role) {
