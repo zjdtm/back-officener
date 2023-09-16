@@ -4,7 +4,6 @@ import fastcampus.team7.Livable_officener.domain.Room;
 import fastcampus.team7.Livable_officener.domain.RoomParticipant;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.global.constant.Role;
-import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
 import fastcampus.team7.Livable_officener.global.exception.NotActiveRoomException;
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotHostException;
@@ -13,8 +12,6 @@ import fastcampus.team7.Livable_officener.repository.XChatRoomParticipantReposit
 import fastcampus.team7.Livable_officener.repository.XChatRoomRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -123,7 +120,7 @@ class ChatServiceTest {
                                                     Class<? extends Throwable> ex,
                                                     String message) {
         var ast = assertThatThrownBy(() ->
-                sut.closeToTakePartIn(roomId, user))
+                sut.closeParticipation(roomId, user))
                 .isInstanceOf(ex);
         if (message != null) {
             ast.hasMessage(message);
