@@ -7,7 +7,7 @@ import fastcampus.team7.Livable_officener.global.constant.Role;
 import fastcampus.team7.Livable_officener.global.exception.NotActiveRoomException;
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotHostException;
-import fastcampus.team7.Livable_officener.global.exception.UserIsNotMemberException;
+import fastcampus.team7.Livable_officener.global.exception.UserIsNotParticipantException;
 import fastcampus.team7.Livable_officener.repository.XChatRoomParticipantRepository;
 import fastcampus.team7.Livable_officener.repository.XChatRoomRepository;
 import org.junit.jupiter.api.Test;
@@ -62,7 +62,7 @@ class ChatServiceTest {
                 .willReturn(Optional.empty());
 
         // when, then
-        assertThrowsWhenCloseParticipation(roomId, user, UserIsNotMemberException.class);
+        assertThrowsWhenCloseParticipation(roomId, user, UserIsNotParticipantException.class);
     }
 
     @Test

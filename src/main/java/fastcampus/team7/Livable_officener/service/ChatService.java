@@ -10,7 +10,7 @@ import fastcampus.team7.Livable_officener.global.constant.Role;
 import fastcampus.team7.Livable_officener.global.constant.SystemMessage;
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotHostException;
-import fastcampus.team7.Livable_officener.global.exception.UserIsNotMemberException;
+import fastcampus.team7.Livable_officener.global.exception.UserIsNotParticipantException;
 import fastcampus.team7.Livable_officener.global.websocket.WebSocketSessionManager;
 import fastcampus.team7.Livable_officener.repository.ChatRepository;
 import fastcampus.team7.Livable_officener.repository.XChatRoomParticipantRepository;
@@ -61,7 +61,7 @@ public class ChatService {
 
     private RoomParticipant getRoomParticipant(Long roomId, Long userId) {
         return roomParticipantRepository.findByRoomIdAndUserId(roomId, userId)
-                .orElseThrow(UserIsNotMemberException::new);
+                .orElseThrow(UserIsNotParticipantException::new);
     }
 
     private static void validateIfRoomParticipantIsHost(Role role) {
