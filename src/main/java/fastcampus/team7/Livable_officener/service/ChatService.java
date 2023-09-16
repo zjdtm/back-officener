@@ -38,6 +38,7 @@ public class ChatService {
     public void closeToTakePartIn(Long roomId, User user) {
         Room room = getRoom(roomId);
         RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
+        room.closeParticipation();
     }
 
     private Room getRoom(Long roomId) {
