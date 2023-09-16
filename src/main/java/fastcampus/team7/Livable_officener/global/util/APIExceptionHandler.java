@@ -1,5 +1,9 @@
 package fastcampus.team7.Livable_officener.global.util;
 
+import fastcampus.team7.Livable_officener.global.exception.NotActiveRoomException;
+import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
+import fastcampus.team7.Livable_officener.global.exception.UserIsNotHostException;
+import fastcampus.team7.Livable_officener.global.exception.UserIsNotParticipantException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,12 +15,18 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
+import java.io.IOException;
+
 @RestControllerAdvice
 @Slf4j
 public class APIExceptionHandler {
 
     public ResponseEntity<?> handleExceptionInternal(Exception e, String errorMessage, HttpStatus httpStatus) {
         return APIErrorResponse.of(httpStatus, errorMessage);
+    }
+
+    public ResponseEntity<?> handleExceptionInternal(Exception e, HttpStatus httpStatus) {
+        return APIErrorResponse.of(httpStatus, e.getMessage());
     }
 
     @ExceptionHandler
@@ -43,5 +53,30 @@ public class APIExceptionHandler {
     @ExceptionHandler(BindException.class)
     public ResponseEntity<?> bindExceptionHandle(BindException e) {
         return handleExceptionInternal(e, "요청 형식이 올바르지 않습니다", HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<?> handleNotFoundRoomException(NotFoundRoomException e) {
+        return handleExceptionInternal(e, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<?> handleNotActiveException(NotActiveRoomException e) {
+        return handleExceptionInternal(e, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<?> handleUserIsNotHostException(UserIsNotHostException e) {
+        return handleExceptionInternal(e, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<?> handleNotMemberRoomException(UserIsNotParticipantException e) {
+        return handleExceptionInternal(e, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<?> handleIOException(IOException e) {
+        return handleExceptionInternal(e, "IOException", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
