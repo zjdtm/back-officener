@@ -1,14 +1,13 @@
 package fastcampus.team7.Livable_officener.domain;
 
+import fastcampus.team7.Livable_officener.global.constant.BankName;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
 
 @Getter
 @Entity
-@NoArgsConstructor
 @RequiredArgsConstructor
 public class Bank {
 
@@ -16,6 +15,7 @@ public class Bank {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, updatable = false)
-    private String name;
+    private BankName name;
 }

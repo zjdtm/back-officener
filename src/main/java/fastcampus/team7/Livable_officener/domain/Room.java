@@ -1,12 +1,18 @@
 package fastcampus.team7.Livable_officener.domain;
 
+import fastcampus.team7.Livable_officener.global.constant.BankName;
 import fastcampus.team7.Livable_officener.global.constant.FoodTag;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
-import lombok.Getter;
+
+import fastcampus.team7.Livable_officener.global.exception.NotActiveRoomException;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 @Getter
 @Entity
 public class Room extends BaseEntity {
@@ -25,7 +31,7 @@ public class Room extends BaseEntity {
     private FoodTag tag;
 
     @Column(nullable = false)
-    private String bankName;
+    private BankName bankName;
 
     @Column(nullable = false)
     private String accountNumber;
@@ -50,4 +56,10 @@ public class Room extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private RoomStatus status;
 
+    public void closeParticipation() {
+        if (getStatus() != RoomStatus.ACTIVE) {
+            throw new NotActiveRoomException();
+        }
+        status = RoomStatus.CLOSED;
+    }
 }
