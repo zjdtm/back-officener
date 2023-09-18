@@ -1,5 +1,6 @@
 package fastcampus.team7.Livable_officener.dto;
 
+import fastcampus.team7.Livable_officener.global.constant.BankName;
 import fastcampus.team7.Livable_officener.global.constant.FoodTag;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,7 +20,7 @@ public class RoomDetailDTO {
     private String menuLink;
     private Long deliveryFee;
     private FoodTag tag;
-    private String bankName;
+    private BankName bankName;
     private String account;
     private LocalDateTime deadline;
     private Long attendees;
