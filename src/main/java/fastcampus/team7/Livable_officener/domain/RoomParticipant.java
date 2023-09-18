@@ -24,12 +24,6 @@ public class RoomParticipant extends BaseEntity {
     private Role role;
 
     @Column
-    private LocalDateTime createdAt;
-
-    @Column
-    private LocalDateTime updatedAt;
-
-    @Column
     private LocalDateTime kickedAt;
 
     @Column

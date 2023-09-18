@@ -8,6 +8,7 @@ import fastcampus.team7.Livable_officener.global.websocket.WebSocketSessionManag
 import fastcampus.team7.Livable_officener.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -18,6 +19,7 @@ import java.util.Collection;
 
 @Slf4j
 @RequiredArgsConstructor
+@Component
 public class CustomTextWebSocketHandler extends TextWebSocketHandler {
 
     private final WebSocketSessionManager webSocketSessionManager;

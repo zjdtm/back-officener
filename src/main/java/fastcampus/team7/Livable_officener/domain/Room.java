@@ -3,6 +3,7 @@ package fastcampus.team7.Livable_officener.domain;
 import fastcampus.team7.Livable_officener.global.constant.BankName;
 import fastcampus.team7.Livable_officener.global.constant.FoodTag;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
+
 import fastcampus.team7.Livable_officener.global.exception.NotActiveRoomException;
 import lombok.*;
 
