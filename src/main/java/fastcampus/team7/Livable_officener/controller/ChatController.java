@@ -28,4 +28,14 @@ public class ChatController {
         chatService.closeParticipation(roomId, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @PostMapping("/transferred")
+    public ResponseEntity<?> completeTransfer(
+            @PathVariable Long roomId,
+            @AuthenticationPrincipal User user) throws IOException {
+
+        chatService.completeTransfer(roomId, user);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 }

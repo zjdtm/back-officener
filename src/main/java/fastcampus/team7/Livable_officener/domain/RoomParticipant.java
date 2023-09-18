@@ -1,18 +1,15 @@
 package fastcampus.team7.Livable_officener.domain;
 
 import fastcampus.team7.Livable_officener.global.constant.Role;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Getter
 @Builder
-@AllArgsConstructor
-@RequiredArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
 public class RoomParticipant extends BaseEntity {
 
@@ -29,4 +26,10 @@ public class RoomParticipant extends BaseEntity {
     @Column
     private LocalDateTime kickedAt;
 
+    @Column
+    private LocalDateTime transferredAt;
+
+    public void completeTransfer() {
+        transferredAt = LocalDateTime.now();
+    }
 }
