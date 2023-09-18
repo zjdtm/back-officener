@@ -49,6 +49,13 @@ public class ChatService {
         sendCloseSystemMessage(room, user);
     }
 
+    @Transactional
+    public void completeTransfer(Long roomId, User user) {
+        Room room = getRoom(roomId);
+        validateIfUserIsGuest(roomId, user.getId());
+
+    }
+
     private Room getRoom(Long roomId) {
         return roomRepository.findById(roomId)
                 .orElseThrow(NotFoundRoomException::new);
@@ -57,6 +64,17 @@ public class ChatService {
     private void validateIfUserIsHost(Long roomId, Long userId) {
         RoomParticipant roomParticipant = getRoomParticipant(roomId, userId);
         validateIfRoomParticipantIsHost(roomParticipant.getRole());
+    }
+
+    private void validateIfUserIsGuest(Long roomId, Long userId) {
+        RoomParticipant roomParticipant = getRoomParticipant(roomId, userId);
+        validateIfRoomParticipantIsGuest(roomParticipant.getRole());
+    }
+
+    private void validateIfRoomParticipantIsGuest(Role role) {
+        if (role != Role.GUEST) {
+            throw new UserIsNotHostException()
+        }
     }
 
     private RoomParticipant getRoomParticipant(Long roomId, Long userId) {
