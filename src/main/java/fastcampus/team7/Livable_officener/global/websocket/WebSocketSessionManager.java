@@ -1,6 +1,7 @@
 package fastcampus.team7.Livable_officener.global.websocket;
 
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
+import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Component
 public class WebSocketSessionManager {
 
     private final Map<Long, Collection<WebSocketSession>> roomIdToSessions = new ConcurrentHashMap<>();
