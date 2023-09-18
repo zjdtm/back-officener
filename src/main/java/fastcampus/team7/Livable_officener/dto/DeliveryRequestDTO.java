@@ -84,8 +84,6 @@ public class DeliveryRequestDTO {
                     .room(room)
                     .user(user)
                     .role(role)
-                    .createdAt(createdAt)
-                    .updatedAt(LocalDateTime.now())
                     .kickedAt(kickedAt)
                     .build();
         }
