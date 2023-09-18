@@ -50,13 +50,11 @@ public class ChatService {
     @Transactional
     public void completeTransfer(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
-        RoomParticipant roomParticipant= getRoomParticipant(roomId, user.getId());
-        if(roomParticipant.getRole() != Role.GUEST) {
-            throw new UserIsNotGuestException("송금완료");
-        }
-        if( roomParticipant.getTransferredAt() != null ) {
-            throw new AlreadyTransferredException();
-        }
+        RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
+
+        validateIfRoomParticipantIsGuest(roomParticipant.getRole());
+        isTransferCompleted(roomParticipant);
+
         roomParticipant.completeTransfer();
         sendCompleteTransferSystemMessage(room, user);
     }
@@ -76,9 +74,21 @@ public class ChatService {
                 .orElseThrow(UserIsNotParticipantException::new);
     }
 
+    private static void validateIfRoomParticipantIsGuest(Role role) {
+        if (role != Role.GUEST) {
+            throw new UserIsNotGuestException("송금완료");
+        }
+    }
+
     private static void validateIfRoomParticipantIsHost(Role role) {
         if (role != Role.HOST) {
             throw new UserIsNotHostException("참여마감하기");
+        }
+    }
+
+    private static void isTransferCompleted(RoomParticipant roomParticipant) {
+        if (roomParticipant.getTransferredAt() != null) {
+            throw new AlreadyTransferredException();
         }
     }
 
