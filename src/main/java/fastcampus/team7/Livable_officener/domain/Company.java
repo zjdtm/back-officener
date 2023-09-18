@@ -19,6 +19,6 @@ public class Company extends BaseEntity {
     private String name;
 
     @Column(nullable = false)
-    private String unit;
+    private String address;
 
 }

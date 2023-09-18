@@ -1,5 +1,6 @@
 package fastcampus.team7.Livable_officener.repository;
 
+import fastcampus.team7.Livable_officener.config.QueryDslConfig;
 import fastcampus.team7.Livable_officener.domain.Building;
 import fastcampus.team7.Livable_officener.domain.Company;
 import org.assertj.core.api.Assertions;
@@ -9,11 +10,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @DataJpaTest
+@Import(QueryDslConfig.class)
 class BuildingRepositoryTest {
 
     @Autowired
@@ -93,7 +96,7 @@ class BuildingRepositoryTest {
                 .builder()
                 .building(building)
                 .name(officeName)
-                .unit(officeUnit)
+                .address(officeUnit)
                 .build();
 
         companyRepository.save(company);
