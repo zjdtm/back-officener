@@ -1,11 +1,14 @@
 package fastcampus.team7.Livable_officener.domain;
 
-import lombok.Getter;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Getter
 @Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
