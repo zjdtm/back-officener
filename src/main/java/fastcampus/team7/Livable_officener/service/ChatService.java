@@ -44,7 +44,7 @@ public class ChatService {
         Room room = getRoom(roomId);
         validateIfUserIsHost(roomId, user.getId());
         room.closeParticipation();
-        sendSystemMessage(room, user, SystemMessage.CLOSE);
+        sendSystemMessage(room, user, SystemMessage.CLOSE_PARTICIPATION);
     }
 
     @Transactional
