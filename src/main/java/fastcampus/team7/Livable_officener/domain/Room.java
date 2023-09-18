@@ -14,8 +14,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Getter
-@RequiredArgsConstructor
-@AllArgsConstructor
 @Entity
 public class Room extends BaseEntity {
 
