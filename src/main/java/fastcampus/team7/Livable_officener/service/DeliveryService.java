@@ -10,7 +10,6 @@ import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
 import fastcampus.team7.Livable_officener.repository.BankRepository;
 import fastcampus.team7.Livable_officener.repository.DeliveryParticipantRepository;
 import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
-import fastcampus.team7.Livable_officener.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,6 @@ public class DeliveryService {
     private final DeliveryRepository deliveryRepository;
     private final DeliveryParticipantRepository deliveryParticipantRepository;
     private final BankRepository bankRepository;
-    private final UserRepository userRepository;
 
     @Transactional
     public void registerRoom(DeliveryRequestDTO.createDTO createDTO, User user) {
