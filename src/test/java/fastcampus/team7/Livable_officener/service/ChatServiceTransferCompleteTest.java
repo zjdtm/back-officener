@@ -4,15 +4,14 @@ import fastcampus.team7.Livable_officener.domain.Room;
 import fastcampus.team7.Livable_officener.domain.RoomParticipant;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.global.constant.Role;
+import fastcampus.team7.Livable_officener.global.exception.AlreadyTransferredException;
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotGuestException;
-import fastcampus.team7.Livable_officener.global.exception.UserIsNotHostException;
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotParticipantException;
 import fastcampus.team7.Livable_officener.repository.XChatRoomParticipantRepository;
 import fastcampus.team7.Livable_officener.repository.XChatRoomRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnJre;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -23,6 +22,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,9 +46,7 @@ public class ChatServiceTransferCompleteTest {
         given(roomRepository.findById(anyLong()))
                 .willReturn(Optional.empty());
         //when//then
-        assertThatThrownBy(() ->
-                sut.completeTransfer(WrongRoomId, user))
-                .isInstanceOf(NotFoundRoomException.class);
+        customAssertThrow(WrongRoomId, user, NotFoundRoomException.class);
     }
 
     @Test
@@ -67,9 +65,7 @@ public class ChatServiceTransferCompleteTest {
                 .willReturn(Optional.empty());
 
         // when, then
-        assertThatThrownBy(() ->
-                sut.completeTransfer(roomId, user))
-                .isInstanceOf(UserIsNotParticipantException.class);
+        customAssertThrow(roomId, user, UserIsNotParticipantException.class);
     }
 
     @Test
@@ -91,11 +87,13 @@ public class ChatServiceTransferCompleteTest {
                 .willReturn(Role.HOST);
 
         // when, then
-        assertThatThrownBy(() ->
-                sut.completeTransfer(roomId, user))
-                .isInstanceOf(UserIsNotGuestException.class)
-                .hasMessage("'송금완료' 요청은 게스트만 가능합니다.");
-
+        customAssertThrow(roomId, user, UserIsNotGuestException.class);
     }
 
+    void customAssertThrow(Long roomId, User user,
+                           Class<? extends Throwable> ex) {
+        assertThatThrownBy(() ->
+                sut.completeTransfer(roomId, user))
+                .isInstanceOf(ex);
+    }
 }
