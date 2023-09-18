@@ -41,19 +41,7 @@ public class DeliveryController {
 
     @GetMapping("/bankList")
     public ResponseEntity<APIDataResponse<Map<String, List<Map<String, String>>>>> bankList() {
-        List<Bank> bankList = bankRepository.findAll();
-
-        List<Map<String, String>> responseData = bankList.stream()
-                .map(bank -> {
-                    Map<String, String> bankMap = new HashMap<>();
-                    bankMap.put("bankName", bank.getName().getName());
-                    return bankMap;
-                })
-                .collect(Collectors.toList());
-
-        Map<String, List<Map<String, String>>> response = new HashMap<>();
-        response.put("banks", responseData);
-
+        Map<String, List<Map<String, String>>> response = deliveryService.loadBankList();
         return APIDataResponse.of(HttpStatus.OK, "성공", response);
     }
 
