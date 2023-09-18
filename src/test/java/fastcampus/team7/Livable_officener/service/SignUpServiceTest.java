@@ -95,7 +95,7 @@ class SignUpServiceTest {
                 .builder()
                 .building(building)
                 .name(officeName)
-                .unit(officeUnit)
+                .address(officeUnit)
                 .build();
 
     }
