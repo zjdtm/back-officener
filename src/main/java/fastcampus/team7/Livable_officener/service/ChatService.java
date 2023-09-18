@@ -42,7 +42,10 @@ public class ChatService {
     @Transactional
     public void closeParticipation(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
-        validateIfUserIsHost(roomId, user.getId());
+
+        RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
+        validateIfRoomParticipantIsHost(roomParticipant.getRole(), "참여마감하기");
+
         room.closeParticipation();
         sendSystemMessage(room, user, SystemMessage.CLOSE_PARTICIPATION);
     }
@@ -52,7 +55,7 @@ public class ChatService {
         Room room = getRoom(roomId);
         RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
 
-        validateIfRoomParticipantIsGuest(roomParticipant.getRole());
+        validateIfRoomParticipantIsGuest(roomParticipant.getRole(), "송금완료");
         isTransferCompleted(roomParticipant);
 
         roomParticipant.completeTransfer();
@@ -64,25 +67,20 @@ public class ChatService {
                 .orElseThrow(NotFoundRoomException::new);
     }
 
-    private void validateIfUserIsHost(Long roomId, Long userId) {
-        RoomParticipant roomParticipant = getRoomParticipant(roomId, userId);
-        validateIfRoomParticipantIsHost(roomParticipant.getRole());
-    }
-
     private RoomParticipant getRoomParticipant(Long roomId, Long userId) {
         return roomParticipantRepository.findByRoomIdAndUserId(roomId, userId)
                 .orElseThrow(UserIsNotParticipantException::new);
     }
 
-    private static void validateIfRoomParticipantIsGuest(Role role) {
+    private static void validateIfRoomParticipantIsGuest(Role role, String requestName) {
         if (role != Role.GUEST) {
-            throw new UserIsNotGuestException("송금완료");
+            throw new UserIsNotGuestException(requestName);
         }
     }
 
-    private static void validateIfRoomParticipantIsHost(Role role) {
+    private static void validateIfRoomParticipantIsHost(Role role, String requestName) {
         if (role != Role.HOST) {
-            throw new UserIsNotHostException("참여마감하기");
+            throw new UserIsNotHostException(requestName);
         }
     }
 
