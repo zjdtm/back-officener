@@ -10,6 +10,7 @@ import fastcampus.team7.Livable_officener.global.exception.UserIsNotHostExceptio
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotParticipantException;
 import fastcampus.team7.Livable_officener.repository.XChatRoomParticipantRepository;
 import fastcampus.team7.Livable_officener.repository.XChatRoomRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,7 +26,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
-class ChatServiceTest {
+class ChatServiceCloseParticipationTest {
 
     @InjectMocks
     private ChatService sut;
@@ -34,8 +35,9 @@ class ChatServiceTest {
     @Mock
     private XChatRoomParticipantRepository roomParticipantRepository;
 
+    @DisplayName("참여마감시 해당 ID에 해당하는 함께배달 없으면 예외발생")
     @Test
-    void 참여마감시_채팅방Id없으면_예외발생() {
+    void whenNoRoomOfId_thenThrowsException() {
         // given
         Long roomIdNotExist = 1L;
         User user = mock(User.class);
@@ -47,8 +49,9 @@ class ChatServiceTest {
         assertThrowsWhenCloseParticipation(roomIdNotExist, user, NotFoundRoomException.class);
     }
 
+    @DisplayName("참여마감시 해당 함께배달의 참여자가 아니면 예외발생")
     @Test
-    void 참여마감시_해당채팅방의참여자가아니면_예외발생() {
+    void whenNotParticipant_thenThrowsException() {
         // given
         Long roomId = 1L;
         User user = mock(User.class);
@@ -65,8 +68,9 @@ class ChatServiceTest {
         assertThrowsWhenCloseParticipation(roomId, user, UserIsNotParticipantException.class);
     }
 
+    @DisplayName("참여마감시 호스트가 아니면 예외발생")
     @Test
-    void 참여마감시_호스트가아니면_예외발생() {
+    void whenNotHost_thenThrowsException() {
         // given
         Long roomId = 1L;
         User user = mock(User.class);
@@ -89,8 +93,9 @@ class ChatServiceTest {
                 "'참여마감하기' 요청은 호스트만 가능합니다.");
     }
 
+    @DisplayName("참여마감시 함께배달이 활성상태가 아니면 예외발생")
     @Test
-    void 참여마감시_함께배달방이활성상태가아니면_예외발생() {
+    void whenRoomIsNotActive_thenThrowsException() {
         // given
         Long roomId = 1L;
         User user = mock(User.class);
