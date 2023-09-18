@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 
 @RequiredArgsConstructor
-@RequestMapping("/api/chat{roomId}")
+@RequestMapping("/api/chat/{roomId}")
 @RestController
 public class ChatController {
 
