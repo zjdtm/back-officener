@@ -72,4 +72,30 @@ public class ChatServiceTransferCompleteTest {
                 .isInstanceOf(UserIsNotParticipantException.class);
     }
 
+    @Test
+    @DisplayName("송금완료 시 게스트가 아니면 예외발생")
+    void isGuestTest() {
+        // given
+        Long roomId = 1L;
+        User user = mock(User.class);
+        Room room = mock(Room.class);
+        RoomParticipant roomParticipant = mock(RoomParticipant.class);
+
+        given(user.getId())
+                .willReturn(1L);
+        given(roomRepository.findById(anyLong()))
+                .willReturn(Optional.of(room));
+        given(roomParticipantRepository.findByRoomIdAndUserId(anyLong(), anyLong()))
+                .willReturn(Optional.of(roomParticipant));
+        given(roomParticipant.getRole())
+                .willReturn(Role.HOST);
+
+        // when, then
+        assertThatThrownBy(() ->
+                sut.completeTransfer(roomId, user))
+                .isInstanceOf(UserIsNotGuestException.class)
+                .hasMessage("'송금완료' 요청은 게스트만 가능합니다.");
+
+    }
+
 }
