@@ -3,6 +3,7 @@ package fastcampus.team7.Livable_officener.domain;
 import fastcampus.team7.Livable_officener.global.constant.BankName;
 import fastcampus.team7.Livable_officener.global.constant.FoodTag;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @Builder
 @Getter
 @RequiredArgsConstructor
+@AllArgsConstructor
 @Entity
 public class Room extends BaseEntity {
 

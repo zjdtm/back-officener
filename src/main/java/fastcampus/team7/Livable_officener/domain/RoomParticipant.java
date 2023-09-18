@@ -1,6 +1,7 @@
 package fastcampus.team7.Livable_officener.domain;
 
 import fastcampus.team7.Livable_officener.global.constant.Role;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
+@AllArgsConstructor
 @RequiredArgsConstructor
 @Entity
 public class RoomParticipant extends BaseEntity {
@@ -24,12 +26,6 @@ public class RoomParticipant extends BaseEntity {
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
     private Role role;
-
-    @Column
-    private LocalDateTime createdAt;
-
-    @Column
-    private LocalDateTime updatedAt;
 
     @Column
     private LocalDateTime kickedAt;
