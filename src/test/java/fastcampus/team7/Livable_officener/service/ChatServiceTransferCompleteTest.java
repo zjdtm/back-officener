@@ -90,6 +90,29 @@ public class ChatServiceTransferCompleteTest {
         customAssertThrow(roomId, user, UserIsNotGuestException.class);
     }
 
+    @Test
+    @DisplayName("이미 송금완료 했을 시 예외 발생")
+    void alreadyTransfer() {
+        //given
+        Long roomId = 1L;
+        User user = mock(User.class);
+        Room room = mock(Room.class);
+        RoomParticipant roomParticipant = mock(RoomParticipant.class);
+
+        given(user.getId())
+                .willReturn(1L);
+        given(roomRepository.findById(anyLong()))
+                .willReturn(Optional.of(room));
+        given(roomParticipantRepository.findByRoomIdAndUserId(anyLong(), anyLong()))
+                .willReturn(Optional.of(roomParticipant));
+        given(roomParticipant.getRole())
+                .willReturn(Role.GUEST);
+        doThrow(AlreadyTransferredException.class)
+                .when(roomParticipant).completeTransfer();
+
+        customAssertThrow(roomId, user, AlreadyTransferredException.class);
+    }
+
     void customAssertThrow(Long roomId, User user,
                            Class<? extends Throwable> ex) {
         assertThatThrownBy(() ->
