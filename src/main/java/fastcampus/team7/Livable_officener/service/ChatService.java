@@ -42,9 +42,12 @@ public class ChatService {
     @Transactional
     public void closeParticipation(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
-        validateIfUserIsHost(roomId, user.getId());
+
+        RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
+        validateIfRoomParticipantIsHost(roomParticipant.getRole(), "참여마감하기");
+
         room.closeParticipation();
-        sendCloseSystemMessage(room, user);
+        sendSystemMessage(room, user, SystemMessage.CLOSE_PARTICIPATION);
     }
 
     @Transactional
@@ -52,11 +55,11 @@ public class ChatService {
         Room room = getRoom(roomId);
         RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
 
-        validateIfRoomParticipantIsGuest(roomParticipant.getRole());
+        validateIfRoomParticipantIsGuest(roomParticipant.getRole(), "송금완료");
         isTransferCompleted(roomParticipant);
 
         roomParticipant.completeTransfer();
-        sendCompleteTransferSystemMessage(room, user);
+        sendSystemMessage(room, user, SystemMessage.COMPLETE_TRANSFER);
     }
 
     private Room getRoom(Long roomId) {
@@ -64,25 +67,20 @@ public class ChatService {
                 .orElseThrow(NotFoundRoomException::new);
     }
 
-    private void validateIfUserIsHost(Long roomId, Long userId) {
-        RoomParticipant roomParticipant = getRoomParticipant(roomId, userId);
-        validateIfRoomParticipantIsHost(roomParticipant.getRole());
-    }
-
     private RoomParticipant getRoomParticipant(Long roomId, Long userId) {
         return roomParticipantRepository.findByRoomIdAndUserId(roomId, userId)
                 .orElseThrow(UserIsNotParticipantException::new);
     }
 
-    private static void validateIfRoomParticipantIsGuest(Role role) {
+    private static void validateIfRoomParticipantIsGuest(Role role, String requestName) {
         if (role != Role.GUEST) {
-            throw new UserIsNotGuestException("송금완료");
+            throw new UserIsNotGuestException(requestName);
         }
     }
 
-    private static void validateIfRoomParticipantIsHost(Role role) {
+    private static void validateIfRoomParticipantIsHost(Role role, String requestName) {
         if (role != Role.HOST) {
-            throw new UserIsNotHostException("참여마감하기");
+            throw new UserIsNotHostException(requestName);
         }
     }
 
@@ -92,15 +90,9 @@ public class ChatService {
         }
     }
 
-    private void sendCloseSystemMessage(Room room, User user) throws IOException {
+    private void sendSystemMessage(Room room, User user, SystemMessage systemMessage) throws IOException {
         Collection<WebSocketSession> webSocketSessions = webSocketSessionManager.getWebSocketSessions(room.getId());
-        TextMessage textMessage = new TextMessage(SystemMessage.CLOSE.getContent(user.getName()));
-        send(new SendChatDTO(room, user, textMessage, ChatType.SYSTEM_MESSAGE, webSocketSessions));
-    }
-
-    private void sendCompleteTransferSystemMessage(Room room, User user) throws IOException {
-        Collection<WebSocketSession> webSocketSessions = webSocketSessionManager.getWebSocketSessions(room.getId());
-        TextMessage textMessage = new TextMessage(SystemMessage.COMPLETE_TRANSFER.getContent(user.getName()));
+        TextMessage textMessage = new TextMessage(systemMessage.getContent(user.getName()));
         send(new SendChatDTO(room, user, textMessage, ChatType.SYSTEM_MESSAGE, webSocketSessions));
     }
 }
