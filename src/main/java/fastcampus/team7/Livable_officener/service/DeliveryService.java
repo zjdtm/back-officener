@@ -8,7 +8,6 @@ import fastcampus.team7.Livable_officener.global.constant.FoodTag;
 import fastcampus.team7.Livable_officener.global.constant.Role;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
 import fastcampus.team7.Livable_officener.dto.RoomDetailDTO;
-import fastcampus.team7.Livable_officener.repository.BankRepository;
 import fastcampus.team7.Livable_officener.repository.DeliveryParticipantRepository;
 import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +24,6 @@ public class DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
     private final DeliveryParticipantRepository deliveryParticipantRepository;
-    private final BankRepository bankRepository;
 
     @Transactional
     public void registerRoom(DeliveryRequestDTO.createDTO createDTO, User user) {
@@ -63,6 +61,7 @@ public class DeliveryService {
 
         Room room = deliveryRepository.findById(roomId).orElseThrow(() -> new IllegalArgumentException("올바른 roomId 아님"));
         deliveryParticipantRepository.save(roomParticipantSaveDTO.toEntity(room, user));
+    }
 
     public RoomDetailDTO selectRoomDetail(Long id) {
         // TODO : 예외처리 로직 추가
