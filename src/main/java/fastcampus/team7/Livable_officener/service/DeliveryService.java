@@ -1,5 +1,6 @@
 package fastcampus.team7.Livable_officener.service;
 
+import fastcampus.team7.Livable_officener.domain.Bank;
 import fastcampus.team7.Livable_officener.domain.Room;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.DeliveryRequestDTO;
@@ -8,6 +9,7 @@ import fastcampus.team7.Livable_officener.global.constant.FoodTag;
 import fastcampus.team7.Livable_officener.global.constant.Role;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
 import fastcampus.team7.Livable_officener.dto.RoomDetailDTO;
+import fastcampus.team7.Livable_officener.repository.BankRepository;
 import fastcampus.team7.Livable_officener.repository.DeliveryParticipantRepository;
 import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -24,6 +30,7 @@ public class DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
     private final DeliveryParticipantRepository deliveryParticipantRepository;
+    private final BankRepository bankRepository;
 
     @Transactional
     public void registerRoom(DeliveryRequestDTO.createDTO createDTO, User user) {
@@ -66,5 +73,22 @@ public class DeliveryService {
     public RoomDetailDTO selectRoomDetail(Long id) {
         // TODO : 예외처리 로직 추가
         return deliveryRepository.findRoomById(id);
+    }
+
+    public Map<String, List<Map<String, String>>> loadBankList() {
+        List<Bank> bankList = bankRepository.findAll();
+
+        List<Map<String, String>> responseData = bankList.stream()
+                .map(bank -> {
+                    Map<String, String> bankMap = new HashMap<>();
+                    bankMap.put("bankName", bank.getName().getName());
+                    return bankMap;
+                })
+                .collect(Collectors.toList());
+
+        Map<String, List<Map<String, String>>> response = new HashMap<>();
+        response.put("banks", responseData);
+
+        return response;
     }
 }
