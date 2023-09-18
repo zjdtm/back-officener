@@ -34,4 +34,10 @@ public class RoomParticipant extends BaseEntity {
     @Column
     private LocalDateTime kickedAt;
 
+    @Column
+    private LocalDateTime transferredAt;
+
+    public void completeTransfer() {
+        transferredAt = LocalDateTime.now();
+    }
 }
