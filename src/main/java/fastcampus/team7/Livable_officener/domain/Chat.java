@@ -10,11 +10,9 @@ import javax.persistence.*;
 public class Chat extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(nullable = false)
     private Room room;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(nullable = false)
     private User sender;
 
     private String content;

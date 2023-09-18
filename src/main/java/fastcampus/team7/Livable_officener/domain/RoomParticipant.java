@@ -10,11 +10,9 @@ import java.sql.Timestamp;
 @Entity
 public class RoomParticipant extends BaseEntity {
 
-    @Column(nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     private Room room;
 
-    @Column(nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
