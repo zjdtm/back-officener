@@ -44,7 +44,7 @@ public class ChatService {
         Room room = getRoom(roomId);
         validateIfUserIsHost(roomId, user.getId());
         room.closeParticipation();
-        sendCloseSystemMessage(room, user);
+        sendSystemMessage(room, user, SystemMessage.CLOSE);
     }
 
     @Transactional
@@ -56,7 +56,7 @@ public class ChatService {
         isTransferCompleted(roomParticipant);
 
         roomParticipant.completeTransfer();
-        sendCompleteTransferSystemMessage(room, user);
+        sendSystemMessage(room, user, SystemMessage.COMPLETE_TRANSFER);
     }
 
     private Room getRoom(Long roomId) {
@@ -92,15 +92,9 @@ public class ChatService {
         }
     }
 
-    private void sendCloseSystemMessage(Room room, User user) throws IOException {
+    private void sendSystemMessage(Room room, User user, SystemMessage systemMessage) throws IOException {
         Collection<WebSocketSession> webSocketSessions = webSocketSessionManager.getWebSocketSessions(room.getId());
-        TextMessage textMessage = new TextMessage(SystemMessage.CLOSE.getContent(user.getName()));
-        send(new SendChatDTO(room, user, textMessage, ChatType.SYSTEM_MESSAGE, webSocketSessions));
-    }
-
-    private void sendCompleteTransferSystemMessage(Room room, User user) throws IOException {
-        Collection<WebSocketSession> webSocketSessions = webSocketSessionManager.getWebSocketSessions(room.getId());
-        TextMessage textMessage = new TextMessage(SystemMessage.COMPLETE_TRANSFER.getContent(user.getName()));
+        TextMessage textMessage = new TextMessage(systemMessage.getContent(user.getName()));
         send(new SendChatDTO(room, user, textMessage, ChatType.SYSTEM_MESSAGE, webSocketSessions));
     }
 }
