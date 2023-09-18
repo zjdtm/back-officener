@@ -1,5 +1,13 @@
 package fastcampus.team7.Livable_officener.controller;
 
+
+import fastcampus.team7.Livable_officener.dto.RoomDetailDTO;
+import fastcampus.team7.Livable_officener.service.DeliveryService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import fastcampus.team7.Livable_officener.domain.Bank;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.DeliveryRequestDTO;
@@ -10,8 +18,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +35,12 @@ import java.util.stream.Collectors;
 public class DeliveryController {
 
     private final DeliveryService deliveryService;
+
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> findRoomDetail(@PathVariable Long id){
+        final RoomDetailDTO roomDetail = deliveryService.selectRoomDetail(id);
+        return ResponseEntity.ok(roomDetail);
 
     private final BankRepository bankRepository;
 

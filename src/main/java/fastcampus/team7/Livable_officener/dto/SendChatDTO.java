@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-import java.util.Set;
+import java.util.Collection;
 
 @RequiredArgsConstructor
 @Getter
@@ -17,5 +17,5 @@ public class SendChatDTO {
     private final User sender;
     private final TextMessage message;
     private final ChatType type;
-    private final Set<WebSocketSession> sessionSet;
+    private final Collection<WebSocketSession> webSocketSessions;
 }

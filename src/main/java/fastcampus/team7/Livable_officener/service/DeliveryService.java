@@ -7,6 +7,7 @@ import fastcampus.team7.Livable_officener.global.constant.BankName;
 import fastcampus.team7.Livable_officener.global.constant.FoodTag;
 import fastcampus.team7.Livable_officener.global.constant.Role;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
+import fastcampus.team7.Livable_officener.dto.RoomDetailDTO;
 import fastcampus.team7.Livable_officener.repository.BankRepository;
 import fastcampus.team7.Livable_officener.repository.DeliveryParticipantRepository;
 import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
@@ -63,5 +64,8 @@ public class DeliveryService {
         Room room = deliveryRepository.findById(roomId).orElseThrow(() -> new IllegalArgumentException("올바른 roomId 아님"));
         deliveryParticipantRepository.save(roomParticipantSaveDTO.toEntity(room, user));
 
+    public RoomDetailDTO selectRoomDetail(Long id) {
+        // TODO : 예외처리 로직 추가
+        return deliveryRepository.findRoomById(id);
     }
 }
