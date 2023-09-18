@@ -35,18 +35,12 @@ import java.util.stream.Collectors;
 public class DeliveryController {
 
     private final DeliveryService deliveryService;
-
-
-    @GetMapping("/{id}")
-    public ResponseEntity<?> findRoomDetail(@PathVariable Long id){
-        final RoomDetailDTO roomDetail = deliveryService.selectRoomDetail(id);
-        return ResponseEntity.ok(roomDetail);
-
     private final BankRepository bankRepository;
 
-    @GetMapping("/test")
-    public String test() {
-        return "ok";
+    @GetMapping("/{id}")
+    public ResponseEntity<?> findRoomDetail(@PathVariable Long id) {
+        final RoomDetailDTO roomDetail = deliveryService.selectRoomDetail(id);
+        return ResponseEntity.ok(roomDetail);
     }
 
     @GetMapping("/bankList")
