@@ -8,9 +8,7 @@ import fastcampus.team7.Livable_officener.dto.SendChatDTO;
 import fastcampus.team7.Livable_officener.global.constant.ChatType;
 import fastcampus.team7.Livable_officener.global.constant.Role;
 import fastcampus.team7.Livable_officener.global.constant.SystemMessage;
-import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
-import fastcampus.team7.Livable_officener.global.exception.UserIsNotHostException;
-import fastcampus.team7.Livable_officener.global.exception.UserIsNotParticipantException;
+import fastcampus.team7.Livable_officener.global.exception.*;
 import fastcampus.team7.Livable_officener.global.websocket.WebSocketSessionManager;
 import fastcampus.team7.Livable_officener.repository.ChatRepository;
 import fastcampus.team7.Livable_officener.repository.XChatRoomParticipantRepository;
@@ -50,10 +48,17 @@ public class ChatService {
     }
 
     @Transactional
-    public void completeTransfer(Long roomId, User user) {
+    public void completeTransfer(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
-        validateIfUserIsGuest(roomId, user.getId());
-
+        RoomParticipant roomParticipant= getRoomParticipant(roomId, user.getId());
+        if(roomParticipant.getRole() != Role.GUEST) {
+            throw new UserIsNotGuestException("송금완료");
+        }
+        if( roomParticipant.getTransferredAt() != null ) {
+            throw new AlreadyTransferredException();
+        }
+        roomParticipant.completeTransfer();
+        sendCompleteTransferSystemMessage(room, user);
     }
 
     private Room getRoom(Long roomId) {
@@ -64,17 +69,6 @@ public class ChatService {
     private void validateIfUserIsHost(Long roomId, Long userId) {
         RoomParticipant roomParticipant = getRoomParticipant(roomId, userId);
         validateIfRoomParticipantIsHost(roomParticipant.getRole());
-    }
-
-    private void validateIfUserIsGuest(Long roomId, Long userId) {
-        RoomParticipant roomParticipant = getRoomParticipant(roomId, userId);
-        validateIfRoomParticipantIsGuest(roomParticipant.getRole());
-    }
-
-    private void validateIfRoomParticipantIsGuest(Role role) {
-        if (role != Role.GUEST) {
-            throw new UserIsNotHostException()
-        }
     }
 
     private RoomParticipant getRoomParticipant(Long roomId, Long userId) {
@@ -91,6 +85,12 @@ public class ChatService {
     private void sendCloseSystemMessage(Room room, User user) throws IOException {
         Collection<WebSocketSession> webSocketSessions = webSocketSessionManager.getWebSocketSessions(room.getId());
         TextMessage textMessage = new TextMessage(SystemMessage.CLOSE.getContent(user.getName()));
-        send(new SendChatDTO(room, user, textMessage, ChatType.CLOSE, webSocketSessions));
+        send(new SendChatDTO(room, user, textMessage, ChatType.SYSTEM_MESSAGE, webSocketSessions));
+    }
+
+    private void sendCompleteTransferSystemMessage(Room room, User user) throws IOException {
+        Collection<WebSocketSession> webSocketSessions = webSocketSessionManager.getWebSocketSessions(room.getId());
+        TextMessage textMessage = new TextMessage(SystemMessage.COMPLETE_TRANSFER.getContent(user.getName()));
+        send(new SendChatDTO(room, user, textMessage, ChatType.SYSTEM_MESSAGE, webSocketSessions));
     }
 }
