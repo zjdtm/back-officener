@@ -10,7 +10,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     defer-datasource-initialization: true
     properties:
       hibernate:
@@ -34,5 +34,3 @@ logging:
 jwt:
   secret:
     key: ${JWT_SECRET_KEY}
-
-
