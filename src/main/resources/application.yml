@@ -1,12 +1,16 @@
+api:
+  key: HDE3ab698f24d4211ee92a
+  secret: 3ab6991d4d4211ee92a802b67259d33a
+
 spring:
   datasource:
     username: root
     password: mysql
-    url: jdbc:mysql://localhost:3306/chillibubble
+    url: jdbc:mysql://localhost:3306/chilibubble
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: create
     defer-datasource-initialization: true
     properties:
       hibernate:
