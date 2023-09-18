@@ -6,12 +6,14 @@ import fastcampus.team7.Livable_officener.repository.XChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
 
 import java.util.Map;
 
 @RequiredArgsConstructor
+@Component
 public class CustomHandshakeInterceptor extends HttpSessionHandshakeInterceptor {
 
     private final XChatRoomRepository roomRepository;
