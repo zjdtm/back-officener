@@ -34,7 +34,7 @@ public class ChatServiceReceiveCompleteTest {
     private XChatRoomParticipantRepository roomParticipantRepository;
 
     @Test
-    @DisplayName("이미 송금완료 했을 시 예외 발생")
+    @DisplayName("이미 수령완료 했을 시 예외 발생")
     void alreadyTransfer() {
         //given
         Long roomId = 1L;
