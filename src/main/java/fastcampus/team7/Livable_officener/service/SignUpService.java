@@ -13,6 +13,7 @@ import fastcampus.team7.Livable_officener.repository.PhoneAuthDTORedisRepository
 import fastcampus.team7.Livable_officener.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +33,8 @@ public class SignUpService {
 
     private final UserRepository userRepository;
     private final PhoneAuthDTORedisRepository phoneAuthDTORedisRepository;
+
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
     public List<BuildingWithCompaniesDTO> getBuildingWithCompanies(String keyword) {
@@ -99,7 +102,7 @@ public class SignUpService {
         Building building = buildingRepository.findByName(requestBuildingName)
                 .orElseThrow(() -> new NotFoundBuildingException());
 
-        User user = request.toEntity(building);
+        User user = request.toEntity(building, passwordEncoder.encode(request.getPassword()));
 
         userRepository.save(user);
 
