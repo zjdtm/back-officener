@@ -67,6 +67,7 @@ public class ChatService {
         Room room = getRoom(roomId);
         RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
         validateIfRoomParticipantIsHost(roomParticipant.getRole(), "배달완료");
+        room.completeDelivery();
     }
 
     private Room getRoom(Long roomId) {
