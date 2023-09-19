@@ -1,6 +1,7 @@
 package fastcampus.team7.Livable_officener.service;
 
 import fastcampus.team7.Livable_officener.domain.Elevator;
+import fastcampus.team7.Livable_officener.domain.UserElevator;
 import fastcampus.team7.Livable_officener.dto.ElevatorDTO;
 import fastcampus.team7.Livable_officener.global.util.APIDataResponse;
 import fastcampus.team7.Livable_officener.global.util.GenerateSig;
@@ -61,6 +62,16 @@ public class ElevatorService {
         return responseEntity;
     }
 
+    public void setElevator(List<Long> selectedIds){
+        List<UserElevator> userElevators = new ArrayList<>();
+        for (Long id : selectedIds) {
+            UserElevator userElevator = new UserElevator();
+            userElevator.setElevatorId(id);
+            userElevators.add(userElevator);
+        }
+
+    }
+
     private ElevatorDTO convertToDTO(Elevator elevator) {
         ElevatorDTO elevatorDTO = new ElevatorDTO();
         elevatorDTO.setId(elevator.getId());
@@ -69,5 +80,6 @@ public class ElevatorService {
         elevatorDTO.setStatus(elevator.getStatus());
         return elevatorDTO;
     }
+
 
 }
