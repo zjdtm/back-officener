@@ -71,6 +71,7 @@ public class DeliveryController {
         deliveryService.deleteDelivery(id, user);
 
         return new ResponseEntity<>(HttpStatus.OK);
+    }
 
     @GetMapping("/list")
     public ResponseEntity<APIDataResponse<DeliveryResponseDTO.PagedRoomListResponseDTO>> list(@RequestParam(defaultValue = "0") int page,
