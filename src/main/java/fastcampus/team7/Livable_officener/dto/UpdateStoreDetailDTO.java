@@ -6,28 +6,19 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class RoomDetailDTO {
-    private Long roomId;
-    private Long hostId;
-    private String hostName;
+public class UpdateStoreDetailDTO {
     private String storeName;
     private String menuLink;
     private Long deliveryFee;
-    private FoodTag tag;
+    private FoodTag foodTag;
     private BankName bankName;
-    private String account;
+    private String accountNum;
     private LocalDateTime deadline;
-    private Long attendees;
     private Long maxAttendees;
-    private String description;
-    private Boolean isJoin;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
+    private String desc;
 }
-
