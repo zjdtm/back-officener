@@ -35,4 +35,8 @@ public class RoomParticipant extends BaseEntity {
     public void completeTransfer() {
         transferredAt = LocalDateTime.now();
     }
+
+    public void completeReceive() {
+        receivedAt = LocalDateTime.now();
+    }
 }
