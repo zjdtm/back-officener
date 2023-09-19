@@ -4,6 +4,7 @@ import fastcampus.team7.Livable_officener.global.constant.BankName;
 import fastcampus.team7.Livable_officener.global.constant.FoodTag;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
 
+import fastcampus.team7.Livable_officener.global.exception.AlreadyDeliveredException;
 import fastcampus.team7.Livable_officener.global.exception.NotActiveRoomException;
 import lombok.*;
 
@@ -56,10 +57,18 @@ public class Room extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private RoomStatus status;
 
+    private LocalDateTime deliveredAt;
+
     public void closeParticipation() {
         if (getStatus() != RoomStatus.ACTIVE) {
             throw new NotActiveRoomException();
         }
         status = RoomStatus.CLOSED;
+    }
+
+    public void completeDelivery() {
+        if (getDeliveredAt() != null) {
+            throw new AlreadyDeliveredException();
+        }
     }
 }
