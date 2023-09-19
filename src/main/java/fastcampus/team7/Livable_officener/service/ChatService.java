@@ -62,6 +62,12 @@ public class ChatService {
         sendSystemMessage(room, user, SystemMessage.COMPLETE_TRANSFER);
     }
 
+    @Transactional
+    public void completeDelivery(Long roomId, User user) {
+        Room room = getRoom(roomId);
+
+    }
+
     private Room getRoom(Long roomId) {
         return roomRepository.findById(roomId)
                 .orElseThrow(NotFoundRoomException::new);
