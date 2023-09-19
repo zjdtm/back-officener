@@ -1,5 +1,6 @@
 package fastcampus.team7.Livable_officener.service;
 
+import fastcampus.team7.Livable_officener.domain.Chat;
 import fastcampus.team7.Livable_officener.domain.Room;
 import fastcampus.team7.Livable_officener.domain.RoomParticipant;
 import fastcampus.team7.Livable_officener.domain.User;
@@ -8,6 +9,8 @@ import fastcampus.team7.Livable_officener.global.exception.AlreadyDeliveredExcep
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotHostException;
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotParticipantException;
+import fastcampus.team7.Livable_officener.global.websocket.WebSocketSessionManager;
+import fastcampus.team7.Livable_officener.repository.ChatRepository;
 import fastcampus.team7.Livable_officener.repository.XChatRoomParticipantRepository;
 import fastcampus.team7.Livable_officener.repository.XChatRoomRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -30,9 +33,13 @@ class ChatServiceCompleteDeliveryTest {
     @InjectMocks
     private ChatService sut;
     @Mock
+    private ChatRepository chatRepository;
+    @Mock
     private XChatRoomRepository roomRepository;
     @Mock
     private XChatRoomParticipantRepository roomParticipantRepository;
+    @Mock
+    private WebSocketSessionManager webSocketSessionManager;
 
     @DisplayName("roomId에 해당하는 함께배달이 없으면 예외 발생")
     @Test
@@ -131,10 +138,14 @@ class ChatServiceCompleteDeliveryTest {
                 .willReturn(Optional.of(roomParticipant));
         given(roomParticipant.getRole())
                 .willReturn(Role.HOST);
+        given(room.getId())
+                .willReturn(roomId);
 
         // when, then
         sut.completeDelivery(roomId, user);
 
         verify(room, times(1)).completeDelivery();
+        verify(webSocketSessionManager, times(1)).getWebSocketSessions(roomId);
+        verify(chatRepository, times(1)).save(any(Chat.class));
     }
 }
