@@ -1,6 +1,5 @@
 package fastcampus.team7.Livable_officener.dto;
 
-import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.global.constant.Direction;
 import fastcampus.team7.Livable_officener.global.constant.ElevatorStatus;
 import lombok.Data;
@@ -19,7 +18,6 @@ public class ElevatorDTO {
     @Data
     public static class UserElevatorDTO{
         private List<Long> selectedIds;
-        private User user;
     }
 
 }
