@@ -8,7 +8,6 @@ import fastcampus.team7.Livable_officener.global.exception.AlreadyDeliveredExcep
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotHostException;
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotParticipantException;
-import fastcampus.team7.Livable_officener.repository.ChatRepository;
 import fastcampus.team7.Livable_officener.repository.XChatRoomParticipantRepository;
 import fastcampus.team7.Livable_officener.repository.XChatRoomRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -18,7 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -30,8 +28,6 @@ class ChatServiceCompleteDeliveryTest {
 
     @InjectMocks
     private ChatService sut;
-    @Mock
-    private ChatRepository chatRepository;
     @Mock
     private XChatRoomRepository roomRepository;
     @Mock
@@ -114,5 +110,30 @@ class ChatServiceCompleteDeliveryTest {
         // when, then
         assertThatThrownBy(() -> sut.completeDelivery(roomId, user))
                 .isInstanceOf(AlreadyDeliveredException.class);
+    }
+
+    @DisplayName("배달완료시 예외 발생 안함")
+    @Test
+    void whenCompleteDelivery_thenPass() {
+        // given
+        Long roomId = 1L;
+        Long userId = 1L;
+        User user = mock(User.class);
+        Room room = mock(Room.class);
+        RoomParticipant roomParticipant = mock(RoomParticipant.class);
+
+        given(roomRepository.findById(roomId))
+                .willReturn(Optional.of(room));
+        given(user.getId())
+                .willReturn(userId);
+        given(roomParticipantRepository.findByRoomIdAndUserId(roomId, userId))
+                .willReturn(Optional.of(roomParticipant));
+        given(roomParticipant.getRole())
+                .willReturn(Role.HOST);
+
+        // when, then
+        sut.completeDelivery(roomId, user);
+
+        verify(room, times(1)).completeDelivery();
     }
 }
