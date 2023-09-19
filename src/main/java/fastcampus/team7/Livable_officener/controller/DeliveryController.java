@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.DeliveryRequestDTO;
 import fastcampus.team7.Livable_officener.global.util.APIDataResponse;
-import fastcampus.team7.Livable_officener.repository.BankRepository;
 import org.springframework.http.HttpStatus;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -57,6 +56,15 @@ public class DeliveryController {
     public ResponseEntity<APIDataResponse<DeliveryResponseDTO.PagedRoomListResponseDTO>> list(@RequestParam(defaultValue = "0") int page,
                                                                                               @RequestParam(defaultValue = "10") int size) {
         DeliveryResponseDTO.PagedRoomListResponseDTO response = deliveryService.getRoomList(PageRequest.of(page, size));
+        return APIDataResponse.of(HttpStatus.CREATED, "성공", response);
+    }
+
+    @GetMapping("joinedRoom")
+    public ResponseEntity<APIDataResponse<DeliveryResponseDTO.PagedRoomListResponseDTO>> joinedRoom(@RequestParam(defaultValue = "0") int page,
+                                                                                                    @RequestParam(defaultValue = "10") int size,
+                                                                                                    @AuthenticationPrincipal User user) {
+
+        DeliveryResponseDTO.PagedRoomListResponseDTO response = deliveryService.getFilteredRoomList(PageRequest.of(page, size), user);
         return APIDataResponse.of(HttpStatus.CREATED, "성공", response);
     }
 }
