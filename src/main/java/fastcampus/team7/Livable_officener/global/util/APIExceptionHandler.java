@@ -1,9 +1,6 @@
 package fastcampus.team7.Livable_officener.global.util;
 
-import fastcampus.team7.Livable_officener.global.exception.NotActiveRoomException;
-import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
-import fastcampus.team7.Livable_officener.global.exception.UserIsNotHostException;
-import fastcampus.team7.Livable_officener.global.exception.UserIsNotParticipantException;
+import fastcampus.team7.Livable_officener.global.exception.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -78,5 +75,20 @@ public class APIExceptionHandler {
     @ExceptionHandler
     public ResponseEntity<?> handleIOException(IOException e) {
         return handleExceptionInternal(e, "IOException", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<?> handleDuplicatedPhoneNumberException(DuplicatedPhoneNumberException e) {
+        return handleExceptionInternal(e, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<?> handleNotFoundBuildingException(NotFoundBuildingException e) {
+        return handleExceptionInternal(e, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<?> handleNotVerifiedPhoneNumberException(NotVerifiedPhoneNumberException e) {
+        return handleExceptionInternal(e, HttpStatus.BAD_REQUEST);
     }
 }
