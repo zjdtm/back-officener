@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -114,7 +115,7 @@ class ChatServiceCompleteDeliveryTest {
 
     @DisplayName("배달완료시 예외 발생 안함")
     @Test
-    void whenCompleteDelivery_thenPass() {
+    void whenCompleteDelivery_thenPass() throws IOException {
         // given
         Long roomId = 1L;
         Long userId = 1L;
