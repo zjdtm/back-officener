@@ -46,6 +46,25 @@ public class ChatServiceReceiveCompleteTest {
     }
 
     @Test
+    @DisplayName("수령완료 시 해당 채팅방의 참여자가 아니면 예외발생")
+    void isParticipantTest() {
+        // given
+        Long roomId = 1L;
+        User user = mock(User.class);
+        Room room = mock(Room.class);
+
+        given(user.getId())
+                .willReturn(1L);
+        given(roomRepository.findById(anyLong()))
+                .willReturn(Optional.of(room));
+        given(roomParticipantRepository.findByRoomIdAndUserId(anyLong(), anyLong()))
+                .willReturn(Optional.empty());
+
+        // when, then
+        customAssertThrow(roomId, user, UserIsNotParticipantException.class);
+    }
+
+    @Test
     @DisplayName("이미 수령완료 했을 시 예외 발생")
     void alreadyTransfer() {
         //given
