@@ -13,7 +13,6 @@ import fastcampus.team7.Livable_officener.global.websocket.WebSocketSessionManag
 import fastcampus.team7.Livable_officener.repository.ChatRepository;
 import fastcampus.team7.Livable_officener.repository.XChatRoomParticipantRepository;
 import fastcampus.team7.Livable_officener.repository.XChatRoomRepository;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,6 +74,18 @@ public class ChatService {
         sendSystemMessage(room, user, SystemMessage.COMPLETE_DELIVERY);
     }
 
+    @Transactional
+    public void completeReceive(Long roomId, User user) throws IOException {
+        Room room = getRoom(roomId);
+        RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
+
+        validateIfRoomParticipantIsGuest(roomParticipant.getRole(), "수령완료");
+        isReceiveCompleted(roomParticipant);
+
+        roomParticipant.completeReceive();
+        sendSystemMessage(room, user, SystemMessage.COMPLETE_RECEIVE);
+    }
+
     private Room getRoom(Long roomId) {
         return roomRepository.findById(roomId)
                 .orElseThrow(NotFoundRoomException::new);
@@ -100,6 +111,12 @@ public class ChatService {
     private static void isTransferCompleted(RoomParticipant roomParticipant) {
         if (roomParticipant.getTransferredAt() != null) {
             throw new AlreadyTransferredException();
+        }
+    }
+
+    private static void isReceiveCompleted(RoomParticipant roomParticipant) {
+        if (roomParticipant.getReceivedAt() != null) {
+            throw new AlreadyReceivedException();
         }
     }
 

@@ -47,4 +47,13 @@ public class ChatController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @PostMapping("/received")
+    public ResponseEntity<?> completeReceive(
+            @PathVariable Long roomId,
+            @AuthenticationPrincipal User user) throws IOException {
+
+        chatService.completeReceive(roomId, user);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 }

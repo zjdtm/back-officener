@@ -1,12 +1,16 @@
+api:
+  key: HDE3ab698f24d4211ee92a
+  secret: 3ab6991d4d4211ee92a802b67259d33a
+
 spring:
   datasource:
     username: root
-    password: root1234
+    password: mysql
     url: jdbc:mysql://localhost:3306/chilibubble
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: none
     defer-datasource-initialization: true
     properties:
       hibernate:
@@ -30,5 +34,3 @@ logging:
 jwt:
   secret:
     key: ${JWT_SECRET_KEY}
-
-

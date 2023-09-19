@@ -1,9 +1,9 @@
 package fastcampus.team7.Livable_officener.domain;
 
+import fastcampus.team7.Livable_officener.dto.UpdateStoreDetailDTO;
 import fastcampus.team7.Livable_officener.global.constant.BankName;
 import fastcampus.team7.Livable_officener.global.constant.FoodTag;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
-
 import fastcampus.team7.Livable_officener.global.exception.AlreadyDeliveredException;
 import fastcampus.team7.Livable_officener.global.exception.NotActiveRoomException;
 import lombok.*;
@@ -32,6 +32,7 @@ public class Room extends BaseEntity {
     private FoodTag tag;
 
     @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
     private BankName bankName;
 
     @Column(nullable = false)
@@ -71,5 +72,17 @@ public class Room extends BaseEntity {
             throw new AlreadyDeliveredException();
         }
         deliveredAt = LocalDateTime.now();
+    }
+
+    public void updateStoreDetail(UpdateStoreDetailDTO requestDTO) {
+        this.storeName = requestDTO.getStoreName();
+        this.menuLink = requestDTO.getMenuLink();
+        this.deliveryFee = requestDTO.getDeliveryFee();
+        this.tag = requestDTO.getFoodTag();
+        this.bankName = requestDTO.getBankName();
+        this.accountNumber = requestDTO.getAccountNum();
+        this.deadline = requestDTO.getDeadline();
+        this.maxAttendees = requestDTO.getMaxAttendees();
+        this.description = requestDTO.getDesc();
     }
 }
