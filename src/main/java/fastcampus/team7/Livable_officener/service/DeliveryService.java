@@ -141,6 +141,7 @@ public class DeliveryService {
                 .collect(Collectors.toList()));
 
         return response;
+
     }
 
     private DeliveryResponseDTO.RoomListResponseDTO convertToRoomListResponseDTO(Room room) {
@@ -160,5 +161,21 @@ public class DeliveryService {
                 .createdAt(room.getCreatedAt())
                 .updatedAt(room.getUpdatedAt())
                 .build();
+    }
+
+    @Transactional
+    public DeliveryResponseDTO.PagedRoomListResponseDTO getFilteredRoomList(Pageable pageable, User user) {
+        Page<Room> rooms = deliveryRepository.findRoomsByUserId(user.getId(), pageable);
+
+        DeliveryResponseDTO.PagedRoomListResponseDTO response = new DeliveryResponseDTO.PagedRoomListResponseDTO();
+        response.setCurrentPage(rooms.getNumber());
+        response.setTotalPage(rooms.getTotalPages());
+        response.setTotalElements(rooms.getTotalElements());
+
+        response.setRooms(rooms.stream()
+                .map(this::convertToRoomListResponseDTO)
+                .collect(Collectors.toList()));
+
+        return response;
     }
 }
