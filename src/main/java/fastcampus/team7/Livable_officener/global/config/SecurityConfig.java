@@ -1,6 +1,5 @@
 package fastcampus.team7.Livable_officener.global.config;
 
-import fastcampus.team7.Livable_officener.global.sercurity.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
