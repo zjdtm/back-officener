@@ -2,14 +2,17 @@ package fastcampus.team7.Livable_officener.service;
 
 import fastcampus.team7.Livable_officener.domain.Bank;
 import fastcampus.team7.Livable_officener.domain.Room;
+import fastcampus.team7.Livable_officener.domain.RoomParticipant;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.DeliveryRequestDTO;
+import fastcampus.team7.Livable_officener.dto.RoomDetailDTO;
+import fastcampus.team7.Livable_officener.dto.UpdateStoreDetailDTO;
 import fastcampus.team7.Livable_officener.dto.DeliveryResponseDTO;
 import fastcampus.team7.Livable_officener.global.constant.BankName;
 import fastcampus.team7.Livable_officener.global.constant.FoodTag;
 import fastcampus.team7.Livable_officener.global.constant.Role;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
-import fastcampus.team7.Livable_officener.dto.RoomDetailDTO;
+import fastcampus.team7.Livable_officener.global.exception.UserIsNotParticipantException;
 import fastcampus.team7.Livable_officener.repository.BankRepository;
 import fastcampus.team7.Livable_officener.repository.DeliveryParticipantRepository;
 import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
@@ -24,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -96,6 +100,34 @@ public class DeliveryService {
     }
 
     @Transactional
+    public void updateStoreDetail(Long roomId, UpdateStoreDetailDTO requestDTO, User user) {
+        Room room = checkHost(roomId, user);
+
+        room.updateStoreDetail(requestDTO);
+    }
+
+    @Transactional
+    public void deleteDelivery(Long roomId, User user) {
+        Room room = checkHost(roomId, user);
+
+        deliveryParticipantRepository.deleteAllByRoomId(roomId);
+        deliveryRepository.delete(room);
+    }
+
+    private Room checkHost(Long roomId, User user) {
+        Room room = deliveryRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않는 방입니다."));
+
+        Optional<RoomParticipant> roomParticipant = Optional.ofNullable(
+                deliveryParticipantRepository.findRoomParticipant(roomId, user.getId())
+                        .orElseThrow(UserIsNotParticipantException::new));
+
+        if (roomParticipant.isPresent() && roomParticipant.get().getRole() == Role.GUEST) {
+            throw new IllegalArgumentException("호스트가 아닌 사람은 수정할 수 없습니다.");
+        }
+        return room;
+    }
+
     public DeliveryResponseDTO.PagedRoomListResponseDTO getRoomList(Pageable pageable) {
         Page<Room> rooms = deliveryRepository.findAll(pageable);
 
