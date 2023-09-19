@@ -4,8 +4,7 @@ import fastcampus.team7.Livable_officener.domain.Room;
 import fastcampus.team7.Livable_officener.domain.RoomParticipant;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.global.constant.Role;
-import fastcampus.team7.Livable_officener.global.exception.AlreadyReceivedException;
-import fastcampus.team7.Livable_officener.global.exception.AlreadyTransferredException;
+import fastcampus.team7.Livable_officener.global.exception.*;
 import fastcampus.team7.Livable_officener.repository.XChatRoomParticipantRepository;
 import fastcampus.team7.Livable_officener.repository.XChatRoomRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -32,6 +31,19 @@ public class ChatServiceReceiveCompleteTest {
     private XChatRoomRepository roomRepository;
     @Mock
     private XChatRoomParticipantRepository roomParticipantRepository;
+
+    @Test
+    @DisplayName("수령 완료시 채팅방 Id 없으면 예외 발생")
+    void roomIdNotFoundTest() {
+        //given
+        Long WrongRoomId = 1L;
+        User user = mock(User.class);
+
+        given(roomRepository.findById(anyLong()))
+                .willReturn(Optional.empty());
+        //when//then
+        customAssertThrow(WrongRoomId, user, NotFoundRoomException.class);
+    }
 
     @Test
     @DisplayName("이미 수령완료 했을 시 예외 발생")
