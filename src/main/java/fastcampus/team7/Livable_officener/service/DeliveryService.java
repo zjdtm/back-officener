@@ -48,7 +48,7 @@ public class DeliveryService {
                 .foodTag(foodTag)
                 .bankName(bankName)
                 .accountNumber(createDTO.getAccountNumber())
-                .hostName("testUser")
+                .hostName(user.getName())
                 .deadline(createDTO.getDeadline())
                 .attendees(1L)
                 .maxAttendees(createDTO.getMaxAttendees())
@@ -57,12 +57,11 @@ public class DeliveryService {
                 .build();
 
         Room savedRoom = deliveryRepository.save(roomSaveDTO.toEntity());
-        log.info("roomSave 통과");
         Long roomId = savedRoom.getId();
 
         DeliveryRequestDTO.roomParticipantSaveDTO roomParticipantSaveDTO = DeliveryRequestDTO.roomParticipantSaveDTO.builder()
                 .roomId(roomId)
-                .userId(1L)
+                .userId(user.getId())
                 .role(Role.HOST)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
