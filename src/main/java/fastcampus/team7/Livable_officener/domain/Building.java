@@ -1,11 +1,14 @@
 package fastcampus.team7.Livable_officener.domain;
 
-import lombok.Getter;
+import lombok.*;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
 @Getter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
 @Entity
 public class Building extends BaseEntity {
 

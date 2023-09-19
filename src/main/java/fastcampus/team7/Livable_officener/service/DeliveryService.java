@@ -7,6 +7,7 @@ import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.DeliveryRequestDTO;
 import fastcampus.team7.Livable_officener.dto.RoomDetailDTO;
 import fastcampus.team7.Livable_officener.dto.UpdateStoreDetailDTO;
+import fastcampus.team7.Livable_officener.dto.DeliveryResponseDTO;
 import fastcampus.team7.Livable_officener.global.constant.BankName;
 import fastcampus.team7.Livable_officener.global.constant.FoodTag;
 import fastcampus.team7.Livable_officener.global.constant.Role;
@@ -17,6 +18,8 @@ import fastcampus.team7.Livable_officener.repository.DeliveryParticipantReposito
 import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,7 +52,7 @@ public class DeliveryService {
                 .foodTag(foodTag)
                 .bankName(bankName)
                 .accountNumber(createDTO.getAccountNumber())
-                .hostName("testUser")
+                .hostName(user.getName())
                 .deadline(createDTO.getDeadline())
                 .attendees(1L)
                 .maxAttendees(createDTO.getMaxAttendees())
@@ -58,12 +61,11 @@ public class DeliveryService {
                 .build();
 
         Room savedRoom = deliveryRepository.save(roomSaveDTO.toEntity());
-        log.info("roomSave 통과");
         Long roomId = savedRoom.getId();
 
         DeliveryRequestDTO.roomParticipantSaveDTO roomParticipantSaveDTO = DeliveryRequestDTO.roomParticipantSaveDTO.builder()
                 .roomId(roomId)
-                .userId(1L)
+                .userId(user.getId())
                 .role(Role.HOST)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
@@ -79,6 +81,7 @@ public class DeliveryService {
         return deliveryRepository.findRoomById(id);
     }
 
+    @Transactional
     public Map<String, List<Map<String, String>>> loadBankList() {
         List<Bank> bankList = bankRepository.findAll();
 
@@ -123,5 +126,39 @@ public class DeliveryService {
             throw new IllegalArgumentException("호스트가 아닌 사람은 수정할 수 없습니다.");
         }
         return room;
+    }
+
+    public DeliveryResponseDTO.PagedRoomListResponseDTO getRoomList(Pageable pageable) {
+        Page<Room> rooms = deliveryRepository.findAll(pageable);
+
+        DeliveryResponseDTO.PagedRoomListResponseDTO response = new DeliveryResponseDTO.PagedRoomListResponseDTO();
+        response.setCurrentPage(rooms.getNumber());
+        response.setTotalPage(rooms.getTotalPages());
+        response.setTotalElements(rooms.getTotalElements());
+
+        response.setRooms(rooms.stream()
+                .map(this::convertToRoomListResponseDTO)
+                .collect(Collectors.toList()));
+
+        return response;
+    }
+
+    private DeliveryResponseDTO.RoomListResponseDTO convertToRoomListResponseDTO(Room room) {
+        String foodTag = room.getTag().toString();
+        String roomStatus = room.getStatus().toString();
+        return DeliveryResponseDTO.RoomListResponseDTO.builder()
+                .roomId(room.getId())
+                .hostId(1L)
+                .storeName(room.getStoreName())
+                .menuLink(room.getMenuLink())
+                .deliveryFee(room.getDeliveryFee())
+                .tag(foodTag)
+                .attendees(room.getAttendees())
+                .maxAttendees(room.getMaxAttendees())
+                .deadLine(room.getDeadline())
+                .roomStatus(roomStatus)
+                .createdAt(room.getCreatedAt())
+                .updatedAt(room.getUpdatedAt())
+                .build();
     }
 }

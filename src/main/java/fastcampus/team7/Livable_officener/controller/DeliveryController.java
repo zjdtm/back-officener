@@ -1,6 +1,12 @@
 package fastcampus.team7.Livable_officener.controller;
 
 
+import fastcampus.team7.Livable_officener.dto.DeliveryResponseDTO;
+import fastcampus.team7.Livable_officener.dto.RoomDetailDTO;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.DeliveryRequestDTO;
 import fastcampus.team7.Livable_officener.dto.RoomDetailDTO;
@@ -25,7 +31,6 @@ import java.util.Map;
 public class DeliveryController {
 
     private final DeliveryService deliveryService;
-    private final BankRepository bankRepository;
 
     @GetMapping("/{id}")
     public ResponseEntity<?> findRoomDetail(@PathVariable Long id) {
@@ -66,5 +71,11 @@ public class DeliveryController {
         deliveryService.deleteDelivery(id, user);
 
         return new ResponseEntity<>(HttpStatus.OK);
+
+    @GetMapping("/list")
+    public ResponseEntity<APIDataResponse<DeliveryResponseDTO.PagedRoomListResponseDTO>> list(@RequestParam(defaultValue = "0") int page,
+                                                                                              @RequestParam(defaultValue = "10") int size) {
+        DeliveryResponseDTO.PagedRoomListResponseDTO response = deliveryService.getRoomList(PageRequest.of(page, size));
+        return APIDataResponse.of(HttpStatus.CREATED, "성공", response);
     }
 }

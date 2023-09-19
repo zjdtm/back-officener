@@ -18,6 +18,17 @@ spring:
       mode: always
       platform: mysql
 
+  redis:
+    host: localhost
+    port: 6379
+
 logging:
   level:
     sql: trace
+
+
+jwt:
+  secret:
+    key: ${JWT_SECRET_KEY}
+
+
