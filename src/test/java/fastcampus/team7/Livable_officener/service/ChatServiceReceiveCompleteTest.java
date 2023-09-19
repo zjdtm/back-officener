@@ -65,6 +65,28 @@ public class ChatServiceReceiveCompleteTest {
     }
 
     @Test
+    @DisplayName("수령완료 시 게스트가 아니면 예외발생")
+    void isGuestTest() {
+        // given
+        Long roomId = 1L;
+        User user = mock(User.class);
+        Room room = mock(Room.class);
+        RoomParticipant roomParticipant = mock(RoomParticipant.class);
+
+        given(user.getId())
+                .willReturn(1L);
+        given(roomRepository.findById(anyLong()))
+                .willReturn(Optional.of(room));
+        given(roomParticipantRepository.findByRoomIdAndUserId(anyLong(), anyLong()))
+                .willReturn(Optional.of(roomParticipant));
+        given(roomParticipant.getRole())
+                .willReturn(Role.HOST);
+
+        // when, then
+        customAssertThrow(roomId, user, UserIsNotGuestException.class);
+    }
+
+    @Test
     @DisplayName("이미 수령완료 했을 시 예외 발생")
     void alreadyTransfer() {
         //given
