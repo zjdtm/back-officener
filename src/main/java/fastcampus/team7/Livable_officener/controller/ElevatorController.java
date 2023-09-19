@@ -24,16 +24,17 @@ public class ElevatorController {
     @GetMapping("/api/elevator")
     public ResponseEntity<APIDataResponse<List<ElevatorDTO>>> getAllElevators(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization){
-
-        return elevatorService.getAllElevators();
+        String token = authorization.split(" ")[1];
+        return elevatorService.getAllElevators(token);
     }
 
     @PostMapping("/api/elevator")
-    public ResponseEntity<String> processSelectedIds(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
+    public ResponseEntity<APIDataResponse<String>> processSelectedIds(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
             @RequestBody ElevatorDTO.UserElevatorDTO userElevatorDTO) {
+        String token = authorization.split(" ")[1];
         List<Long> selectedIds = userElevatorDTO.getSelectedIds();
-        return elevatorService.setElevator(selectedIds);
+        return elevatorService.setElevator(selectedIds,token);
     }
-
 
 }
