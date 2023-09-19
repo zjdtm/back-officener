@@ -38,6 +38,15 @@ public class ChatController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @PostMapping("/delivered")
+    public ResponseEntity<?> completeDelivery(
+            @PathVariable Long roomId,
+            @AuthenticationPrincipal User user) throws IOException {
+
+        chatService.completeDelivery(roomId, user);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @PostMapping("/received")
     public ResponseEntity<?> completeReceive(
             @PathVariable Long roomId,
