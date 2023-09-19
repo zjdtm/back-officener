@@ -65,6 +65,7 @@ public class ChatService {
     @Transactional
     public void completeDelivery(Long roomId, User user) {
         Room room = getRoom(roomId);
+        RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
 
     }
 
