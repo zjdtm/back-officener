@@ -70,5 +70,6 @@ public class Room extends BaseEntity {
         if (getDeliveredAt() != null) {
             throw new AlreadyDeliveredException();
         }
+        deliveredAt = LocalDateTime.now();
     }
 }
