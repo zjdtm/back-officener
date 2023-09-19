@@ -21,7 +21,7 @@ class RoomCompleteDeliveryTest {
 
         // when, then
         assertThatThrownBy(room::completeDelivery)
-                        .isInstanceOf(AlreadyDeliveredException.class);
+                .isInstanceOf(AlreadyDeliveredException.class);
     }
 
     @DisplayName("배달완료시 현재시간 입력")
