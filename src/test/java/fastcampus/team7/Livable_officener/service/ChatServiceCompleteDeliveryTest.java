@@ -11,8 +11,8 @@ import fastcampus.team7.Livable_officener.global.exception.UserIsNotHostExceptio
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotParticipantException;
 import fastcampus.team7.Livable_officener.global.websocket.WebSocketSessionManager;
 import fastcampus.team7.Livable_officener.repository.ChatRepository;
-import fastcampus.team7.Livable_officener.repository.XChatRoomParticipantRepository;
-import fastcampus.team7.Livable_officener.repository.XChatRoomRepository;
+import fastcampus.team7.Livable_officener.repository.DeliveryParticipantRepository;
+import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,9 +35,9 @@ class ChatServiceCompleteDeliveryTest {
     @Mock
     private ChatRepository chatRepository;
     @Mock
-    private XChatRoomRepository roomRepository;
+    private DeliveryRepository roomRepository;
     @Mock
-    private XChatRoomParticipantRepository roomParticipantRepository;
+    private DeliveryParticipantRepository roomParticipantRepository;
     @Mock
     private WebSocketSessionManager webSocketSessionManager;
 
@@ -83,7 +83,7 @@ class ChatServiceCompleteDeliveryTest {
                 .willReturn(Optional.of(room));
         given(user.getId())
                 .willReturn(userId);
-        given(roomParticipantRepository.findByRoomIdAndUserId(roomId, userId))
+        given(roomParticipantRepository.findRoomParticipant(roomId, userId))
                 .willReturn(Optional.of(roomParticipant));
         given(roomParticipant.getRole())
                 .willReturn(Role.GUEST);
@@ -108,7 +108,7 @@ class ChatServiceCompleteDeliveryTest {
                 .willReturn(Optional.of(room));
         given(user.getId())
                 .willReturn(userId);
-        given(roomParticipantRepository.findByRoomIdAndUserId(roomId, userId))
+        given(roomParticipantRepository.findRoomParticipant(roomId, userId))
                 .willReturn(Optional.of(roomParticipant));
         given(roomParticipant.getRole())
                 .willReturn(Role.HOST);
@@ -134,7 +134,7 @@ class ChatServiceCompleteDeliveryTest {
                 .willReturn(Optional.of(room));
         given(user.getId())
                 .willReturn(userId);
-        given(roomParticipantRepository.findByRoomIdAndUserId(roomId, userId))
+        given(roomParticipantRepository.findRoomParticipant(roomId, userId))
                 .willReturn(Optional.of(roomParticipant));
         given(roomParticipant.getRole())
                 .willReturn(Role.HOST);
