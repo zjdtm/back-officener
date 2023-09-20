@@ -4,7 +4,7 @@ import fastcampus.team7.Livable_officener.domain.Room;
 import fastcampus.team7.Livable_officener.domain.RoomParticipant;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.global.constant.Role;
-import fastcampus.team7.Livable_officener.global.exception.AlreadyTransferredException;
+import fastcampus.team7.Livable_officener.global.exception.AlreadyRemittedException;
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotGuestException;
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotParticipantException;
@@ -26,7 +26,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
-public class ChatServiceTransferCompleteTest {
+public class ChatServiceRemitCompleteTest {
 
     @InjectMocks
     private ChatService sut;
@@ -92,7 +92,7 @@ public class ChatServiceTransferCompleteTest {
 
     @Test
     @DisplayName("이미 송금완료 했을 시 예외 발생")
-    void alreadyTransfer() {
+    void alreadyRemit() {
         //given
         Long roomId = 1L;
         User user = mock(User.class);
@@ -107,16 +107,16 @@ public class ChatServiceTransferCompleteTest {
                 .willReturn(Optional.of(roomParticipant));
         given(roomParticipant.getRole())
                 .willReturn(Role.GUEST);
-        doThrow(AlreadyTransferredException.class)
-                .when(roomParticipant).completeTransfer();
+        doThrow(AlreadyRemittedException.class)
+                .when(roomParticipant).completeRemit();
 
-        customAssertThrow(roomId, user, AlreadyTransferredException.class);
+        customAssertThrow(roomId, user, AlreadyRemittedException.class);
     }
 
     void customAssertThrow(Long roomId, User user,
                            Class<? extends Throwable> ex) {
         assertThatThrownBy(() ->
-                sut.completeTransfer(roomId, user))
+                sut.completeRemit(roomId, user))
                 .isInstanceOf(ex);
     }
 }

@@ -27,13 +27,13 @@ public class RoomParticipant extends BaseEntity {
     private LocalDateTime kickedAt;
 
     @Column
-    private LocalDateTime transferredAt;
+    private LocalDateTime remittedAt;
 
     @Column
     private LocalDateTime receivedAt;
 
-    public void completeTransfer() {
-        transferredAt = LocalDateTime.now();
+    public void completeRemit() {
+        remittedAt = LocalDateTime.now();
     }
 
     public void completeReceive() {
