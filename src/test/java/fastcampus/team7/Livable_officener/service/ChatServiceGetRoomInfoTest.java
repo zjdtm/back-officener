@@ -1,10 +1,13 @@
 package fastcampus.team7.Livable_officener.service;
 
 import fastcampus.team7.Livable_officener.domain.Room;
+import fastcampus.team7.Livable_officener.domain.RoomParticipant;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
 import fastcampus.team7.Livable_officener.global.exception.NotActiveRoomException;
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
+import fastcampus.team7.Livable_officener.global.exception.UserIsNotParticipantException;
+import fastcampus.team7.Livable_officener.repository.XChatRoomParticipantRepository;
 import fastcampus.team7.Livable_officener.repository.XChatRoomRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,6 +32,8 @@ class ChatServiceGetRoomInfoTest {
     private ChatService sut;
     @Mock
     private XChatRoomRepository roomRepository;
+    @Mock
+    private XChatRoomParticipantRepository roomParticipantRepository;
 
     @DisplayName("roomId에 해당하는 함께배달 존재하지 않으면 예외")
     @Test
@@ -56,5 +61,23 @@ class ChatServiceGetRoomInfoTest {
         // when, then
         assertThatThrownBy(() -> sut.getChatroomInfo(1L, mock(User.class)))
                 .isInstanceOf(NotActiveRoomException.class);
+    }
+
+    @DisplayName("roomId에 해당하는 함께배달의 참여자가 아니면 예외")
+    @Test
+    void whenNotParticipant_thenThrowsUserIsNotParticipantException() {
+        // given
+        User user = mock(User.class);
+        Room room = mock(Room.class);
+        given(roomRepository.findById(anyLong()))
+                .willReturn(Optional.of(room));
+        given(room.getStatus())
+                .willReturn(RoomStatus.ACTIVE);
+        given(roomParticipantRepository.findByRoomIdAndUserId(anyLong(), anyLong()))
+                .willReturn(Optional.empty());
+
+        // when, then
+        assertThatThrownBy(() -> sut.getChatroomInfo(1L, user))
+                .isInstanceOf(UserIsNotParticipantException.class);
     }
 }
