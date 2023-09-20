@@ -91,6 +91,50 @@ public class ChatServiceExitChatRoomTest {
         customAssertThrow(roomId, user, UserIsNotHostException.class);
     }
 
+    @Test
+    @DisplayName("모든 유저의 송금완료 and 수령완료 가 완료되지 않았을 경우 예외발생")
+    void notCompleteRemit() {
+        //given
+        Long roomId = 1L;
+        User user = mock(User.class);
+        Room room = mock(Room.class);
+        RoomParticipant roomParticipant = mock(RoomParticipant.class);
+
+        List<RoomParticipant> participants = new ArrayList<>();
+
+        RoomParticipant participant1 = mock(RoomParticipant.class);
+        given(participant1.getRemittedAt())
+                .willReturn(LocalDateTime.now());
+        given(participant1.getReceivedAt())
+                .willReturn(LocalDateTime.now());
+        participants.add(participant1);
+
+        RoomParticipant participant2 = mock(RoomParticipant.class);
+        given(participant2.getRemittedAt())
+                .willReturn(LocalDateTime.now());
+        given(participant2.getReceivedAt())
+                .willReturn(null);
+        participants.add(participant2);
+
+        given(user.getId())
+                .willReturn(1L);
+        given(roomParticipantRepository.findAllByRoomId(roomId))
+                .willReturn(participants);
+        given(roomRepository.findById(anyLong()))
+                .willReturn(Optional.of(room));
+        given(roomParticipantRepository.findRoomParticipant(anyLong(), anyLong()))
+                .willReturn(Optional.of(roomParticipant));
+        given(roomParticipant.getRole())
+                .willReturn(Role.HOST);
+        given(user.getId())
+                .willReturn(1L);
+        given(roomParticipantRepository.findAllByRoomId(roomId))
+                .willReturn(participants);
+
+        //Then
+        customAssertThrow(roomId, user, RemitNotCompletedException.class, ReceiveNotCompletedException.class);
+    }
+
     void customAssertThrow(Long roomId, User user,
                            Class<? extends Throwable> ex) {
         assertThatThrownBy(() ->
