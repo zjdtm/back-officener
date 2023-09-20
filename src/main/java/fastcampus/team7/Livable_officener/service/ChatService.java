@@ -51,15 +51,15 @@ public class ChatService {
     }
 
     @Transactional
-    public void completeTransfer(Long roomId, User user) throws IOException {
+    public void completeRemit(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
         RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
 
         validateIfRoomParticipantIsGuest(roomParticipant.getRole(), "송금완료");
-        isTransferCompleted(roomParticipant);
+        isRemitCompleted(roomParticipant);
 
-        roomParticipant.completeTransfer();
-        sendSystemMessage(room, user, SystemMessage.COMPLETE_TRANSFER);
+        roomParticipant.completeRemit();
+        sendSystemMessage(room, user, SystemMessage.COMPLETE_REMIT);
     }
 
     @Transactional
@@ -108,9 +108,9 @@ public class ChatService {
         }
     }
 
-    private static void isTransferCompleted(RoomParticipant roomParticipant) {
-        if (roomParticipant.getTransferredAt() != null) {
-            throw new AlreadyTransferredException();
+    private static void isRemitCompleted(RoomParticipant roomParticipant) {
+        if (roomParticipant.getRemittedAt() != null) {
+            throw new AlreadyRemittedException();
         }
     }
 
