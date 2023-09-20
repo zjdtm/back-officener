@@ -86,6 +86,15 @@ public class ChatService {
         sendSystemMessage(room, user, SystemMessage.COMPLETE_RECEIVE);
     }
 
+    @Transactional
+    public void kickRequest(Long roomId, User user) throws IOException{
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new NotFoundRoomException());
+        RoomParticipant roomParticipant = getRoomParticipant(room.getId(), user.getId());
+        validateIfRoomParticipantIsGuest(roomParticipant.getRole(), "나가기요청");
+        sendSystemMessage(room,user,SystemMessage.EXIT_REQUEST);
+    }
+
     private Room getRoom(Long roomId) {
         return roomRepository.findById(roomId)
                 .orElseThrow(NotFoundRoomException::new);
@@ -119,6 +128,7 @@ public class ChatService {
             throw new AlreadyReceivedException();
         }
     }
+
 
     private void sendSystemMessage(Room room, User user, SystemMessage systemMessage) throws IOException {
         Collection<WebSocketSession> webSocketSessions = webSocketSessionManager.getWebSocketSessions(room.getId());
