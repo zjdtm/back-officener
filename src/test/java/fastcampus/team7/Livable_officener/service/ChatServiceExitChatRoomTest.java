@@ -135,6 +135,30 @@ public class ChatServiceExitChatRoomTest {
         customAssertThrow(roomId, user, RemitNotCompletedException.class, ReceiveNotCompletedException.class);
     }
 
+    @Test
+    @DisplayName("호스트 exit 시 채팅방 삭제 확인")
+    void whenCompleteExitDeleteChatRoom() {
+        // given
+        Long roomId = 1L;
+        User user = mock(User.class);
+        Room room = mock(Room.class);
+        RoomParticipant roomParticipant = mock(RoomParticipant.class);
+
+        given(user.getId())
+                .willReturn(1L);
+        given(roomRepository.findById(anyLong()))
+                .willReturn(Optional.of(room));
+        given(roomParticipantRepository.findRoomParticipant(anyLong(), anyLong()))
+                .willReturn(Optional.of(roomParticipant));
+        given(roomParticipant.getRole())
+                .willReturn(Role.HOST);
+
+        //when
+        sut.exitChatRoom(roomId, user); //
+        //then
+        verify(roomRepository).deleteById(roomId);
+    }
+
     void customAssertThrow(Long roomId, User user, Class<? extends Throwable>... expectedExceptions) {
         Throwable thrown = catchThrowable(() -> sut.exitChatRoom(roomId, user));
         assertThat(thrown).isInstanceOfAny(expectedExceptions);
