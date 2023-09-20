@@ -4,9 +4,9 @@ import fastcampus.team7.Livable_officener.domain.Room;
 import fastcampus.team7.Livable_officener.domain.RoomParticipant;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.global.constant.Role;
-import fastcampus.team7.Livable_officener.global.exception.NotActiveRoomException;
+import fastcampus.team7.Livable_officener.global.exception.AlreadyReceivedException;
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
-import fastcampus.team7.Livable_officener.global.exception.UserIsNotHostException;
+import fastcampus.team7.Livable_officener.global.exception.UserIsNotGuestException;
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotParticipantException;
 import fastcampus.team7.Livable_officener.repository.DeliveryParticipantRepository;
 import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
@@ -26,7 +26,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
-class ChatServiceCloseParticipationTest {
+public class ChatServiceReceiveCompleteTest {
 
     @InjectMocks
     private ChatService sut;
@@ -35,23 +35,22 @@ class ChatServiceCloseParticipationTest {
     @Mock
     private DeliveryParticipantRepository roomParticipantRepository;
 
-    @DisplayName("참여마감시 해당 ID에 해당하는 함께배달 없으면 예외발생")
     @Test
-    void whenNoRoomOfId_thenThrowsException() {
-        // given
-        Long roomIdNotExist = 1L;
+    @DisplayName("수령 완료시 채팅방 Id 없으면 예외 발생")
+    void roomIdNotFoundTest() {
+        //given
+        Long WrongRoomId = 1L;
         User user = mock(User.class);
 
         given(roomRepository.findById(anyLong()))
                 .willReturn(Optional.empty());
-
-        // when, then
-        assertThrowsWhenCloseParticipation(roomIdNotExist, user, NotFoundRoomException.class);
+        //when//then
+        customAssertThrow(WrongRoomId, user, NotFoundRoomException.class);
     }
 
-    @DisplayName("참여마감시 해당 함께배달의 참여자가 아니면 예외발생")
     @Test
-    void whenNotParticipant_thenThrowsException() {
+    @DisplayName("수령완료 시 해당 채팅방의 참여자가 아니면 예외발생")
+    void isParticipantTest() {
         // given
         Long roomId = 1L;
         User user = mock(User.class);
@@ -65,37 +64,12 @@ class ChatServiceCloseParticipationTest {
                 .willReturn(Optional.empty());
 
         // when, then
-        assertThrowsWhenCloseParticipation(roomId, user, UserIsNotParticipantException.class);
+        customAssertThrow(roomId, user, UserIsNotParticipantException.class);
     }
 
-    @DisplayName("참여마감시 호스트가 아니면 예외발생")
     @Test
-    void whenNotHost_thenThrowsException() {
-        // given
-        Long roomId = 1L;
-        User user = mock(User.class);
-        Room room = mock(Room.class);
-        RoomParticipant roomParticipant = mock(RoomParticipant.class);
-
-        given(user.getId())
-                .willReturn(1L);
-        given(roomRepository.findById(anyLong()))
-                .willReturn(Optional.of(room));
-        given(roomParticipantRepository.findRoomParticipant(anyLong(), anyLong()))
-                .willReturn(Optional.of(roomParticipant));
-        given(roomParticipant.getRole())
-                .willReturn(Role.GUEST);
-
-        // when, then
-        assertThrowsWhenCloseParticipation(
-                roomId, user,
-                UserIsNotHostException.class,
-                "'참여마감하기' 요청은 호스트만 가능합니다.");
-    }
-
-    @DisplayName("참여마감시 함께배달이 활성상태가 아니면 예외발생")
-    @Test
-    void whenRoomIsNotActive_thenThrowsException() {
+    @DisplayName("수령완료 시 게스트가 아니면 예외발생")
+    void isGuestTest() {
         // given
         Long roomId = 1L;
         User user = mock(User.class);
@@ -110,25 +84,38 @@ class ChatServiceCloseParticipationTest {
                 .willReturn(Optional.of(roomParticipant));
         given(roomParticipant.getRole())
                 .willReturn(Role.HOST);
-        doThrow(NotActiveRoomException.class)
-                .when(room).closeParticipation();
 
         // when, then
-        assertThrowsWhenCloseParticipation(roomId, user, NotActiveRoomException.class);
+        customAssertThrow(roomId, user, UserIsNotGuestException.class);
     }
 
-    private void assertThrowsWhenCloseParticipation(Long roomId, User user, Class<? extends Throwable> ex) {
-        assertThrowsWhenCloseParticipation(roomId, user, ex, null);
+    @Test
+    @DisplayName("이미 수령완료 했을 시 예외 발생")
+    void alreadyReceive() {
+        //given
+        Long roomId = 1L;
+        User user = mock(User.class);
+        Room room = mock(Room.class);
+        RoomParticipant roomParticipant = mock(RoomParticipant.class);
+
+        given(user.getId())
+                .willReturn(1L);
+        given(roomRepository.findById(anyLong()))
+                .willReturn(Optional.of(room));
+        given(roomParticipantRepository.findRoomParticipant(anyLong(), anyLong()))
+                .willReturn(Optional.of(roomParticipant));
+        given(roomParticipant.getRole())
+                .willReturn(Role.GUEST);
+        doThrow(AlreadyReceivedException.class)
+                .when(roomParticipant).completeReceive();
+
+        customAssertThrow(roomId, user, AlreadyReceivedException.class);
     }
 
-    private void assertThrowsWhenCloseParticipation(Long roomId, User user,
-                                                    Class<? extends Throwable> ex,
-                                                    String message) {
-        var ast = assertThatThrownBy(() ->
-                sut.closeParticipation(roomId, user))
+    void customAssertThrow(Long roomId, User user,
+                           Class<? extends Throwable> ex) {
+        assertThatThrownBy(() ->
+                sut.completeReceive(roomId, user))
                 .isInstanceOf(ex);
-        if (message != null) {
-            ast.hasMessage(message);
-        }
     }
 }

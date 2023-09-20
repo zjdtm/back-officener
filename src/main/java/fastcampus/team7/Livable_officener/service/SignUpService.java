@@ -4,17 +4,23 @@ import fastcampus.team7.Livable_officener.domain.Building;
 import fastcampus.team7.Livable_officener.domain.Company;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.*;
+import fastcampus.team7.Livable_officener.global.exception.NotFoundBuildingException;
+import fastcampus.team7.Livable_officener.global.exception.DuplicatedPhoneNumberException;
+import fastcampus.team7.Livable_officener.global.exception.NotVerifiedPhoneNumberException;
 import fastcampus.team7.Livable_officener.repository.BuildingRepository;
 import fastcampus.team7.Livable_officener.repository.CompanyRepository;
 import fastcampus.team7.Livable_officener.repository.PhoneAuthDTORedisRepository;
 import fastcampus.team7.Livable_officener.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityNotFoundException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.StringJoiner;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +33,8 @@ public class SignUpService {
 
     private final UserRepository userRepository;
     private final PhoneAuthDTORedisRepository phoneAuthDTORedisRepository;
+
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
     public List<BuildingWithCompaniesDTO> getBuildingWithCompanies(String keyword) {
@@ -56,22 +64,22 @@ public class SignUpService {
         String requestPhoneNumber = request.getPhoneNumber();
 
         userRepository.findByPhoneNumber(requestPhoneNumber)
-                .ifPresent(value -> new RuntimeException("이미 등록된 휴대폰 번호입니다."));
+                .ifPresent(e -> new DuplicatedPhoneNumberException());
 
         PhoneAuthDTO findPhoneAuthDTO = phoneAuthDTORedisRepository.findById(requestPhoneNumber)
                 .orElse(null);
 
-        String newVerifyCode = generateVerifyCode();
-        if (Objects.isNull(findPhoneAuthDTO)) {
-            phoneAuthDTORedisRepository.save(PhoneAuthDTO.builder()
+        if (findPhoneAuthDTO == null) {
+            PhoneAuthDTO savedPhoneAuthDTO = phoneAuthDTORedisRepository.save(PhoneAuthDTO.builder()
                     .phoneNumber(requestPhoneNumber)
-                    .verifyCode(newVerifyCode)
+                    .verifyCode(generateVerifyCode())
                     .build());
-        } else {
-            findPhoneAuthDTO.changeVerifyCode(newVerifyCode);
+            return savedPhoneAuthDTO.getVerifyCode();
         }
 
-        return newVerifyCode;
+        findPhoneAuthDTO.changeVerifyCode(generateVerifyCode());
+
+        return findPhoneAuthDTO.getVerifyCode();
 
     }
 
@@ -82,7 +90,7 @@ public class SignUpService {
         String requestVerifyCode = request.getVerifyCode();
 
         PhoneAuthDTO findPhoneAuthDTO = phoneAuthDTORedisRepository.findById(requestPhoneNumber)
-                .orElseThrow(() -> new RuntimeException("인증되지 않은 핸드폰 번호입니다."));
+                .orElseThrow(() -> new NotVerifiedPhoneNumberException());
 
         return findPhoneAuthDTO.getVerifyCode().equals(requestVerifyCode);
 
@@ -92,9 +100,9 @@ public class SignUpService {
 
         String requestBuildingName = request.getBuildingName();
         Building building = buildingRepository.findByName(requestBuildingName)
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 건물명입니다."));
+                .orElseThrow(() -> new NotFoundBuildingException());
 
-        User user = request.toEntity(building);
+        User user = request.toEntity(building, passwordEncoder.encode(request.getPassword()));
 
         userRepository.save(user);
 
@@ -130,5 +138,4 @@ public class SignUpService {
         }
         return companyDTOs;
     }
-
 }

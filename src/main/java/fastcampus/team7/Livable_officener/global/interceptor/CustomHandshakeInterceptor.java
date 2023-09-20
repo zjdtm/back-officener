@@ -2,7 +2,7 @@ package fastcampus.team7.Livable_officener.global.interceptor;
 
 import fastcampus.team7.Livable_officener.domain.Room;
 import fastcampus.team7.Livable_officener.domain.User;
-import fastcampus.team7.Livable_officener.repository.XChatRoomRepository;
+import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -16,7 +16,7 @@ import java.util.Map;
 @Component
 public class CustomHandshakeInterceptor extends HttpSessionHandshakeInterceptor {
 
-    private final XChatRoomRepository roomRepository;
+    private final DeliveryRepository roomRepository;
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request,

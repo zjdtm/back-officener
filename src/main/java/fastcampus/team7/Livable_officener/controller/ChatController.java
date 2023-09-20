@@ -1,6 +1,7 @@
 package fastcampus.team7.Livable_officener.controller;
 
 import fastcampus.team7.Livable_officener.domain.User;
+import fastcampus.team7.Livable_officener.repository.UserRepository;
 import fastcampus.team7.Livable_officener.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import java.io.IOException;
 @RestController
 public class ChatController {
 
+    private final UserRepository userRepository;
     private final ChatService chatService;
 
     @PostMapping("/closed")
@@ -29,12 +31,38 @@ public class ChatController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("/transferred")
-    public ResponseEntity<?> completeTransfer(
+    @PostMapping("/remitted")
+    public ResponseEntity<?> completeRemit(
             @PathVariable Long roomId,
             @AuthenticationPrincipal User user) throws IOException {
 
-        chatService.completeTransfer(roomId, user);
+        chatService.completeRemit(roomId, user);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/delivered")
+    public ResponseEntity<?> completeDelivery(
+            @PathVariable Long roomId,
+            @AuthenticationPrincipal User user) throws IOException {
+
+        chatService.completeDelivery(roomId, user);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/received")
+    public ResponseEntity<?> completeReceive(
+            @PathVariable Long roomId,
+            @AuthenticationPrincipal User user) throws IOException {
+
+        chatService.completeReceive(roomId, user);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/kickRequest")
+    public ResponseEntity<?> kickRequest(
+            @PathVariable Long roomId,
+            @AuthenticationPrincipal User user) throws IOException{
+        chatService.kickRequest(roomId,user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
