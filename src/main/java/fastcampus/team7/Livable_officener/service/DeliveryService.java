@@ -176,8 +176,19 @@ public class DeliveryService {
         return response;
     }
 
+
+    public MyChatListResponseDTO getChatRoomList(User user) {
+
+        List<ChatRoomListDTO> chatRoomListDTO = deliveryRepository.findChatRoomList(user.getId());
+
+        MyChatListResponseDTO myChatListResponseDTO = new MyChatListResponseDTO();
+        myChatListResponseDTO.listOf(chatRoomListDTO);
+
+        return myChatListResponseDTO;
+    }
+
     @Transactional
-    public void joinDeliveryRoom(Long roomId, User user) {
+    public void joinDeliveryRoom (Long roomId, User user){
         Room room = deliveryRepository.findById(roomId)
                 .orElseThrow(() -> new NotFoundRoomException("유효하지 않은 방입니다."));
 
@@ -196,15 +207,5 @@ public class DeliveryService {
                 .build();
 
         deliveryParticipantRepository.save(roomParticipant);
-    }
-
-    public MyChatListResponseDTO getChatRoomList(User user) {
-
-        List<ChatRoomListDTO> chatRoomListDTO = deliveryRepository.findChatRoomList(user.getId());
-
-        MyChatListResponseDTO myChatListResponseDTO = new MyChatListResponseDTO();
-        myChatListResponseDTO.listOf(chatRoomListDTO);
-
-        return myChatListResponseDTO;
     }
 }
