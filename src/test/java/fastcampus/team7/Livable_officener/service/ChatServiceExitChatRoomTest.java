@@ -135,6 +135,11 @@ public class ChatServiceExitChatRoomTest {
         customAssertThrow(roomId, user, RemitNotCompletedException.class, ReceiveNotCompletedException.class);
     }
 
+    void customAssertThrow(Long roomId, User user, Class<? extends Throwable>... expectedExceptions) {
+        Throwable thrown = catchThrowable(() -> sut.exitChatRoom(roomId, user));
+        assertThat(thrown).isInstanceOfAny(expectedExceptions);
+    }
+
     void customAssertThrow(Long roomId, User user,
                            Class<? extends Throwable> ex) {
         assertThatThrownBy(() ->
