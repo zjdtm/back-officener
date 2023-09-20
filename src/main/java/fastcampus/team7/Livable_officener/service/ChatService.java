@@ -62,6 +62,17 @@ public class ChatService {
         sendSystemMessage(room, user, SystemMessage.COMPLETE_TRANSFER);
     }
 
+    @Transactional
+    public void completeDelivery(Long roomId, User user) throws IOException {
+        Room room = getRoom(roomId);
+
+        RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
+        validateIfRoomParticipantIsHost(roomParticipant.getRole(), "배달완료");
+
+        room.completeDelivery();
+
+        sendSystemMessage(room, user, SystemMessage.COMPLETE_DELIVERY);
+    }
 
     @Transactional
     public void completeReceive(Long roomId, User user) throws IOException {
@@ -111,7 +122,22 @@ public class ChatService {
 
     private void sendSystemMessage(Room room, User user, SystemMessage systemMessage) throws IOException {
         Collection<WebSocketSession> webSocketSessions = webSocketSessionManager.getWebSocketSessions(room.getId());
-        TextMessage textMessage = new TextMessage(systemMessage.getContent(user.getName()));
+        TextMessage textMessage = getTextMessage(systemMessage, user);
         send(new SendChatDTO(room, user, textMessage, ChatType.SYSTEM_MESSAGE, webSocketSessions));
+    }
+
+    private static TextMessage getTextMessage(SystemMessage systemMessage, User user) {
+        Object[] systemMessageArgs = getSystemMessageArgs(systemMessage, user);
+        return new TextMessage(systemMessage.getContent(systemMessageArgs));
+    }
+
+    private static Object[] getSystemMessageArgs(SystemMessage systemMessage, User user) {
+        Object[] systemMessageArgs;
+        if (systemMessage == SystemMessage.COMPLETE_DELIVERY) {
+            systemMessageArgs = null;
+        } else {
+            systemMessageArgs = new Object[]{user.getName()};
+        }
+        return systemMessageArgs;
     }
 }
