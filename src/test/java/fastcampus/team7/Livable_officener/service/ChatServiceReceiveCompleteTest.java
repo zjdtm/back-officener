@@ -88,7 +88,7 @@ public class ChatServiceReceiveCompleteTest {
 
     @Test
     @DisplayName("이미 수령완료 했을 시 예외 발생")
-    void alreadyTransfer() {
+    void alreadyReceive() {
         //given
         Long roomId = 1L;
         User user = mock(User.class);
