@@ -12,7 +12,18 @@ public class RoomParticipantTest {
         //given
         RoomParticipant roomParticipant = RoomParticipant.builder().build();
         //when
-        roomParticipant.completeTransfer();
+        roomParticipant.completeRemit();
+        //then
+        Assertions.assertThat(roomParticipant).isNotNull();
+    }
+
+    @Test
+    @DisplayName("수령완료시 완료시간 갱신 테스트")
+    void completeReceivedAtTest () {
+        //given
+        RoomParticipant roomParticipant = RoomParticipant.builder().build();
+        //when
+        roomParticipant.completeReceive();
         //then
         Assertions.assertThat(roomParticipant).isNotNull();
     }
