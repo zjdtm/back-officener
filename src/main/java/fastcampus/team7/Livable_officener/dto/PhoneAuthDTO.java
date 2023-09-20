@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 @Getter
 @Builder
-@RedisHash("phoneAuthDto")
+@RedisHash(timeToLive = 60)
 public class PhoneAuthDTO implements Serializable {
 
     @Id

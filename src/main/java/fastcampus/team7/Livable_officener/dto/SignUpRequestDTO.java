@@ -24,10 +24,10 @@ public class SignUpRequestDTO {
 
     private boolean agree;
 
-    public User toEntity(Building building) {
+    public User toEntity(Building building, String encodingPassword) {
         return User.builder()
                 .email(email)
-                .password(password)
+                .password(encodingPassword)
                 .building(building)
                 .name(name)
                 .phoneNumber(phoneNumber)

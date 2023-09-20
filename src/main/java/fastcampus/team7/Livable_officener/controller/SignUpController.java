@@ -43,7 +43,10 @@ public class SignUpController {
 
         boolean isConfirm = signUpService.confirmVerifyCode(request);
 
-        return APIDataResponse.of(HttpStatus.OK, "성공하였습니다.", isConfirm ? "인증이 완료되었습니다." : "잘못된 인증 코드입니다.");
+        return APIDataResponse.of(
+                isConfirm ? HttpStatus.OK : HttpStatus.BAD_REQUEST,
+                isConfirm ? "성공하였습니다." : "인증에 실패하였습니다.",
+                isConfirm ? "인증이 완료되었습니다." : "잘못된 인증 코드입니다.");
 
     }
 

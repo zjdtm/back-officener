@@ -1,6 +1,5 @@
 package fastcampus.team7.Livable_officener.global.config;
 
-import fastcampus.team7.Livable_officener.global.sercurity.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +19,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                    .antMatchers("/h2-console/**", "/api/building", "/api/authentication", "/api/verification", "/api/signup", "/api/login","/api/elevator")
+                    .antMatchers("/h2-console/**", "/api/building", "/api/auth", "/api/verify", "/api/confirm", "/api/signup", "/api/login", "/api/elevator")
                     .permitAll()
                     .anyRequest().authenticated()
                     .and()

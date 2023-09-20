@@ -116,5 +116,4 @@ class BuildingRepositoryTest {
         buildingRepository.save(building);
         return building;
     }
-
 }
