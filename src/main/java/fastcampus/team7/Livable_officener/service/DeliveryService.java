@@ -178,4 +178,30 @@ public class DeliveryService {
 
         return response;
     }
+
+    /**
+     * room, room_participant 둘 다 insert, update
+     */
+    @Transactional
+    public void joinDeliveryRoom(Long roomId, User user) {
+        Room room = deliveryRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 방입니다."));
+
+        if (room.getAttendees() >= room.getMaxAttendees()) {
+            throw new IllegalArgumentException("함께배달 방의 현재 인원이 최대 인원보다 많거나 같습니다. 만원입니다.");
+        }
+
+        room.setAttendees(room.getAttendees() + 1);
+        Room updatedRoom = deliveryRepository.save(room);
+
+        RoomParticipant roomParticipant = RoomParticipant.builder()
+                .room(updatedRoom)
+                .user(user)
+                .role(Role.GUEST)
+                .kickedAt(null)
+                .transferredAt(null)
+                .build();
+
+        deliveryParticipantRepository.save(roomParticipant);
+    }
 }
