@@ -199,7 +199,6 @@ public class DeliveryService {
                 .user(user)
                 .role(Role.GUEST)
                 .kickedAt(null)
-                .transferredAt(null)
                 .build();
 
         deliveryParticipantRepository.save(roomParticipant);
