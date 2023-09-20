@@ -81,7 +81,7 @@ public class DeliveryController {
         return APIDataResponse.of(HttpStatus.CREATED, "성공", response);
     }
 
-    @GetMapping("joinedRoom")
+    @GetMapping("/joinedRoom")
     public ResponseEntity<APIDataResponse<DeliveryResponseDTO.PagedRoomListResponseDTO>> joinedRoom(@RequestParam(defaultValue = "0") int page,
                                                                                                     @RequestParam(defaultValue = "10") int size,
                                                                                                     @AuthenticationPrincipal User user) {
@@ -89,4 +89,13 @@ public class DeliveryController {
         DeliveryResponseDTO.PagedRoomListResponseDTO response = deliveryService.getFilteredRoomList(PageRequest.of(page, size), user);
         return APIDataResponse.of(HttpStatus.CREATED, "성공", response);
     }
+
+    @PostMapping("/{id}/join")
+    public ResponseEntity<APIDataResponse<String>> join(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User user) {
+        deliveryService.joinDeliveryRoom(id, user);
+        return APIDataResponse.of(HttpStatus.CREATED, "성공", "성공");
+    }
+
 }
