@@ -69,6 +69,28 @@ public class ChatServiceExitChatRoomTest {
         customAssertThrow(roomId, user, UserIsNotParticipantException.class);
     }
 
+    @Test
+    @DisplayName("나가기 시 호스트가 아니면 예외발생")
+    void isHostTest() {
+        // given
+        Long roomId = 1L;
+        User user = mock(User.class);
+        Room room = mock(Room.class);
+        RoomParticipant roomParticipant = mock(RoomParticipant.class);
+
+        given(user.getId())
+                .willReturn(1L);
+        given(roomRepository.findById(anyLong()))
+                .willReturn(Optional.of(room));
+        given(roomParticipantRepository.findRoomParticipant(anyLong(), anyLong()))
+                .willReturn(Optional.of(roomParticipant));
+        given(roomParticipant.getRole())
+                .willReturn(Role.GUEST);
+
+        // when, then
+        customAssertThrow(roomId, user, UserIsNotHostException.class);
+    }
+
     void customAssertThrow(Long roomId, User user,
                            Class<? extends Throwable> ex) {
         assertThatThrownBy(() ->
