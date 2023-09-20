@@ -1,6 +1,11 @@
 package fastcampus.team7.Livable_officener.controller;
 
 import fastcampus.team7.Livable_officener.domain.User;
+<<<<<<< Updated upstream
+=======
+import fastcampus.team7.Livable_officener.dto.chat.ChatroomInfoDTO;
+import fastcampus.team7.Livable_officener.global.util.APIDataResponse;
+>>>>>>> Stashed changes
 import fastcampus.team7.Livable_officener.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +24,15 @@ import java.io.IOException;
 public class ChatController {
 
     private final ChatService chatService;
+
+    @PostMapping("/connect")
+    public ResponseEntity<?> getChatroomInfo(
+            @PathVariable Long roomId,
+            @AuthenticationPrincipal User user) {
+
+        ChatroomInfoDTO dto = chatService.getChatroomInfo(roomId, user);
+        return APIDataResponse.of(HttpStatus.OK, dto);
+    }
 
     @PostMapping("/closed")
     public ResponseEntity<?> closeParticipation(
@@ -56,4 +70,24 @@ public class ChatController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+<<<<<<< Updated upstream
+=======
+    @PostMapping("/exit")
+    public ResponseEntity<?> exitChatRoom(
+            @PathVariable Long roomId,
+            @AuthenticationPrincipal User user) {
+
+        chatService.exitChatRoom(roomId, user);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/kickRequest")
+    public ResponseEntity<?> kickRequest(
+            @PathVariable Long roomId,
+            @AuthenticationPrincipal User user) throws IOException {
+
+        chatService.kickRequest(roomId, user);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+>>>>>>> Stashed changes
 }

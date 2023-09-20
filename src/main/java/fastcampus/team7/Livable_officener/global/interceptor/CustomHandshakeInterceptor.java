@@ -2,6 +2,7 @@ package fastcampus.team7.Livable_officener.global.interceptor;
 
 import fastcampus.team7.Livable_officener.domain.Room;
 import fastcampus.team7.Livable_officener.domain.User;
+import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
 import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.server.ServerHttpRequest;
@@ -24,10 +25,10 @@ public class CustomHandshakeInterceptor extends HttpSessionHandshakeInterceptor 
                                    WebSocketHandler wsHandler,
                                    Map<String, Object> attributes) {
         Room room = getRoom(request);
-        User sender = getSender(request);
+        User user = getUser(request);
 
         attributes.put("room", room);
-        attributes.put("sender", sender);
+        attributes.put("user", user);
 
         return true;
     }
@@ -35,11 +36,10 @@ public class CustomHandshakeInterceptor extends HttpSessionHandshakeInterceptor 
     private Room getRoom(ServerHttpRequest request) {
         Long roomId = getRoomId(request);
         return roomRepository.findById(roomId)
-                // TODO NotFoundRoomException 정의
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(NotFoundRoomException::new);
     }
 
-    private User getSender(ServerHttpRequest request) {
+    private User getUser(ServerHttpRequest request) {
         return (User) request.getPrincipal();
     }
 
