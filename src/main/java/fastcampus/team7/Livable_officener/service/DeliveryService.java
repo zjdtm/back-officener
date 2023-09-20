@@ -1,13 +1,7 @@
 package fastcampus.team7.Livable_officener.service;
 
-import fastcampus.team7.Livable_officener.domain.Bank;
-import fastcampus.team7.Livable_officener.domain.Room;
-import fastcampus.team7.Livable_officener.domain.RoomParticipant;
-import fastcampus.team7.Livable_officener.domain.User;
-import fastcampus.team7.Livable_officener.dto.DeliveryRequestDTO;
-import fastcampus.team7.Livable_officener.dto.RoomDetailDTO;
-import fastcampus.team7.Livable_officener.dto.UpdateStoreDetailDTO;
-import fastcampus.team7.Livable_officener.dto.DeliveryResponseDTO;
+import fastcampus.team7.Livable_officener.domain.*;
+import fastcampus.team7.Livable_officener.dto.*;
 import fastcampus.team7.Livable_officener.global.constant.BankName;
 import fastcampus.team7.Livable_officener.global.constant.FoodTag;
 import fastcampus.team7.Livable_officener.global.constant.Role;
@@ -30,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static fastcampus.team7.Livable_officener.dto.ChatRoomListResponseDTO.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -200,5 +196,15 @@ public class DeliveryService {
                 .build();
 
         deliveryParticipantRepository.save(roomParticipant);
+    }
+
+    public MyChatListResponseDTO getChatRoomList(User user) {
+
+        List<ChatRoomListDTO> chatRoomListDTO = deliveryRepository.findChatRoomList(user.getId());
+
+        MyChatListResponseDTO myChatListResponseDTO = new MyChatListResponseDTO();
+        myChatListResponseDTO.listOf(chatRoomListDTO);
+
+        return myChatListResponseDTO;
     }
 }

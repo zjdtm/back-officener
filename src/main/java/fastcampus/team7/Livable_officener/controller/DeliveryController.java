@@ -1,8 +1,7 @@
 package fastcampus.team7.Livable_officener.controller;
 
 
-import fastcampus.team7.Livable_officener.dto.DeliveryResponseDTO;
-import fastcampus.team7.Livable_officener.dto.RoomDetailDTO;
+import fastcampus.team7.Livable_officener.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -10,9 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import fastcampus.team7.Livable_officener.domain.User;
-import fastcampus.team7.Livable_officener.dto.DeliveryRequestDTO;
 import fastcampus.team7.Livable_officener.dto.RoomDetailDTO;
-import fastcampus.team7.Livable_officener.dto.UpdateStoreDetailDTO;
 import fastcampus.team7.Livable_officener.global.util.APIDataResponse;
 import fastcampus.team7.Livable_officener.repository.BankRepository;
 import fastcampus.team7.Livable_officener.service.DeliveryService;
@@ -98,4 +95,8 @@ public class DeliveryController {
         return APIDataResponse.of(HttpStatus.CREATED, "성공", "성공");
     }
 
+    @GetMapping("/chats")
+    public ResponseEntity<APIDataResponse<ChatRoomListResponseDTO.MyChatListResponseDTO>> chatRoomList(@AuthenticationPrincipal User user) {
+        return APIDataResponse.of(HttpStatus.OK, "성공", deliveryService.getChatRoomList(user));
+    }
 }
