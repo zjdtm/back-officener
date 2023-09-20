@@ -12,6 +12,7 @@ import fastcampus.team7.Livable_officener.global.constant.BankName;
 import fastcampus.team7.Livable_officener.global.constant.FoodTag;
 import fastcampus.team7.Livable_officener.global.constant.Role;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
+import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotParticipantException;
 import fastcampus.team7.Livable_officener.repository.BankRepository;
 import fastcampus.team7.Livable_officener.repository.DeliveryParticipantRepository;
@@ -179,13 +180,10 @@ public class DeliveryService {
         return response;
     }
 
-    /**
-     * room, room_participant 둘 다 insert, update
-     */
     @Transactional
     public void joinDeliveryRoom(Long roomId, User user) {
         Room room = deliveryRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 방입니다."));
+                .orElseThrow(() -> new NotFoundRoomException("유효하지 않은 방입니다."));
 
         if (room.getAttendees() >= room.getMaxAttendees()) {
             throw new IllegalArgumentException("함께배달 방의 현재 인원이 최대 인원보다 많거나 같습니다. 만원입니다.");
