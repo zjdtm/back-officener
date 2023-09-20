@@ -4,9 +4,12 @@ import fastcampus.team7.Livable_officener.domain.Room;
 import fastcampus.team7.Livable_officener.domain.RoomParticipant;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.global.constant.Role;
-import fastcampus.team7.Livable_officener.global.exception.*;
-import fastcampus.team7.Livable_officener.repository.XChatRoomParticipantRepository;
-import fastcampus.team7.Livable_officener.repository.XChatRoomRepository;
+import fastcampus.team7.Livable_officener.global.exception.AlreadyReceivedException;
+import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
+import fastcampus.team7.Livable_officener.global.exception.UserIsNotGuestException;
+import fastcampus.team7.Livable_officener.global.exception.UserIsNotParticipantException;
+import fastcampus.team7.Livable_officener.repository.DeliveryParticipantRepository;
+import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,9 +31,9 @@ public class ChatServiceReceiveCompleteTest {
     @InjectMocks
     private ChatService sut;
     @Mock
-    private XChatRoomRepository roomRepository;
+    private DeliveryRepository roomRepository;
     @Mock
-    private XChatRoomParticipantRepository roomParticipantRepository;
+    private DeliveryParticipantRepository roomParticipantRepository;
 
     @Test
     @DisplayName("수령 완료시 채팅방 Id 없으면 예외 발생")
@@ -57,7 +60,7 @@ public class ChatServiceReceiveCompleteTest {
                 .willReturn(1L);
         given(roomRepository.findById(anyLong()))
                 .willReturn(Optional.of(room));
-        given(roomParticipantRepository.findByRoomIdAndUserId(anyLong(), anyLong()))
+        given(roomParticipantRepository.findRoomParticipant(anyLong(), anyLong()))
                 .willReturn(Optional.empty());
 
         // when, then
@@ -77,7 +80,7 @@ public class ChatServiceReceiveCompleteTest {
                 .willReturn(1L);
         given(roomRepository.findById(anyLong()))
                 .willReturn(Optional.of(room));
-        given(roomParticipantRepository.findByRoomIdAndUserId(anyLong(), anyLong()))
+        given(roomParticipantRepository.findRoomParticipant(anyLong(), anyLong()))
                 .willReturn(Optional.of(roomParticipant));
         given(roomParticipant.getRole())
                 .willReturn(Role.HOST);
@@ -99,7 +102,7 @@ public class ChatServiceReceiveCompleteTest {
                 .willReturn(1L);
         given(roomRepository.findById(anyLong()))
                 .willReturn(Optional.of(room));
-        given(roomParticipantRepository.findByRoomIdAndUserId(anyLong(), anyLong()))
+        given(roomParticipantRepository.findRoomParticipant(anyLong(), anyLong()))
                 .willReturn(Optional.of(roomParticipant));
         given(roomParticipant.getRole())
                 .willReturn(Role.GUEST);

@@ -11,8 +11,8 @@ import fastcampus.team7.Livable_officener.global.constant.SystemMessage;
 import fastcampus.team7.Livable_officener.global.exception.*;
 import fastcampus.team7.Livable_officener.global.websocket.WebSocketSessionManager;
 import fastcampus.team7.Livable_officener.repository.ChatRepository;
-import fastcampus.team7.Livable_officener.repository.XChatRoomParticipantRepository;
-import fastcampus.team7.Livable_officener.repository.XChatRoomRepository;
+import fastcampus.team7.Livable_officener.repository.DeliveryParticipantRepository;
+import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +27,8 @@ import java.util.Collection;
 public class ChatService {
 
     private final ChatRepository chatRepository;
-    private final XChatRoomRepository roomRepository;
-    private final XChatRoomParticipantRepository roomParticipantRepository;
+    private final DeliveryRepository roomRepository;
+    private final DeliveryParticipantRepository roomParticipantRepository;
     private final WebSocketSessionManager webSocketSessionManager;
 
     @Transactional
@@ -92,7 +92,7 @@ public class ChatService {
     }
 
     private RoomParticipant getRoomParticipant(Long roomId, Long userId) {
-        return roomParticipantRepository.findByRoomIdAndUserId(roomId, userId)
+        return roomParticipantRepository.findRoomParticipant(roomId, userId)
                 .orElseThrow(UserIsNotParticipantException::new);
     }
 
