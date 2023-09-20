@@ -20,10 +20,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ChatServiceGetRoomInfoTest {
@@ -79,5 +80,27 @@ class ChatServiceGetRoomInfoTest {
         // when, then
         assertThatThrownBy(() -> sut.getChatroomInfo(1L, user))
                 .isInstanceOf(UserIsNotParticipantException.class);
+    }
+
+    @DisplayName("읽지 않은 메시지 수 초기화")
+    @Test
+    void whenSuccess_thenResetNumUnread() {
+        // given
+        User user = mock(User.class);
+        Room room = mock(Room.class);
+        RoomParticipant roomParticipant = mock(RoomParticipant.class);
+        given(roomRepository.findById(anyLong()))
+                .willReturn(Optional.of(room));
+        given(room.getStatus())
+                .willReturn(RoomStatus.ACTIVE);
+        given(roomParticipantRepository.findByRoomIdAndUserId(anyLong(), anyLong()))
+                .willReturn(Optional.of(roomParticipant));
+
+        // when
+        sut.getChatroomInfo(1L, user);
+
+        // then
+        verify(roomParticipant, times(1)).resetNumUnread();
+        assertThat(roomParticipant.getNumUnread()).isSameAs(0);
     }
 }
