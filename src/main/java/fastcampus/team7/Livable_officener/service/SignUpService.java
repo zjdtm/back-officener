@@ -4,9 +4,8 @@ import fastcampus.team7.Livable_officener.domain.Building;
 import fastcampus.team7.Livable_officener.domain.Company;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.*;
-import fastcampus.team7.Livable_officener.global.exception.NotFoundBuildingException;
-import fastcampus.team7.Livable_officener.global.exception.DuplicatedPhoneNumberException;
-import fastcampus.team7.Livable_officener.global.exception.NotVerifiedPhoneNumberException;
+import fastcampus.team7.Livable_officener.global.exception.*;
+import fastcampus.team7.Livable_officener.global.sercurity.JwtProvider;
 import fastcampus.team7.Livable_officener.repository.BuildingRepository;
 import fastcampus.team7.Livable_officener.repository.CompanyRepository;
 import fastcampus.team7.Livable_officener.repository.PhoneAuthDTORedisRepository;
@@ -33,6 +32,8 @@ public class SignUpService {
 
     private final UserRepository userRepository;
     private final PhoneAuthDTORedisRepository phoneAuthDTORedisRepository;
+
+    private final JwtProvider jwtProvider;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -98,14 +99,35 @@ public class SignUpService {
 
     public void signUp(SignUpRequestDTO request) {
 
+        String requestEmail = request.getEmail();
         String requestBuildingName = request.getBuildingName();
         Building building = buildingRepository.findByName(requestBuildingName)
                 .orElseThrow(() -> new NotFoundBuildingException());
+
+        boolean existEmail = userRepository.existsByEmail(requestEmail);
+
+        if (existEmail) {
+            throw new DuplicatedUserEmailException();
+        }
 
         User user = request.toEntity(building, passwordEncoder.encode(request.getPassword()));
 
         userRepository.save(user);
 
+    }
+
+    public LoginResponseDTO login(LoginRequestDTO request) {
+
+        String requestEmail = request.getEmail();
+
+        userRepository.findByEmail(requestEmail)
+                .orElseThrow(() -> new NotFoundUserException());
+
+        String token = jwtProvider.createToken(requestEmail);
+
+        return LoginResponseDTO.builder()
+                .token(token)
+                .build();
     }
 
     private String generateVerifyCode() {
