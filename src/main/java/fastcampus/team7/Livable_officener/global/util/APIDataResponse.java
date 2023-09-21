@@ -10,14 +10,17 @@ import org.springframework.http.ResponseEntity;
 @Getter
 public class APIDataResponse<T> {
 
+    private int statusCode;
+    private String message;
     private T data;
 
-    public static <S> ResponseEntity<APIDataResponse<S>> of(HttpStatus httpStatus, S data) {
-        APIDataResponse<S> response = new APIDataResponse<>(data);
+    public static <S> ResponseEntity<APIDataResponse<S>> of(HttpStatus httpStatus, String message, S data) {
+        APIDataResponse<S> response = new APIDataResponse<>(httpStatus.value(), message, data);
         return new ResponseEntity<>(response, httpStatus);
     }
 
-    public static <S> ResponseEntity<APIDataResponse<S>> empty(HttpStatus httpStatus) {
-        return of(httpStatus, null);
+    public static <S> ResponseEntity<APIDataResponse<S>> empty(HttpStatus httpStatus, String message) {
+        APIDataResponse<S> response = new APIDataResponse<>(httpStatus.value(), message, null);
+        return new ResponseEntity<>(response, httpStatus);
     }
 }
