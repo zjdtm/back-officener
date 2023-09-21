@@ -22,4 +22,8 @@ public class Report extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private ReportType type;
 
+    @Column(length = 2000)
+    @Lob
+    private String reportMessage;
+
 }
