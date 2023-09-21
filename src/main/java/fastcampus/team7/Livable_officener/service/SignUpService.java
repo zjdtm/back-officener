@@ -98,19 +98,18 @@ public class SignUpService {
     }
 
     public void signUp(SignUpRequestDTO request) {
-
-        String requestEmail = request.getEmail();
-        String requestBuildingName = request.getBuildingName();
-        Building building = buildingRepository.findByName(requestBuildingName)
+        Building building = buildingRepository.findByName(request.getBuildingName())
                 .orElseThrow(() -> new NotFoundBuildingException());
+        Company company = companyRepository.findByName(request.getCompanyName())
+                .orElseThrow(() -> new IllegalArgumentException("해당 이름의 회사를 찾을 수 없습니다."));
 
-        boolean existEmail = userRepository.existsByEmail(requestEmail);
+        boolean existEmail = userRepository.existsByEmail(request.getEmail());
 
         if (existEmail) {
             throw new DuplicatedUserEmailException();
         }
 
-        User user = request.toEntity(building, passwordEncoder.encode(request.getPassword()));
+        User user = request.toEntity(building, company, passwordEncoder.encode(request.getPassword()));
 
         userRepository.save(user);
 
