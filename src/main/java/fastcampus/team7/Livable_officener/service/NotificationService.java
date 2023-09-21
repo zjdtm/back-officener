@@ -23,47 +23,43 @@ public class NotificationService {
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
 
-    public ResponseEntity<APIDataResponse<List<NotificationDTO>>> getNotifyList(String token){
+    public ResponseEntity<APIDataResponse<List<NotificationDTO>>> getNotifyList(String token) {
         String email = jwtProvider.getEmail(token);
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("해당하는 유저가 없습니다."));;
+                .orElseThrow(() -> new RuntimeException("해당하는 유저가 없습니다."));
+        ;
         Long id = user.getId();
         List<Notification> notifications = notificationRepository.findByUserId(id)
                 .orElseThrow(() -> new RuntimeException("해당하는 유저에 알림이 없습니다."));
 
         List<NotificationDTO> notificationDTOS = new ArrayList<>();
 
-        for(Notification notification : notifications){
+        for (Notification notification : notifications) {
             notificationDTOS.add(toDTO(notification));
         }
 
-        ResponseEntity<APIDataResponse<List<NotificationDTO>>> responseEntity = APIDataResponse.of(
-                HttpStatus.OK, "성공", notificationDTOS);
-
-        return responseEntity;
+        return APIDataResponse.of(HttpStatus.OK, notificationDTOS);
     }
 
-    public ResponseEntity<APIDataResponse<String>> readAll(String token){
+    public ResponseEntity<APIDataResponse<String>> readAll(String token) {
         String email = jwtProvider.getEmail(token);
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("해당하는 유저가 없습니다."));;
+                .orElseThrow(() -> new RuntimeException("해당하는 유저가 없습니다."));
+        ;
         Long id = user.getId();
 
         List<Notification> notifications = notificationRepository.findByUserId(id)
                 .orElseThrow(() -> new RuntimeException("해당하는 유저에 알림이 없습니다."));
 
-        for(Notification notification : notifications){
+        for (Notification notification : notifications) {
             notification.setRead(true);
             notificationRepository.save(notification);
         }
 
-        ResponseEntity<APIDataResponse<String>> responseEntity = APIDataResponse.empty(
-                HttpStatus.OK,"성공");
-
-        return responseEntity;
+        return APIDataResponse.empty(HttpStatus.OK);
     }
 
-    public NotificationDTO toDTO(Notification entity){
+    public NotificationDTO toDTO(Notification entity) {
         NotificationDTO DTO = new NotificationDTO();
         DTO.setReceiverId(entity.getUser().getId());
         DTO.setRoomId(entity.getRoom().getId());
