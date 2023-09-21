@@ -3,27 +3,25 @@ package fastcampus.team7.Livable_officener.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import fastcampus.team7.Livable_officener.domain.Chat;
-import fastcampus.team7.Livable_officener.domain.Room;
-import fastcampus.team7.Livable_officener.domain.RoomParticipant;
-import fastcampus.team7.Livable_officener.domain.User;
+import fastcampus.team7.Livable_officener.domain.*;
 import fastcampus.team7.Livable_officener.dto.chat.*;
 import fastcampus.team7.Livable_officener.global.constant.ChatType;
 import fastcampus.team7.Livable_officener.global.constant.Role;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
 import fastcampus.team7.Livable_officener.global.exception.*;
 import fastcampus.team7.Livable_officener.global.websocket.WebSocketSessionManager;
-import fastcampus.team7.Livable_officener.repository.ChatRepository;
-import fastcampus.team7.Livable_officener.repository.DeliveryParticipantRepository;
-import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
+import fastcampus.team7.Livable_officener.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.TextMessage;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -38,6 +36,8 @@ public class ChatService {
     }
 
     private final ChatRepository chatRepository;
+    private final UserRepository userRepository;
+    private final ReportRepository reportRepository;
     private final DeliveryRepository roomRepository;
     private final DeliveryParticipantRepository roomParticipantRepository;
     private final WebSocketSessionManager webSocketSessionManager;
@@ -127,6 +127,21 @@ public class ChatService {
         roomRepository.deleteById(roomId);
     }
 
+    @Transactional
+    public Report createReport(Long roomId, User user, ReportDTO reportDTO) {
+        getRoom(roomId);
+        getRoomParticipant(roomId, user.getId());
+
+        User reportedUser = validateReportedUser(reportDTO.getReportedUserId());
+        User reporter = validateReporter(reportDTO.getReportingUserId());
+
+        validateReportFrequency(reporter, reportedUser);
+
+        Report report = createReport(reportDTO, reportedUser, reporter);
+
+        return reportRepository.save(report);
+    }
+
     private Room getRoom(Long roomId) {
         return roomRepository.findById(roomId)
                 .orElseThrow(NotFoundRoomException::new);
@@ -149,6 +164,16 @@ public class ChatService {
         }
     }
 
+    private User validateReportedUser(Long reportedUserId) {
+        return userRepository.findById(reportedUserId)
+                .orElseThrow(NotFoundReportedUserException::new);
+    }
+
+    private User validateReporter(Long reportingUserId) {
+        return userRepository.findById(reportingUserId)
+                .orElseThrow(NotFoundReporterException::new);
+    }
+
     private void validateAllParticipantsCompletedRemitAndReceive(Long roomId) {
         List<RoomParticipant> participants = roomParticipantRepository.findAllByRoomId(roomId);
 
@@ -159,6 +184,15 @@ public class ChatService {
             if (participant.getReceivedAt() == null) {
                 throw new ReceiveNotCompletedException();
             }
+        }
+    }
+
+    private void validateReportFrequency(User reporter, User reportedUser) {
+        LocalDateTime todayStart = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT);
+
+        Optional<Report> existingReport = reportRepository.findByReporterAndReportedUserAndCreatedAtIsAfter(reporter, reportedUser, todayStart);
+        if (existingReport.isPresent()) {
+            throw new AlreadyReportSameUserException();
         }
     }
 
@@ -183,6 +217,15 @@ public class ChatService {
     private static SendPayloadDTO createSystemMessagePayloadDTO(User sender, ChatType messageType) {
         String content = getSystemMessageContent(sender, messageType);
         return createSystemMessagePayloadDTO(sender, messageType, content);
+    }
+
+    private static Report createReport(ReportDTO reportDTO, User reportedUser, User reporter) {
+        Report report = new Report();
+        report.assignReportedUser(reportedUser);
+        report.assignReporter(reporter);
+        report.assignType(reportDTO.getReportType());
+        report.assignReportMessage(reportDTO.getReportMessage());
+        return report;
     }
 
     private static String getSystemMessageContent(User sender, ChatType messageType) {
