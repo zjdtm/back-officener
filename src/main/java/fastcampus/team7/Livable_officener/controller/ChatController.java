@@ -1,6 +1,8 @@
 package fastcampus.team7.Livable_officener.controller;
 
 import fastcampus.team7.Livable_officener.domain.User;
+import fastcampus.team7.Livable_officener.dto.chat.ChatroomInfoDTO;
+import fastcampus.team7.Livable_officener.global.util.APIDataResponse;
 import fastcampus.team7.Livable_officener.repository.UserRepository;
 import fastcampus.team7.Livable_officener.service.ChatService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,15 @@ public class ChatController {
 
     private final UserRepository userRepository;
     private final ChatService chatService;
+
+    @PostMapping("/connect")
+    public ResponseEntity<?> getChatroomInfo(
+            @PathVariable Long roomId,
+            @AuthenticationPrincipal User user) {
+
+        ChatroomInfoDTO dto = chatService.getChatroomInfo(roomId, user);
+        return APIDataResponse.of(HttpStatus.OK, dto);
+    }
 
     @PostMapping("/closed")
     public ResponseEntity<?> closeParticipation(
@@ -70,8 +81,9 @@ public class ChatController {
     @PostMapping("/kickRequest")
     public ResponseEntity<?> kickRequest(
             @PathVariable Long roomId,
-            @AuthenticationPrincipal User user) throws IOException{
-        chatService.kickRequest(roomId,user);
+            @AuthenticationPrincipal User user) throws IOException {
+
+        chatService.kickRequest(roomId, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

@@ -32,11 +32,18 @@ public class RoomParticipant extends BaseEntity {
     @Column
     private LocalDateTime receivedAt;
 
+    @Column(nullable = false)
+    private int numUnread;
+
     public void completeRemit() {
         remittedAt = LocalDateTime.now();
     }
 
     public void completeReceive() {
         receivedAt = LocalDateTime.now();
+    }
+
+    public void resetNumUnread() {
+        numUnread = 0;
     }
 }

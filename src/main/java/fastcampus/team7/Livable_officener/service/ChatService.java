@@ -7,10 +7,10 @@ import fastcampus.team7.Livable_officener.domain.Chat;
 import fastcampus.team7.Livable_officener.domain.Room;
 import fastcampus.team7.Livable_officener.domain.RoomParticipant;
 import fastcampus.team7.Livable_officener.domain.User;
-import fastcampus.team7.Livable_officener.dto.chat.SendChatDTO;
-import fastcampus.team7.Livable_officener.dto.chat.SendPayloadDTO;
+import fastcampus.team7.Livable_officener.dto.chat.*;
 import fastcampus.team7.Livable_officener.global.constant.ChatType;
 import fastcampus.team7.Livable_officener.global.constant.Role;
+import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
 import fastcampus.team7.Livable_officener.global.exception.*;
 import fastcampus.team7.Livable_officener.global.websocket.WebSocketSessionManager;
 import fastcampus.team7.Livable_officener.repository.ChatRepository;
@@ -24,6 +24,7 @@ import org.springframework.web.socket.TextMessage;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -215,5 +216,32 @@ public class ChatService {
     private TextMessage convertPayloadDtoToJsonTextMessage(SendPayloadDTO payloadDTO) throws JsonProcessingException {
         String payload = objectMapper.writeValueAsString(payloadDTO);
         return new TextMessage(payload);
+    }
+
+    @Transactional
+    public ChatroomInfoDTO getChatroomInfo(Long roomId, User user) {
+        Room room = getRoom(roomId);
+        validateIfRoomIsActive(room);
+
+        RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
+        roomParticipant.resetNumUnread();
+
+        return createChatRoomInfoDTO(roomId, user.getId());
+    }
+
+    private static void validateIfRoomIsActive(Room room) {
+        if (room.getStatus() != RoomStatus.ACTIVE) {
+            throw new NotActiveRoomException();
+        }
+    }
+
+    private ChatroomInfoDTO createChatRoomInfoDTO(Long roomId, Long userId) {
+        List<GetMessageDTO> messages = chatRepository.findByRoomIdOrderByCreatedAtDesc(roomId).stream()
+                .map(GetMessageDTO::from)
+                .collect(Collectors.toList());
+        List<GetParticipantDTO> members = roomParticipantRepository.findAllByRoomId(roomId).stream()
+                .map(participant -> GetParticipantDTO.from(userId, participant))
+                .collect(Collectors.toList());
+        return new ChatroomInfoDTO(messages, members);
     }
 }
