@@ -1,11 +1,9 @@
 package fastcampus.team7.Livable_officener.controller;
 
 import fastcampus.team7.Livable_officener.domain.User;
-<<<<<<< Updated upstream
-=======
 import fastcampus.team7.Livable_officener.dto.chat.ChatroomInfoDTO;
 import fastcampus.team7.Livable_officener.global.util.APIDataResponse;
->>>>>>> Stashed changes
+import fastcampus.team7.Livable_officener.repository.UserRepository;
 import fastcampus.team7.Livable_officener.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,6 +21,7 @@ import java.io.IOException;
 @RestController
 public class ChatController {
 
+    private final UserRepository userRepository;
     private final ChatService chatService;
 
     @PostMapping("/connect")
@@ -70,8 +69,6 @@ public class ChatController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-<<<<<<< Updated upstream
-=======
     @PostMapping("/exit")
     public ResponseEntity<?> exitChatRoom(
             @PathVariable Long roomId,
@@ -89,5 +86,4 @@ public class ChatController {
         chatService.kickRequest(roomId, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
->>>>>>> Stashed changes
 }
