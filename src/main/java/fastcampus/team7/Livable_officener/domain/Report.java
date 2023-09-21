@@ -2,16 +2,15 @@ package fastcampus.team7.Livable_officener.domain;
 
 import fastcampus.team7.Livable_officener.dto.chat.ReportDTO;
 import fastcampus.team7.Livable_officener.global.constant.ReportType;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Getter
 @Entity
 @Builder
-@RequiredArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Report extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
