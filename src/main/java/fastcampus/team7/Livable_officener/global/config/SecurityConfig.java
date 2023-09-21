@@ -19,7 +19,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                    .antMatchers("/h2-console/**", "/api/building", "/api/auth", "/api/verify", "/api/confirm", "/api/signup", "/api/login", "/api/elevator","/api/chat/{roomid}/kickRequest")
+                    .antMatchers("/h2-console/**", "/api/building", "/api/auth", "/api/verify", "/api/confirm", "/api/signup", "/api/login", "/api/elevator","/api/notify/list","/api/notify/readAll")
                     .permitAll()
                     .anyRequest().authenticated()
                     .and()
