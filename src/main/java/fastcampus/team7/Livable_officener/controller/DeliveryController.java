@@ -2,11 +2,9 @@ package fastcampus.team7.Livable_officener.controller;
 
 
 import fastcampus.team7.Livable_officener.domain.User;
-import fastcampus.team7.Livable_officener.dto.DeliveryRequestDTO;
-import fastcampus.team7.Livable_officener.dto.DeliveryResponseDTO;
-import fastcampus.team7.Livable_officener.dto.RoomDetailDTO;
-import fastcampus.team7.Livable_officener.dto.UpdateStoreDetailDTO;
+import fastcampus.team7.Livable_officener.dto.*;
 import fastcampus.team7.Livable_officener.global.util.APIDataResponse;
+import fastcampus.team7.Livable_officener.repository.BankRepository;
 import fastcampus.team7.Livable_officener.service.DeliveryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,11 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Map;
-
-import static fastcampus.team7.Livable_officener.dto.ChatRoomListResponseDTO.MyChatListResponseDTO;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -86,8 +81,16 @@ public class DeliveryController {
         return APIDataResponse.of(HttpStatus.CREATED, "성공", response);
     }
 
+    @PostMapping("/{id}/join")
+    public ResponseEntity<APIDataResponse<String>> join(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User user) {
+        deliveryService.joinDeliveryRoom(id, user);
+        return APIDataResponse.of(HttpStatus.CREATED, "성공", "성공");
+    }
+
     @GetMapping("/chats")
-    public ResponseEntity<APIDataResponse<MyChatListResponseDTO>> chatRoomList(@AuthenticationPrincipal User user) {
+    public ResponseEntity<APIDataResponse<ChatRoomListResponseDTO.MyChatListResponseDTO>> chatRoomList(@AuthenticationPrincipal User user) {
         return APIDataResponse.of(HttpStatus.OK, "성공", deliveryService.getChatRoomList(user));
     }
 }
