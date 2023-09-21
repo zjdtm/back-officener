@@ -28,7 +28,7 @@ public class NotificationController {
 
     @GetMapping("/api/notify/readAll")
     public ResponseEntity<APIDataResponse<String>> readAll(
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization){
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
         String token = authorization.split(" ")[1];
         return notificationService.readAll(token);
     }

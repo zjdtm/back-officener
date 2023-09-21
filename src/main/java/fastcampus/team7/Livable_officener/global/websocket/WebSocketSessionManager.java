@@ -2,8 +2,10 @@ package fastcampus.team7.Livable_officener.global.websocket;
 
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,5 +37,12 @@ public class WebSocketSessionManager {
     public void removeSessionFromRoom(Long roomId, WebSocketSession session) {
         Collection<WebSocketSession> sessions = getWebSocketSessions(roomId);
         sessions.remove(session);
+    }
+
+    public void send(Long roomId, TextMessage message) throws IOException {
+        Collection<WebSocketSession> webSocketSessions = getWebSocketSessions(roomId);
+        for (WebSocketSession webSocketSession : webSocketSessions) {
+            webSocketSession.sendMessage(message);
+        }
     }
 }

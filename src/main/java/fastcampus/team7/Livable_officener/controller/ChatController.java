@@ -66,6 +66,7 @@ public class ChatController {
         chatService.exitChatRoom(roomId, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
     @PostMapping("/kickRequest")
     public ResponseEntity<?> kickRequest(
             @PathVariable Long roomId,
