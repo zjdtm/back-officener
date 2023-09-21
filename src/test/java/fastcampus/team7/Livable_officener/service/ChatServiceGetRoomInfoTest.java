@@ -3,10 +3,12 @@ package fastcampus.team7.Livable_officener.service;
 import fastcampus.team7.Livable_officener.domain.Room;
 import fastcampus.team7.Livable_officener.domain.RoomParticipant;
 import fastcampus.team7.Livable_officener.domain.User;
+import fastcampus.team7.Livable_officener.dto.chat.ChatroomInfoDTO;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
 import fastcampus.team7.Livable_officener.global.exception.NotActiveRoomException;
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotParticipantException;
+import fastcampus.team7.Livable_officener.repository.ChatRepository;
 import fastcampus.team7.Livable_officener.repository.DeliveryParticipantRepository;
 import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -31,6 +33,8 @@ class ChatServiceGetRoomInfoTest {
 
     @InjectMocks
     private ChatService sut;
+    @Mock
+    private ChatRepository chatRepository;
     @Mock
     private DeliveryRepository roomRepository;
     @Mock
@@ -88,6 +92,7 @@ class ChatServiceGetRoomInfoTest {
         // given
         User user = mock(User.class);
         Room room = mock(Room.class);
+        Long roomId = 1L;
         RoomParticipant roomParticipant = mock(RoomParticipant.class);
         given(roomRepository.findById(anyLong()))
                 .willReturn(Optional.of(room));
@@ -97,10 +102,13 @@ class ChatServiceGetRoomInfoTest {
                 .willReturn(Optional.of(roomParticipant));
 
         // when
-        sut.getChatroomInfo(1L, user);
+        ChatroomInfoDTO chatroomInfo = sut.getChatroomInfo(roomId, user);
 
         // then
         verify(roomParticipant, times(1)).resetUnreadCount();
         assertThat(roomParticipant.getUnreadCount()).isSameAs(0);
+        verify(chatRepository, times(1)).findByRoomIdOrderByCreatedAtDesc(eq(roomId));
+        verify(roomParticipantRepository, times(1)).findAllByRoomId(eq(roomId));
+        assertThat(chatroomInfo).isNotNull();
     }
 }
