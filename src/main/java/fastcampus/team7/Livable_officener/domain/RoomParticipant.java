@@ -33,7 +33,7 @@ public class RoomParticipant extends BaseEntity {
     private LocalDateTime receivedAt;
 
     @Column(nullable = false)
-    private int numUnread;
+    private int unreadCount;
 
     public void completeRemit() {
         remittedAt = LocalDateTime.now();
@@ -43,7 +43,7 @@ public class RoomParticipant extends BaseEntity {
         receivedAt = LocalDateTime.now();
     }
 
-    public void resetNumUnread() {
-        numUnread = 0;
+    public void resetUnreadCount() {
+        unreadCount = 0;
     }
 }

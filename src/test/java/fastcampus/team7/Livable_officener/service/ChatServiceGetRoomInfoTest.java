@@ -82,9 +82,9 @@ class ChatServiceGetRoomInfoTest {
                 .isInstanceOf(UserIsNotParticipantException.class);
     }
 
-    @DisplayName("읽지 않은 메시지 수 초기화")
+    @DisplayName("성공")
     @Test
-    void whenSuccess_thenResetNumUnread() {
+    void success() {
         // given
         User user = mock(User.class);
         Room room = mock(Room.class);
@@ -100,7 +100,7 @@ class ChatServiceGetRoomInfoTest {
         sut.getChatroomInfo(1L, user);
 
         // then
-        verify(roomParticipant, times(1)).resetNumUnread();
-        assertThat(roomParticipant.getNumUnread()).isSameAs(0);
+        verify(roomParticipant, times(1)).resetUnreadCount();
+        assertThat(roomParticipant.getUnreadCount()).isSameAs(0);
     }
 }

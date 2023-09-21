@@ -224,7 +224,7 @@ public class ChatService {
         validateIfRoomIsActive(room);
 
         RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
-        roomParticipant.resetNumUnread();
+        roomParticipant.resetUnreadCount();
 
         return createChatRoomInfoDTO(roomId, user.getId());
     }
