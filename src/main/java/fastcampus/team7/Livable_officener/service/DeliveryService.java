@@ -6,6 +6,7 @@ import fastcampus.team7.Livable_officener.global.constant.BankName;
 import fastcampus.team7.Livable_officener.global.constant.FoodTag;
 import fastcampus.team7.Livable_officener.global.constant.Role;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
+import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotParticipantException;
 import fastcampus.team7.Livable_officener.repository.BankRepository;
 import fastcampus.team7.Livable_officener.repository.DeliveryParticipantRepository;
@@ -175,6 +176,7 @@ public class DeliveryService {
         return response;
     }
 
+
     public MyChatListResponseDTO getChatRoomList(User user) {
 
         List<ChatRoomListDTO> chatRoomListDTO = deliveryRepository.findChatRoomList(user.getId());
@@ -183,5 +185,27 @@ public class DeliveryService {
         myChatListResponseDTO.listOf(chatRoomListDTO);
 
         return myChatListResponseDTO;
+    }
+
+    @Transactional
+    public void joinDeliveryRoom (Long roomId, User user){
+        Room room = deliveryRepository.findById(roomId)
+                .orElseThrow(() -> new NotFoundRoomException("유효하지 않은 방입니다."));
+
+        if (room.getAttendees() >= room.getMaxAttendees()) {
+            throw new IllegalArgumentException("함께배달 방의 현재 인원이 최대 인원보다 많거나 같습니다. 만원입니다.");
+        }
+
+        room.setAttendees(room.getAttendees() + 1);
+        Room updatedRoom = deliveryRepository.save(room);
+
+        RoomParticipant roomParticipant = RoomParticipant.builder()
+                .room(updatedRoom)
+                .user(user)
+                .role(Role.GUEST)
+                .kickedAt(null)
+                .build();
+
+        deliveryParticipantRepository.save(roomParticipant);
     }
 }

@@ -2,8 +2,7 @@ package fastcampus.team7.Livable_officener.global.handler;
 
 import fastcampus.team7.Livable_officener.domain.Room;
 import fastcampus.team7.Livable_officener.domain.User;
-import fastcampus.team7.Livable_officener.dto.SendChatDTO;
-import fastcampus.team7.Livable_officener.global.constant.ChatType;
+import fastcampus.team7.Livable_officener.dto.chat.SendChatDTO;
 import fastcampus.team7.Livable_officener.global.websocket.WebSocketSessionManager;
 import fastcampus.team7.Livable_officener.service.ChatService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +14,6 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
-import java.util.Collection;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -38,10 +36,9 @@ public class CustomTextWebSocketHandler extends TextWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
         Room room = getRoom(session);
         User sender = getSender(session);
-        Collection<WebSocketSession> webSocketSessions = webSocketSessionManager.getWebSocketSessions(room.getId());
-        log.info("roomId: {}, senderId: {}, content: {}", room.getId(), sender.getId(), message.getPayload());
+        log.info("roomId: {}, senderId: {}, payload: {}", room.getId(), sender.getId(), message.getPayload());
 
-        chatService.send(new SendChatDTO(room, sender, message, ChatType.TALK, webSocketSessions));
+        chatService.send(new SendChatDTO(room, sender, message));
     }
 
     @Override

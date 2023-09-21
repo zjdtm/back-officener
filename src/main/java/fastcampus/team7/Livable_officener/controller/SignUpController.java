@@ -1,9 +1,6 @@
 package fastcampus.team7.Livable_officener.controller;
 
-import fastcampus.team7.Livable_officener.dto.BuildingWithCompaniesDTO;
-import fastcampus.team7.Livable_officener.dto.PhoneAuthConfirmDTO;
-import fastcampus.team7.Livable_officener.dto.PhoneAuthRequestDTO;
-import fastcampus.team7.Livable_officener.dto.SignUpRequestDTO;
+import fastcampus.team7.Livable_officener.dto.*;
 import fastcampus.team7.Livable_officener.global.util.APIDataResponse;
 import fastcampus.team7.Livable_officener.service.SignUpService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +54,15 @@ public class SignUpController {
         signUpService.signUp(request);
 
         return APIDataResponse.of(HttpStatus.OK, "성공하였습니다.", "회원가입에 성공했습니다.");
+
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<APIDataResponse<LoginResponseDTO>> login(@RequestBody LoginRequestDTO request) {
+
+        LoginResponseDTO response = signUpService.login(request);
+
+        return APIDataResponse.of(HttpStatus.OK, "성공하였습니다.", response);
 
     }
 

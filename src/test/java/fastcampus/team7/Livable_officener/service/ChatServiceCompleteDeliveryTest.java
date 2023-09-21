@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.socket.TextMessage;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -130,11 +131,11 @@ class ChatServiceCompleteDeliveryTest {
         Room room = mock(Room.class);
         RoomParticipant roomParticipant = mock(RoomParticipant.class);
 
-        given(roomRepository.findById(roomId))
+        given(roomRepository.findById(anyLong()))
                 .willReturn(Optional.of(room));
         given(user.getId())
                 .willReturn(userId);
-        given(roomParticipantRepository.findRoomParticipant(roomId, userId))
+        given(roomParticipantRepository.findRoomParticipant(anyLong(), anyLong()))
                 .willReturn(Optional.of(roomParticipant));
         given(roomParticipant.getRole())
                 .willReturn(Role.HOST);
@@ -145,7 +146,7 @@ class ChatServiceCompleteDeliveryTest {
         sut.completeDelivery(roomId, user);
 
         verify(room, times(1)).completeDelivery();
-        verify(webSocketSessionManager, times(1)).getWebSocketSessions(roomId);
+        verify(webSocketSessionManager, times(1)).send(eq(roomId), any(TextMessage.class));
         verify(chatRepository, times(1)).save(any(Chat.class));
     }
 }

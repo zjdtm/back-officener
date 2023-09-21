@@ -58,6 +58,15 @@ public class ChatController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @PostMapping("/exit")
+    public ResponseEntity<?> exitChatRoom(
+            @PathVariable Long roomId,
+            @AuthenticationPrincipal User user) {
+
+        chatService.exitChatRoom(roomId, user);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @PostMapping("/kickRequest")
     public ResponseEntity<?> kickRequest(
             @PathVariable Long roomId,
@@ -65,5 +74,4 @@ public class ChatController {
         chatService.kickRequest(roomId,user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
 }

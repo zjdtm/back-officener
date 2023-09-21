@@ -91,4 +91,15 @@ public class APIExceptionHandler {
     public ResponseEntity<?> handleNotVerifiedPhoneNumberException(NotVerifiedPhoneNumberException e) {
         return handleExceptionInternal(e, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler
+    public ResponseEntity<?> handleDuplicatedUserEmailException(DuplicatedUserEmailException e) {
+        return handleExceptionInternal(e, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<?> handleNotFoundUserException(NotFoundUserException e) {
+        return handleExceptionInternal(e, HttpStatus.BAD_REQUEST);
+    }
+
 }
