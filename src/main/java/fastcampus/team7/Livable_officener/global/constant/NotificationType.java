@@ -3,14 +3,11 @@ package fastcampus.team7.Livable_officener.global.constant;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public enum FoodTag {
-    CHICKEN("치킨"),
-    DESSERT("디저트"),
-    MEET("고기"),
-    CHINESE("중식"),
-    JAPANESE("일식"),
-    KOREAN("한식"),
-    BUNSIK("분식")
+public enum NotificationType {
+    DELIVERED("배달완료"),
+    TRANSFERRED("송금완료"),
+    KICK("강퇴")
+
     ;
 
     private final String name;
