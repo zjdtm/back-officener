@@ -26,4 +26,19 @@ public class Report extends BaseEntity {
     @Lob
     private String reportMessage;
 
+    public void assignReportedUser(User user) {
+        this.reportedUser = user;
+    }
+
+    public void assignReporter(User user) {
+        this.reporter = user;
+    }
+
+    public void assignType(ReportType type) {
+        this.type = type;
+    }
+
+    public void assignReportMessage(String reportMessage) {
+        this.reportMessage = reportMessage;
+    }
 }
