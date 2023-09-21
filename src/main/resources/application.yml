@@ -33,4 +33,4 @@ logging:
 
 jwt:
   secret:
-    key: WsjFrt1rD1ST59p5OJoapq7fP4VB81dM
+    key: ${JWT_SECRET_KEY}
