@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,7 +27,7 @@ public class NotificationController {
     }
 
 
-    @GetMapping("/api/notify/readAll")
+    @PostMapping("/api/notify/readAll")
     public ResponseEntity<APIDataResponse<String>> readAll(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
         String token = authorization.split(" ")[1];
