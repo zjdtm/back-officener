@@ -15,6 +15,4 @@ public class ReportDTO {
 
     private Long reportedUserId;
 
-    private Long reportingUserId;
-
 }

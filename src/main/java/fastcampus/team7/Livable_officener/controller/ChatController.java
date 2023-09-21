@@ -5,6 +5,7 @@ import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.chat.ChatroomInfoDTO;
 import fastcampus.team7.Livable_officener.dto.chat.ReportDTO;
 import fastcampus.team7.Livable_officener.global.util.APIDataResponse;
+import fastcampus.team7.Livable_officener.global.util.APIErrorResponse;
 import fastcampus.team7.Livable_officener.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -86,10 +87,14 @@ public class ChatController {
     }
 
     @PostMapping("/report")
-    public ResponseEntity<APIDataResponse<Report>> createReport(
+    public ResponseEntity<?> createReport(
             @PathVariable Long roomId,
             @AuthenticationPrincipal User user,
             @Valid @RequestBody ReportDTO reportDTO) {
+
+        if(reportDTO.getReportedUserId().equals(user.getId())) {
+            return APIErrorResponse.of(HttpStatus.BAD_REQUEST, "You cannot report yourself.");
+        }
 
         Report report = chatService.createReport(roomId, user, reportDTO);
         return APIDataResponse.of(HttpStatus.CREATED, report);

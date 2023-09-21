@@ -133,11 +133,9 @@ public class ChatService {
         getRoomParticipant(roomId, user.getId());
 
         User reportedUser = validateReportedUser(reportDTO.getReportedUserId());
-        User reporter = validateReporter(reportDTO.getReportingUserId());
 
-        validateReportFrequency(reporter, reportedUser);
-
-        Report report = createReport(reportDTO, reportedUser, reporter);
+        validateReportFrequency(user, reportedUser);
+        Report report = createReport(reportDTO, reportedUser, user);
 
         return reportRepository.save(report);
     }
@@ -167,11 +165,6 @@ public class ChatService {
     private User validateReportedUser(Long reportedUserId) {
         return userRepository.findById(reportedUserId)
                 .orElseThrow(NotFoundReportedUserException::new);
-    }
-
-    private User validateReporter(Long reportingUserId) {
-        return userRepository.findById(reportingUserId)
-                .orElseThrow(NotFoundReporterException::new);
     }
 
     private void validateAllParticipantsCompletedRemitAndReceive(Long roomId) {
@@ -256,6 +249,12 @@ public class ChatService {
         chatRepository.save(Chat.from(room, sender, payloadDto));
     }
 
+    private static void validateIfRoomIsActive(Room room) {
+        if (room.getStatus() != RoomStatus.ACTIVE) {
+            throw new NotActiveRoomException();
+        }
+    }
+
     private TextMessage convertPayloadDtoToJsonTextMessage(SendPayloadDTO payloadDTO) throws JsonProcessingException {
         String payload = objectMapper.writeValueAsString(payloadDTO);
         return new TextMessage(payload);
@@ -270,12 +269,6 @@ public class ChatService {
         roomParticipant.resetUnreadCount();
 
         return createChatRoomInfoDTO(roomId, user.getId());
-    }
-
-    private static void validateIfRoomIsActive(Room room) {
-        if (room.getStatus() != RoomStatus.ACTIVE) {
-            throw new NotActiveRoomException();
-        }
     }
 
     private ChatroomInfoDTO createChatRoomInfoDTO(Long roomId, Long userId) {
