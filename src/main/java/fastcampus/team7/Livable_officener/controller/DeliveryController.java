@@ -77,7 +77,7 @@ public class DeliveryController {
         return APIDataResponse.of(HttpStatus.CREATED, "성공", response);
     }
 
-    @GetMapping("joinedRoom")
+    @GetMapping("/joinedRoom")
     public ResponseEntity<APIDataResponse<DeliveryResponseDTO.PagedRoomListResponseDTO>> joinedRoom(@RequestParam(defaultValue = "0") int page,
                                                                                                     @RequestParam(defaultValue = "10") int size,
                                                                                                     @AuthenticationPrincipal User user) {
