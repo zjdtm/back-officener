@@ -135,7 +135,7 @@ public class ChatService {
         User reportedUser = validateReportedUser(reportDTO.getReportedUserId());
 
         validateReportFrequency(user, reportedUser);
-        Report report = createReport(reportDTO, reportedUser, user);
+        Report report = Report.createReport(reportDTO, reportedUser, user);
 
         return reportRepository.save(report);
     }
@@ -213,11 +213,13 @@ public class ChatService {
     }
 
     private static Report createReport(ReportDTO reportDTO, User reportedUser, User reporter) {
-        Report report = new Report();
-        report.assignReportedUser(reportedUser);
-        report.assignReporter(reporter);
-        report.assignType(reportDTO.getReportType());
-        report.assignReportMessage(reportDTO.getReportMessage());
+        Report report = Report.builder()
+                .reportedUser(reportedUser)
+                .reporter(reporter)
+                .type(reportDTO.getReportType())
+                .reportMessage(reportDTO.getReportMessage())
+                .build();
+
         return report;
     }
 
