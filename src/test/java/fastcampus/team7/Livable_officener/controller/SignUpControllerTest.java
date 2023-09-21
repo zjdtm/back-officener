@@ -5,6 +5,7 @@ import fastcampus.team7.Livable_officener.dto.BuildingWithCompaniesDTO;
 import fastcampus.team7.Livable_officener.dto.CompanyDTO;
 import fastcampus.team7.Livable_officener.dto.PhoneAuthRequestDTO;
 import fastcampus.team7.Livable_officener.global.exception.DuplicatedPhoneNumberException;
+import fastcampus.team7.Livable_officener.global.sercurity.JwtProvider;
 import fastcampus.team7.Livable_officener.service.SignUpService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,9 @@ class SignUpControllerTest {
 
     @MockBean
     private SignUpService signUpService;
+
+    @MockBean
+    private JwtProvider jwtProvider;
 
 
     @Test
