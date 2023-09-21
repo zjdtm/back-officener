@@ -19,17 +19,12 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-//    @GetMapping("/api/notify/list")
-//    public ResponseEntity<APIDataResponse<List<NotificationDTO>>> getNotifyList(
-//            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
-//        String token = authorization.split(" ")[1];
-//        return notificationService.getNotifyList(token);
-//    }
     @GetMapping("/api/notify/list")
-    public ResponseEntity<APIDataResponse<List<NotificationDTO>>> getNotifyList() {
-        return notificationService.getNotifyList2();
+    public ResponseEntity<APIDataResponse<List<NotificationDTO>>> getNotifyList(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
+        String token = authorization.split(" ")[1];
+        return notificationService.getNotifyList(token);
     }
-
 
     @PostMapping("/api/notify/readAll")
     public ResponseEntity<APIDataResponse<String>> readAll(

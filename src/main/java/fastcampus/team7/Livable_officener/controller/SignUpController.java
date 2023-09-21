@@ -22,7 +22,7 @@ public class SignUpController {
 
         List<BuildingWithCompaniesDTO> result = signUpService.getBuildingWithCompanies(keyword);
 
-        return APIDataResponse.of(HttpStatus.OK, "성공하였습니다.", result);
+        return APIDataResponse.of(HttpStatus.OK, result);
 
     }
 
@@ -31,7 +31,7 @@ public class SignUpController {
 
         String phoneAuthCode = signUpService.getPhoneAuthCode(request);
 
-        return APIDataResponse.of(HttpStatus.OK, "성공하였습니다.", phoneAuthCode);
+        return APIDataResponse.of(HttpStatus.OK, phoneAuthCode);
 
     }
 
@@ -42,7 +42,6 @@ public class SignUpController {
 
         return APIDataResponse.of(
                 isConfirm ? HttpStatus.OK : HttpStatus.BAD_REQUEST,
-                isConfirm ? "성공하였습니다." : "인증에 실패하였습니다.",
                 isConfirm ? "인증이 완료되었습니다." : "잘못된 인증 코드입니다.");
 
     }
@@ -53,7 +52,7 @@ public class SignUpController {
 
         signUpService.signUp(request);
 
-        return APIDataResponse.of(HttpStatus.OK, "성공하였습니다.", "회원가입에 성공했습니다.");
+        return APIDataResponse.of(HttpStatus.OK, "회원가입에 성공했습니다.");
 
     }
 
@@ -62,7 +61,7 @@ public class SignUpController {
 
         LoginResponseDTO response = signUpService.login(request);
 
-        return APIDataResponse.of(HttpStatus.OK, "성공하였습니다.", response);
+        return APIDataResponse.of(HttpStatus.OK, response);
 
     }
 

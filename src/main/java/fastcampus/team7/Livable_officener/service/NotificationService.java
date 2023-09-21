@@ -23,28 +23,11 @@ public class NotificationService {
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
 
-//    public ResponseEntity<APIDataResponse<List<NotificationDTO>>> getNotifyList(String token){
-//        String email = jwtProvider.getEmail(token);
-//        User user = userRepository.findByEmail(email)
-//                .orElseThrow(() -> new RuntimeException("해당하는 유저가 없습니다."));;
-//        Long id = user.getId();
-//        List<Notification> notifications = notificationRepository.findByUserId(id)
-//                .orElseThrow(() -> new RuntimeException("해당하는 유저에 알림이 없습니다."));
-//
-//        List<NotificationDTO> notificationDTOS = new ArrayList<>();
-//
-//        for(Notification notification : notifications){
-//            notificationDTOS.add(toDTO(notification));
-//        }
-//
-//        ResponseEntity<APIDataResponse<List<NotificationDTO>>> responseEntity = APIDataResponse.of(
-//                HttpStatus.OK, "성공", notificationDTOS);
-//
-//        return responseEntity;
-//    }
-
-    public ResponseEntity<APIDataResponse<List<NotificationDTO>>> getNotifyList2(){
-        Long id = 2L;
+    public ResponseEntity<APIDataResponse<List<NotificationDTO>>> getNotifyList(String token){
+        String email = jwtProvider.getEmail(token);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("해당하는 유저가 없습니다."));;
+        Long id = user.getId();
         List<Notification> notifications = notificationRepository.findByUserId(id)
                 .orElseThrow(() -> new RuntimeException("해당하는 유저에 알림이 없습니다."));
 
@@ -55,7 +38,7 @@ public class NotificationService {
         }
 
         ResponseEntity<APIDataResponse<List<NotificationDTO>>> responseEntity = APIDataResponse.of(
-                HttpStatus.OK, "성공", notificationDTOS);
+                HttpStatus.OK, notificationDTOS);
 
         return responseEntity;
     }
@@ -75,7 +58,7 @@ public class NotificationService {
         }
 
         ResponseEntity<APIDataResponse<String>> responseEntity = APIDataResponse.empty(
-                HttpStatus.OK,"성공");
+                HttpStatus.OK);
 
         return responseEntity;
     }
