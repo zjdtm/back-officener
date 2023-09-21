@@ -212,17 +212,6 @@ public class ChatService {
         return createSystemMessagePayloadDTO(sender, messageType, content);
     }
 
-    private static Report createReport(ReportDTO reportDTO, User reportedUser, User reporter) {
-        Report report = Report.builder()
-                .reportedUser(reportedUser)
-                .reporter(reporter)
-                .type(reportDTO.getReportType())
-                .reportMessage(reportDTO.getReportMessage())
-                .build();
-
-        return report;
-    }
-
     private static String getSystemMessageContent(User sender, ChatType messageType) {
         Object[] systemMessageArgs = getSystemMessageArgs(messageType, sender);
         return messageType.getSystemMessageContent(systemMessageArgs);
