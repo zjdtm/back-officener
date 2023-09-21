@@ -94,6 +94,8 @@ public class ChatService {
         validateAllParticipantsCompletedRemitAndReceive(roomId);
 
         roomRepository.deleteById(roomId);
+    }
+
     public void kickRequest(Long roomId, User user) throws IOException{
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new NotFoundRoomException());
