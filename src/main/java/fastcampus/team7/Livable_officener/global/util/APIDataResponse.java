@@ -18,7 +18,6 @@ public class APIDataResponse<T> {
     }
 
     public static <S> ResponseEntity<APIDataResponse<S>> empty(HttpStatus httpStatus) {
-        APIDataResponse<S> response = new APIDataResponse<>(null);
-        return new ResponseEntity<>(response, httpStatus);
+        return of(httpStatus, null);
     }
 }
