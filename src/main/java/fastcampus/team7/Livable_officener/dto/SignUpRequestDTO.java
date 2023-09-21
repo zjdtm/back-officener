@@ -1,6 +1,7 @@
 package fastcampus.team7.Livable_officener.dto;
 
 import fastcampus.team7.Livable_officener.domain.Building;
+import fastcampus.team7.Livable_officener.domain.Company;
 import fastcampus.team7.Livable_officener.domain.User;
 import lombok.*;
 
@@ -24,11 +25,12 @@ public class SignUpRequestDTO {
 
     private boolean agree;
 
-    public User toEntity(Building building, String encodingPassword) {
+    public User toEntity(Building building, Company company, String encodingPassword) {
         return User.builder()
                 .email(email)
                 .password(encodingPassword)
                 .building(building)
+                .company(company)
                 .name(name)
                 .phoneNumber(phoneNumber)
                 .build();
