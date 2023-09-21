@@ -1,20 +1,19 @@
 package fastcampus.team7.Livable_officener.global.util;
 
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
-public class APIErrorResponse<T> {
+public class APIErrorResponse {
 
-    private int statusCode;
-    private String message;
+    private final String errorMessage;
 
-    public static <S> ResponseEntity<APIErrorResponse<S>> of(HttpStatus httpStatus, String message) {
-        APIErrorResponse<S> response = new APIErrorResponse<>(httpStatus.value(), message);
+    public static ResponseEntity<APIErrorResponse> of(HttpStatus httpStatus, String errorMessage) {
+        APIErrorResponse response = new APIErrorResponse(errorMessage);
         return new ResponseEntity<>(response, httpStatus);
     }
 }
