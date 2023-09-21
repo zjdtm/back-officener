@@ -26,7 +26,6 @@ public class NotificationController {
         return notificationService.getNotifyList(token);
     }
 
-
     @PostMapping("/api/notify/readAll")
     public ResponseEntity<APIDataResponse<String>> readAll(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {

@@ -15,4 +15,9 @@ public class NotificationDTO {
     private String menuTag;
     private Timestamp createdAt;
 
+    @Data
+    public static class EmptyDTO{
+        private String message = "성공했습니다.";
+    }
+
 }
