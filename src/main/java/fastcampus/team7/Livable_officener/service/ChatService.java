@@ -21,6 +21,7 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -85,6 +86,14 @@ public class ChatService {
     }
 
     @Transactional
+    public void exitChatRoom(Long roomId, User user) {
+        getRoom(roomId);
+        RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
+
+        validateIfRoomParticipantIsHost(roomParticipant.getRole(), "나가기");
+        validateAllParticipantsCompletedRemitAndReceive(roomId);
+
+        roomRepository.deleteById(roomId);
     public void kickRequest(Long roomId, User user) throws IOException{
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new NotFoundRoomException());
@@ -112,6 +121,19 @@ public class ChatService {
     private static void validateIfRoomParticipantIsHost(Role role, String requestName) {
         if (role != Role.HOST) {
             throw new UserIsNotHostException(requestName);
+        }
+    }
+
+    private void validateAllParticipantsCompletedRemitAndReceive(Long roomId) {
+        List<RoomParticipant> participants = roomParticipantRepository.findAllByRoomId(roomId);
+
+        for (RoomParticipant participant : participants) {
+            if (participant.getRemittedAt() == null) {
+                throw new RemitNotCompletedException();
+            }
+            if (participant.getReceivedAt() == null) {
+                throw new ReceiveNotCompletedException();
+            }
         }
     }
 
