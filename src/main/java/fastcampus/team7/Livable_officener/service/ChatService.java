@@ -211,6 +211,11 @@ public class ChatService {
 
         webSocketSessionManager.send(room.getId(), message);
         chatRepository.save(Chat.from(room, sender, payloadDto));
+
+        // 함께배달 참여자 중 웹소켓세션이 연결되어있지 않은(=채팅 페이지를 벗어난) 참여자들의 unreadCount 증가
+        roomParticipantRepository.findAllByRoomId(room.getId()).stream()
+                .filter(participant -> webSocketSessionManager.nonexistent(room.getId(), participant.getUser()))
+                .forEach(RoomParticipant::incrementUnreadCount);
     }
 
     private TextMessage convertPayloadDtoToJsonTextMessage(SendPayloadDTO payloadDTO) throws JsonProcessingException {

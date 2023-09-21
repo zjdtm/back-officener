@@ -2,6 +2,7 @@ package fastcampus.team7.Livable_officener.global.websocket;
 
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -26,9 +27,9 @@ public class WebSocketSessionManager {
             return;
         }
 
-        Long requestUserId = getSessionUserId(session);
+        User requestUser = getSessionUser(session);
         Optional<WebSocketSession> duplicateUserSession = sessions.stream()
-                .filter(sess -> getSessionUserId(sess).equals(requestUserId))
+                .filter(sess -> getSessionUser(sess).equals(requestUser))
                 .findFirst();
         if (duplicateUserSession.isPresent()) {
             throw new IllegalStateException("웹소켓 세션은 채팅방마다 참여자별로 하나만 연결 가능합니다.");
@@ -36,9 +37,9 @@ public class WebSocketSessionManager {
         sessions.add(session);
     }
 
-    private static Long getSessionUserId(WebSocketSession session) {
-        User user = Objects.requireNonNull((User) session.getPrincipal());
-        return user.getId();
+    public static User getSessionUser(WebSocketSession session) {
+        Authentication auth = Objects.requireNonNull((Authentication) session.getPrincipal());
+        return (User) auth.getPrincipal();
     }
 
     public void removeSessionFromRoom(Long roomId, WebSocketSession session) {
@@ -51,6 +52,15 @@ public class WebSocketSessionManager {
         for (WebSocketSession webSocketSession : webSocketSessions) {
             webSocketSession.sendMessage(message);
         }
+    }
+
+    public boolean nonexistent(Long roomId, User user) {
+        for (WebSocketSession session : getWebSocketSessions(roomId)) {
+            if (user.equals(getSessionUser(session))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private Collection<WebSocketSession> getWebSocketSessions(Long roomId) {
