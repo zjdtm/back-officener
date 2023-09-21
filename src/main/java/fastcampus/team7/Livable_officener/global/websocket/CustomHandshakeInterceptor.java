@@ -1,7 +1,6 @@
 package fastcampus.team7.Livable_officener.global.websocket;
 
 import fastcampus.team7.Livable_officener.domain.Room;
-import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
 import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,12 +23,8 @@ public class CustomHandshakeInterceptor extends HttpSessionHandshakeInterceptor 
                                    ServerHttpResponse response,
                                    WebSocketHandler wsHandler,
                                    Map<String, Object> attributes) {
-        Room room = getRoom(request);
-        User user = getUser(request);
 
-        attributes.put("room", room);
-        attributes.put("user", user);
-
+        attributes.put("room", getRoom(request));
         return true;
     }
 
@@ -37,10 +32,6 @@ public class CustomHandshakeInterceptor extends HttpSessionHandshakeInterceptor 
         Long roomId = getRoomId(request);
         return roomRepository.findById(roomId)
                 .orElseThrow(NotFoundRoomException::new);
-    }
-
-    private User getUser(ServerHttpRequest request) {
-        return (User) request.getPrincipal();
     }
 
     private static Long getRoomId(ServerHttpRequest request) {

@@ -3,7 +3,6 @@ package fastcampus.team7.Livable_officener.global.websocket;
 import fastcampus.team7.Livable_officener.domain.Room;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.chat.SendChatDTO;
-import fastcampus.team7.Livable_officener.global.websocket.WebSocketSessionManager;
 import fastcampus.team7.Livable_officener.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,14 +27,14 @@ public class CustomTextWebSocketHandler extends TextWebSocketHandler {
         Room room = getRoom(session);
         webSocketSessionManager.addSessionToRoom(room.getId(), session);
 
-        User sender = getSender(session);
-        log.info("클라이언트 연결 roomId: {}, senderId: {}, sessionId: {}", room.getId(), sender.getId(), session.getId());
+        User user = getUser(session);
+        log.info("클라이언트 연결 roomId: {}, senderId: {}, sessionId: {}", room.getId(), user.getId(), session.getId());
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
         Room room = getRoom(session);
-        User sender = getSender(session);
+        User sender = getUser(session);
         log.info("roomId: {}, senderId: {}, payload: {}", room.getId(), sender.getId(), message.getPayload());
 
         chatService.send(new SendChatDTO(room, sender, message));
@@ -46,16 +45,16 @@ public class CustomTextWebSocketHandler extends TextWebSocketHandler {
         Room room = getRoom(session);
         webSocketSessionManager.removeSessionFromRoom(room.getId(), session);
 
-        User sender = getSender(session);
+        User user = getUser(session);
         log.info("클라이언트 연결 해제 roomId: {}, senderId: {}, sessionId: {}",
-                room.getId(), sender.getId(), session.getId());
+                room.getId(), user.getId(), session.getId());
     }
 
     private Room getRoom(WebSocketSession session) {
         return (Room) session.getAttributes().get("room");
     }
 
-    private User getSender(WebSocketSession session) {
-        return (User) session.getAttributes().get("sender");
+    private User getUser(WebSocketSession session) {
+        return (User) session.getPrincipal();
     }
 }

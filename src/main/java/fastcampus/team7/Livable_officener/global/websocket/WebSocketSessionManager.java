@@ -37,7 +37,7 @@ public class WebSocketSessionManager {
     }
 
     private static Long getSessionUserId(WebSocketSession session) {
-        User user = (User) session.getAttributes().get("user");
+        User user = Objects.requireNonNull((User) session.getPrincipal());
         return user.getId();
     }
 
