@@ -1,11 +1,11 @@
 package fastcampus.team7.Livable_officener.global.sercurity;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import fastcampus.team7.Livable_officener.global.constant.JwtExceptionCode;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,8 +18,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
-@RequiredArgsConstructor
 @Component
+@RequiredArgsConstructor
+@Slf4j
 public class JwtProvider {
 
     @Value("${jwt.secret.key}")
@@ -72,7 +73,7 @@ public class JwtProvider {
 
     public boolean validateToken(String token) {
         try {
-            if (!token.substring(BEARER_TOKEN_PREFIX.length()).equals(BEARER_TOKEN_PREFIX)) {
+            if (!token.startsWith(BEARER_TOKEN_PREFIX)) {
                 return false;
             }
             token = token.split(" ")[1].trim();
@@ -84,8 +85,18 @@ public class JwtProvider {
                     .parseClaimsJws(token);
 
             return !claims.getBody().getExpiration().before(new Date());
-        } catch(Exception e) {
-            return false;
+        } catch (SignatureException e) {
+            log.info("JwtProvider SignatureException 예외 발생");
+            throw new JwtException(JwtExceptionCode.WRONG_TYPE_TOKEN.getMessage());
+        } catch (MalformedJwtException e) {
+            log.info("JwtProvider MalformedJwtException 예외 발생");
+            throw new JwtException(JwtExceptionCode.UNSUPPORTED_TOKEN.getMessage());
+        } catch (ExpiredJwtException e) {
+            log.info("JwtProvider ExpiredJwtException 예외 발생");
+            throw new JwtException(JwtExceptionCode.EXPIRED_TOKEN.getMessage());
+        } catch (IllegalArgumentException e) {
+            log.info("JwtProvider IllegalArgumentException 예외 발생");
+            throw new JwtException(JwtExceptionCode.UNKNOWN_ERROR.getMessage());
         }
     }
 
