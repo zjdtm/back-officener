@@ -52,4 +52,31 @@ class WebSocketSessionManagerAddSessionToRoomTest {
         assertThatThrownBy(() -> sut.addSessionToRoom(roomId, newSession))
                 .isInstanceOf(IllegalStateException.class);
     }
+
+    @DisplayName("이미 방이 존재하고 중복되지 않는 세션이면 패스")
+    @Test
+    void whenExistentRoomAndNotDuplicateSession_thenPass() {
+        // given
+        Long roomId = 1L;
+        Long userId = 1L;
+        User user = User.builder().id(userId).build();
+        Authentication auth = mock(Authentication.class);
+        WebSocketSession session = mock(WebSocketSession.class);
+        given(session.getPrincipal()).willReturn(auth);
+        given(auth.getPrincipal()).willReturn(user);
+        sut.addSessionToRoom(roomId, session);
+
+        Long newUserId = 2L;
+        User newUser = User.builder().id(newUserId).build();
+        Authentication newAuth = mock(Authentication.class);
+        WebSocketSession newSession = mock(WebSocketSession.class);
+        given(newSession.getPrincipal()).willReturn(newAuth);
+        given(newAuth.getPrincipal()).willReturn(newUser);
+
+        // when
+        sut.addSessionToRoom(roomId, newSession);
+
+        // then
+        assertThatNoException().as("패스");
+    }
 }
