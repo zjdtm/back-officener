@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.util.Random;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -36,5 +38,30 @@ class WebSocketSessionManagerNonexistentTest {
 
         // then
         assertThat(nonexistent).isTrue();
+    }
+
+    @DisplayName("특정 방에 주어진 유저의 세션이 존재하면 false")
+    @Test
+    void givenExistent_thenFalse() {
+        // given
+        final Long roomId = 1L;
+        final int numSessions = 6;
+        for (int i = 1; i <= numSessions; ++i) {
+            User user = User.builder().id((long) i).build();
+            Authentication auth = mock(Authentication.class);
+            WebSocketSession session = mock(WebSocketSession.class);
+            given(session.getPrincipal()).willReturn(auth);
+            given(auth.getPrincipal()).willReturn(user);
+            sut.addSessionToRoom(roomId, session);
+        }
+
+
+        // when
+        Long userId = (new Random().nextLong() % 6) + 1;
+        User user = User.builder().id(userId).build();
+        boolean nonexistent = sut.nonexistent(roomId, user);
+
+        // then
+        assertThat(nonexistent).isFalse();
     }
 }
