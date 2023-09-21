@@ -4,12 +4,12 @@ import fastcampus.team7.Livable_officener.domain.Room;
 import fastcampus.team7.Livable_officener.domain.RoomParticipant;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.global.constant.Role;
-import fastcampus.team7.Livable_officener.global.exception.AlreadyTransferredException;
+import fastcampus.team7.Livable_officener.global.exception.AlreadyRemittedException;
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotGuestException;
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotParticipantException;
-import fastcampus.team7.Livable_officener.repository.XChatRoomParticipantRepository;
-import fastcampus.team7.Livable_officener.repository.XChatRoomRepository;
+import fastcampus.team7.Livable_officener.repository.DeliveryParticipantRepository;
+import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,15 +26,14 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
-public class ChatServiceTransferCompleteTest {
+public class ChatServiceRemitCompleteTest {
 
     @InjectMocks
     private ChatService sut;
     @Mock
-    private XChatRoomRepository roomRepository;
+    private DeliveryRepository roomRepository;
     @Mock
-    private XChatRoomParticipantRepository roomParticipantRepository;
-
+    private DeliveryParticipantRepository roomParticipantRepository;
 
     @Test
     @DisplayName("송금 완료시 채팅방 Id 없으면 예외 발생")
@@ -61,7 +60,7 @@ public class ChatServiceTransferCompleteTest {
                 .willReturn(1L);
         given(roomRepository.findById(anyLong()))
                 .willReturn(Optional.of(room));
-        given(roomParticipantRepository.findByRoomIdAndUserId(anyLong(), anyLong()))
+        given(roomParticipantRepository.findRoomParticipant(anyLong(), anyLong()))
                 .willReturn(Optional.empty());
 
         // when, then
@@ -81,7 +80,7 @@ public class ChatServiceTransferCompleteTest {
                 .willReturn(1L);
         given(roomRepository.findById(anyLong()))
                 .willReturn(Optional.of(room));
-        given(roomParticipantRepository.findByRoomIdAndUserId(anyLong(), anyLong()))
+        given(roomParticipantRepository.findRoomParticipant(anyLong(), anyLong()))
                 .willReturn(Optional.of(roomParticipant));
         given(roomParticipant.getRole())
                 .willReturn(Role.HOST);
@@ -92,7 +91,7 @@ public class ChatServiceTransferCompleteTest {
 
     @Test
     @DisplayName("이미 송금완료 했을 시 예외 발생")
-    void alreadyTransfer() {
+    void alreadyRemit() {
         //given
         Long roomId = 1L;
         User user = mock(User.class);
@@ -103,20 +102,20 @@ public class ChatServiceTransferCompleteTest {
                 .willReturn(1L);
         given(roomRepository.findById(anyLong()))
                 .willReturn(Optional.of(room));
-        given(roomParticipantRepository.findByRoomIdAndUserId(anyLong(), anyLong()))
+        given(roomParticipantRepository.findRoomParticipant(anyLong(), anyLong()))
                 .willReturn(Optional.of(roomParticipant));
         given(roomParticipant.getRole())
                 .willReturn(Role.GUEST);
-        doThrow(AlreadyTransferredException.class)
-                .when(roomParticipant).completeTransfer();
+        doThrow(AlreadyRemittedException.class)
+                .when(roomParticipant).completeRemit();
 
-        customAssertThrow(roomId, user, AlreadyTransferredException.class);
+        customAssertThrow(roomId, user, AlreadyRemittedException.class);
     }
 
     void customAssertThrow(Long roomId, User user,
                            Class<? extends Throwable> ex) {
         assertThatThrownBy(() ->
-                sut.completeTransfer(roomId, user))
+                sut.completeRemit(roomId, user))
                 .isInstanceOf(ex);
     }
 }

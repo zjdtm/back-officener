@@ -11,8 +11,8 @@ import fastcampus.team7.Livable_officener.global.constant.SystemMessage;
 import fastcampus.team7.Livable_officener.global.exception.*;
 import fastcampus.team7.Livable_officener.global.websocket.WebSocketSessionManager;
 import fastcampus.team7.Livable_officener.repository.ChatRepository;
-import fastcampus.team7.Livable_officener.repository.XChatRoomParticipantRepository;
-import fastcampus.team7.Livable_officener.repository.XChatRoomRepository;
+import fastcampus.team7.Livable_officener.repository.DeliveryParticipantRepository;
+import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +27,8 @@ import java.util.Collection;
 public class ChatService {
 
     private final ChatRepository chatRepository;
-    private final XChatRoomRepository roomRepository;
-    private final XChatRoomParticipantRepository roomParticipantRepository;
+    private final DeliveryRepository roomRepository;
+    private final DeliveryParticipantRepository roomParticipantRepository;
     private final WebSocketSessionManager webSocketSessionManager;
 
     @Transactional
@@ -51,15 +51,15 @@ public class ChatService {
     }
 
     @Transactional
-    public void completeTransfer(Long roomId, User user) throws IOException {
+    public void completeRemit(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
         RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
 
         validateIfRoomParticipantIsGuest(roomParticipant.getRole(), "송금완료");
-        isTransferCompleted(roomParticipant);
+        isRemitCompleted(roomParticipant);
 
-        roomParticipant.completeTransfer();
-        sendSystemMessage(room, user, SystemMessage.COMPLETE_TRANSFER);
+        roomParticipant.completeRemit();
+        sendSystemMessage(room, user, SystemMessage.COMPLETE_REMIT);
     }
 
     @Transactional
@@ -99,7 +99,7 @@ public class ChatService {
     }
 
     private RoomParticipant getRoomParticipant(Long roomId, Long userId) {
-        return roomParticipantRepository.findByRoomIdAndUserId(roomId, userId)
+        return roomParticipantRepository.findRoomParticipant(roomId, userId)
                 .orElseThrow(UserIsNotParticipantException::new);
     }
 
@@ -115,9 +115,9 @@ public class ChatService {
         }
     }
 
-    private static void isTransferCompleted(RoomParticipant roomParticipant) {
-        if (roomParticipant.getTransferredAt() != null) {
-            throw new AlreadyTransferredException();
+    private static void isRemitCompleted(RoomParticipant roomParticipant) {
+        if (roomParticipant.getRemittedAt() != null) {
+            throw new AlreadyRemittedException();
         }
     }
 

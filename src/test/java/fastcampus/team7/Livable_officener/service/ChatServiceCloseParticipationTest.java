@@ -8,8 +8,8 @@ import fastcampus.team7.Livable_officener.global.exception.NotActiveRoomExceptio
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotHostException;
 import fastcampus.team7.Livable_officener.global.exception.UserIsNotParticipantException;
-import fastcampus.team7.Livable_officener.repository.XChatRoomParticipantRepository;
-import fastcampus.team7.Livable_officener.repository.XChatRoomRepository;
+import fastcampus.team7.Livable_officener.repository.DeliveryParticipantRepository;
+import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,9 +31,9 @@ class ChatServiceCloseParticipationTest {
     @InjectMocks
     private ChatService sut;
     @Mock
-    private XChatRoomRepository roomRepository;
+    private DeliveryRepository roomRepository;
     @Mock
-    private XChatRoomParticipantRepository roomParticipantRepository;
+    private DeliveryParticipantRepository roomParticipantRepository;
 
     @DisplayName("참여마감시 해당 ID에 해당하는 함께배달 없으면 예외발생")
     @Test
@@ -61,7 +61,7 @@ class ChatServiceCloseParticipationTest {
                 .willReturn(1L);
         given(roomRepository.findById(anyLong()))
                 .willReturn(Optional.of(room));
-        given(roomParticipantRepository.findByRoomIdAndUserId(anyLong(), anyLong()))
+        given(roomParticipantRepository.findRoomParticipant(anyLong(), anyLong()))
                 .willReturn(Optional.empty());
 
         // when, then
@@ -81,7 +81,7 @@ class ChatServiceCloseParticipationTest {
                 .willReturn(1L);
         given(roomRepository.findById(anyLong()))
                 .willReturn(Optional.of(room));
-        given(roomParticipantRepository.findByRoomIdAndUserId(anyLong(), anyLong()))
+        given(roomParticipantRepository.findRoomParticipant(anyLong(), anyLong()))
                 .willReturn(Optional.of(roomParticipant));
         given(roomParticipant.getRole())
                 .willReturn(Role.GUEST);
@@ -106,7 +106,7 @@ class ChatServiceCloseParticipationTest {
                 .willReturn(1L);
         given(roomRepository.findById(anyLong()))
                 .willReturn(Optional.of(room));
-        given(roomParticipantRepository.findByRoomIdAndUserId(anyLong(), anyLong()))
+        given(roomParticipantRepository.findRoomParticipant(anyLong(), anyLong()))
                 .willReturn(Optional.of(roomParticipant));
         given(roomParticipant.getRole())
                 .willReturn(Role.HOST);
