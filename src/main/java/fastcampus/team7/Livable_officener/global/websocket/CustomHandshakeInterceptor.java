@@ -29,12 +29,12 @@ public class CustomHandshakeInterceptor extends HttpSessionHandshakeInterceptor 
     }
 
     private Room getRoom(ServerHttpRequest request) {
-        Long roomId = getRoomId(request);
+        Long roomId = parseRoomId(request);
         return roomRepository.findById(roomId)
                 .orElseThrow(NotFoundRoomException::new);
     }
 
-    private static Long getRoomId(ServerHttpRequest request) {
+    private static Long parseRoomId(ServerHttpRequest request) {
         String path = request.getURI().getPath();
         String roomIdStr = path.substring(path.lastIndexOf('/') + 1);
         return Long.parseLong(roomIdStr);
