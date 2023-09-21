@@ -1,12 +1,17 @@
 package fastcampus.team7.Livable_officener.domain;
 
+import fastcampus.team7.Livable_officener.dto.chat.ReportDTO;
 import fastcampus.team7.Livable_officener.global.constant.ReportType;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
 
 @Getter
 @Entity
+@Builder
+@RequiredArgsConstructor
 public class Report extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -26,19 +31,12 @@ public class Report extends BaseEntity {
     @Lob
     private String reportMessage;
 
-    public void assignReportedUser(User user) {
-        this.reportedUser = user;
-    }
-
-    public void assignReporter(User user) {
-        this.reporter = user;
-    }
-
-    public void assignType(ReportType type) {
-        this.type = type;
-    }
-
-    public void assignReportMessage(String reportMessage) {
-        this.reportMessage = reportMessage;
+    public static Report createReport(ReportDTO reportDTO, User reportedUser, User reporter) {
+        return Report.builder()
+                .reportedUser(reportedUser)
+                .reporter(reporter)
+                .type(reportDTO.getReportType())
+                .reportMessage(reportDTO.getReportMessage())
+                .build();
     }
 }
