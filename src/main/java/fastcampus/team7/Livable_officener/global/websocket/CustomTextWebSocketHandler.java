@@ -1,4 +1,4 @@
-package fastcampus.team7.Livable_officener.global.handler;
+package fastcampus.team7.Livable_officener.global.websocket;
 
 import fastcampus.team7.Livable_officener.domain.Room;
 import fastcampus.team7.Livable_officener.domain.User;
