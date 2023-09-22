@@ -3,27 +3,25 @@ package fastcampus.team7.Livable_officener.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import fastcampus.team7.Livable_officener.domain.Chat;
-import fastcampus.team7.Livable_officener.domain.Room;
-import fastcampus.team7.Livable_officener.domain.RoomParticipant;
-import fastcampus.team7.Livable_officener.domain.User;
+import fastcampus.team7.Livable_officener.domain.*;
 import fastcampus.team7.Livable_officener.dto.chat.*;
 import fastcampus.team7.Livable_officener.global.constant.ChatType;
 import fastcampus.team7.Livable_officener.global.constant.Role;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
 import fastcampus.team7.Livable_officener.global.exception.*;
 import fastcampus.team7.Livable_officener.global.websocket.WebSocketSessionManager;
-import fastcampus.team7.Livable_officener.repository.ChatRepository;
-import fastcampus.team7.Livable_officener.repository.DeliveryParticipantRepository;
-import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
+import fastcampus.team7.Livable_officener.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.TextMessage;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -38,6 +36,8 @@ public class ChatService {
     }
 
     private final ChatRepository chatRepository;
+    private final UserRepository userRepository;
+    private final ReportRepository reportRepository;
     private final DeliveryRepository roomRepository;
     private final DeliveryParticipantRepository roomParticipantRepository;
     private final WebSocketSessionManager webSocketSessionManager;
@@ -127,6 +127,19 @@ public class ChatService {
         roomRepository.deleteById(roomId);
     }
 
+    @Transactional
+    public Report createReport(Long roomId, User user, ReportDTO reportDTO) {
+        getRoom(roomId);
+        getRoomParticipant(roomId, user.getId());
+
+        User reportedUser = validateReportedUser(reportDTO.getReportedUserId());
+
+        validateReportFrequency(user, reportedUser);
+        Report report = Report.createReport(reportDTO, reportedUser, user);
+
+        return reportRepository.save(report);
+    }
+
     private Room getRoom(Long roomId) {
         return roomRepository.findById(roomId)
                 .orElseThrow(NotFoundRoomException::new);
@@ -149,6 +162,11 @@ public class ChatService {
         }
     }
 
+    private User validateReportedUser(Long reportedUserId) {
+        return userRepository.findById(reportedUserId)
+                .orElseThrow(NotFoundReportedUserException::new);
+    }
+
     private void validateAllParticipantsCompletedRemitAndReceive(Long roomId) {
         List<RoomParticipant> participants = roomParticipantRepository.findAllByRoomId(roomId);
 
@@ -159,6 +177,15 @@ public class ChatService {
             if (participant.getReceivedAt() == null) {
                 throw new ReceiveNotCompletedException();
             }
+        }
+    }
+
+    private void validateReportFrequency(User reporter, User reportedUser) {
+        LocalDateTime todayStart = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT);
+
+        Optional<Report> existingReport = reportRepository.findByReporterAndReportedUserAndCreatedAtIsAfter(reporter, reportedUser, todayStart);
+        if (existingReport.isPresent()) {
+            throw new AlreadyReportSameUserException();
         }
     }
 
@@ -213,6 +240,12 @@ public class ChatService {
         chatRepository.save(Chat.from(room, sender, payloadDto));
     }
 
+    private static void validateIfRoomIsActive(Room room) {
+        if (room.getStatus() != RoomStatus.ACTIVE) {
+            throw new NotActiveRoomException();
+        }
+    }
+
     private TextMessage convertPayloadDtoToJsonTextMessage(SendPayloadDTO payloadDTO) throws JsonProcessingException {
         String payload = objectMapper.writeValueAsString(payloadDTO);
         return new TextMessage(payload);
@@ -227,12 +260,6 @@ public class ChatService {
         roomParticipant.resetUnreadCount();
 
         return createChatRoomInfoDTO(roomId, user.getId());
-    }
-
-    private static void validateIfRoomIsActive(Room room) {
-        if (room.getStatus() != RoomStatus.ACTIVE) {
-            throw new NotActiveRoomException();
-        }
     }
 
     private ChatroomInfoDTO createChatRoomInfoDTO(Long roomId, Long userId) {
