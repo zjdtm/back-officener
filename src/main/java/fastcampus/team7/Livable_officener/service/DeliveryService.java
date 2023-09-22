@@ -201,6 +201,10 @@ public class DeliveryService {
             throw new IllegalArgumentException("함께배달 방의 현재 인원이 최대 인원보다 많거나 같습니다. 만원입니다.");
         }
 
+        if (user.getId() == findHostIdByRoom(roomId)) {
+            throw new IllegalArgumentException("이미 해당 함께배달 방에 참여중이며, 호스트 입니다.");
+        }
+
         room.setAttendees(room.getAttendees() + 1);
         Room updatedRoom = deliveryRepository.save(room);
 
