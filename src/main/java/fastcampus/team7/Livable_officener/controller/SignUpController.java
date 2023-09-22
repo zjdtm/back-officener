@@ -27,11 +27,11 @@ public class SignUpController {
     }
 
     @PostMapping("/auth")
-    public ResponseEntity<APIDataResponse<String>> getPhoneAuthCode(@RequestBody PhoneAuthRequestDTO request) {
+    public ResponseEntity<APIDataResponse<PhoneAuthResponseDTO>> getPhoneAuthCode(@RequestBody PhoneAuthRequestDTO request) {
 
-        String phoneAuthCode = signUpService.getPhoneAuthCode(request);
+        PhoneAuthResponseDTO result = signUpService.getPhoneAuthCode(request);
 
-        return APIDataResponse.of(HttpStatus.OK, phoneAuthCode);
+        return APIDataResponse.of(HttpStatus.OK, result);
 
     }
 
@@ -59,9 +59,9 @@ public class SignUpController {
     @PostMapping("/login")
     public ResponseEntity<APIDataResponse<LoginResponseDTO>> login(@RequestBody LoginRequestDTO request) {
 
-        LoginResponseDTO response = signUpService.login(request);
+        LoginResponseDTO result = signUpService.login(request);
 
-        return APIDataResponse.of(HttpStatus.OK, response);
+        return APIDataResponse.of(HttpStatus.OK, result);
 
     }
 
