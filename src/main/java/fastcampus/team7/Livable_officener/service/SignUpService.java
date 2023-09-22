@@ -60,7 +60,7 @@ public class SignUpService {
         return buildingDTOs;
     }
 
-    public String getPhoneAuthCode(PhoneAuthRequestDTO request) {
+    public PhoneAuthResponseDTO getPhoneAuthCode(PhoneAuthRequestDTO request) {
 
         String requestPhoneNumber = request.getPhoneNumber();
 
@@ -71,16 +71,22 @@ public class SignUpService {
                 .orElse(null);
 
         if (findPhoneAuthDTO == null) {
+
             PhoneAuthDTO savedPhoneAuthDTO = phoneAuthDTORedisRepository.save(PhoneAuthDTO.builder()
                     .phoneNumber(requestPhoneNumber)
                     .verifyCode(generateVerifyCode())
                     .build());
-            return savedPhoneAuthDTO.getVerifyCode();
+
+            return PhoneAuthResponseDTO.builder()
+                    .verifyCode(savedPhoneAuthDTO.getVerifyCode())
+                    .build();
         }
 
         findPhoneAuthDTO.changeVerifyCode(generateVerifyCode());
 
-        return findPhoneAuthDTO.getVerifyCode();
+        return PhoneAuthResponseDTO.builder()
+                .verifyCode(findPhoneAuthDTO.getVerifyCode())
+                .build();
 
     }
 
@@ -98,10 +104,12 @@ public class SignUpService {
     }
 
     public void signUp(SignUpRequestDTO request) {
+
         Building building = buildingRepository.findByName(request.getBuildingName())
                 .orElseThrow(() -> new NotFoundBuildingException());
+
         Company company = companyRepository.findByName(request.getCompanyName())
-                .orElseThrow(() -> new IllegalArgumentException("해당 이름의 회사를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundCompanyException());
 
         boolean existEmail = userRepository.existsByEmail(request.getEmail());
 
