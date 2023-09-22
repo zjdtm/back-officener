@@ -16,10 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.StringJoiner;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -38,26 +35,28 @@ public class SignUpService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
-    public List<BuildingWithCompaniesDTO> getBuildingWithCompanies(String keyword) {
+    public Map<String, List<BuildingWithCompaniesDTO>> getBuildingWithCompanies(String keyword) {
 
         List<Building> buildings = buildingRepository.findBuildingsByNameContaining(keyword);
+        Map<String, List<BuildingWithCompaniesDTO>> buildingWithCompaniesMap = new HashMap<>();
 
-        List<BuildingWithCompaniesDTO> buildingDTOs = new ArrayList<>();
+        List<BuildingWithCompaniesDTO> buildingWithCompaniesDTOS = new ArrayList<>();
 
         for (Building building : buildings) {
-            String address = getAddress(building);
 
             BuildingWithCompaniesDTO buildingDTO = BuildingWithCompaniesDTO.builder()
                     .id(building.getId())
                     .buildingName(building.getName())
-                    .buildingAddress(address)
-                    .companies(getCompanies(companyRepository.findCompaniesByBuildingName(building.getName())))
+                    .buildingAddress(building.getAddress())
+                    .offices(getCompanies(companyRepository.findCompaniesByBuildingName(building.getName())))
                     .build();
 
-            buildingDTOs.add(buildingDTO);
+            buildingWithCompaniesDTOS.add(buildingDTO);
         }
 
-        return buildingDTOs;
+        buildingWithCompaniesMap.put("buildings", buildingWithCompaniesDTOS);
+
+        return buildingWithCompaniesMap;
     }
 
     public PhoneAuthResponseDTO getPhoneAuthCode(PhoneAuthRequestDTO request) {
@@ -146,25 +145,16 @@ public class SignUpService {
         return newVerifyCode;
     }
 
-    private String getAddress(Building building) {
-        StringJoiner sj = new StringJoiner(" ");
-        sj.add(building.getRegion());
-        sj.add(building.getCity());
-        sj.add(building.getStreet());
-        sj.add(building.getZipcode());
-        return sj.toString();
-    }
-
     private List<CompanyDTO> getCompanies(List<Company> companies) {
-        List<CompanyDTO> companyDTOs = new ArrayList();
+        List<CompanyDTO> companyDTOS = new ArrayList();
         for (Company company : companies) {
             CompanyDTO companyDTO = new CompanyDTO(
                     company.getId(),
                     company.getName(),
                     company.getAddress()
             );
-            companyDTOs.add(companyDTO);
+            companyDTOS.add(companyDTO);
         }
-        return companyDTOs;
+        return companyDTOS;
     }
 }
