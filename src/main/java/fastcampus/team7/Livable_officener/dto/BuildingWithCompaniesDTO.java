@@ -14,6 +14,6 @@ public class BuildingWithCompaniesDTO {
     private Long id;
     private String buildingName;
     private String buildingAddress;
-    private List<CompanyDTO> companies;
+    private List<CompanyDTO> offices;
 
 }
