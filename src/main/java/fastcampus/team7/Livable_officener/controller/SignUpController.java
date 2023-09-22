@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -18,11 +19,11 @@ public class SignUpController {
     private SignUpService signUpService;
 
     @GetMapping("/building")
-    public ResponseEntity<APIDataResponse<List<BuildingWithCompaniesDTO>>> getAllBuildings(@RequestParam("name") String keyword) {
+    public ResponseEntity<APIDataResponse<Map<String, List<BuildingWithCompaniesDTO>>>> getAllBuildings(@RequestParam("name") String keyword) {
 
-        List<BuildingWithCompaniesDTO> result = signUpService.getBuildingWithCompanies(keyword);
+        Map<String, List<BuildingWithCompaniesDTO>> buildingWithCompanies = signUpService.getBuildingWithCompanies(keyword);
 
-        return APIDataResponse.of(HttpStatus.OK, result);
+        return APIDataResponse.of(HttpStatus.OK, buildingWithCompanies);
 
     }
 
