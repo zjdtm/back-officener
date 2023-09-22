@@ -26,10 +26,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                    .antMatchers("/h2-console/**", "/api/building", "/api/auth", "/api/verify", "/api/confirm", "/api/signup", "/api/login", "/api/elevator","/api/notify/list","/api/notify/readAll", "/api/room/list", "/api/room/bankList", "/api/room/create")
-                    .permitAll()
-                    .anyRequest().authenticated()
-                    .and()
+                .antMatchers("/**") // 모든 경로에 대해
+                .permitAll()
+                .and()
                 .formLogin()
                     .disable()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
