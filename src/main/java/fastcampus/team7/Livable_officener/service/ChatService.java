@@ -117,14 +117,17 @@ public class ChatService {
     }
 
     @Transactional
-    public void exitChatRoom(Long roomId, User user) {
-        getRoom(roomId);
+    public void exitChatRoom(Long roomId, User user) throws IOException {
+        Room room = getRoom(roomId);
         RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
 
-        validateIfRoomParticipantIsHost(roomParticipant.getRole(), "나가기");
-        validateAllParticipantsCompletedRemitAndReceive(roomId);
-
-        roomRepository.deleteById(roomId);
+        if (roomParticipant.getRole() == Role.HOST) {
+            validateAllParticipantsCompletedRemitAndReceive(roomId);
+            roomRepository.deleteById(roomId);
+        } else if (roomParticipant.getRole() == Role.GUEST) {
+            roomParticipant.guestExit();
+            sendSystemMessage(room, user, ChatType.EXIT);
+        }
     }
 
     @Transactional
