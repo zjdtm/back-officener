@@ -38,8 +38,8 @@ public class DeliveryService {
 
     @Transactional
     public void registerRoom(DeliveryRequestDTO.createDTO createDTO, User user) {
-        FoodTag foodTag = FoodTag.valueOf(createDTO.getFoodTag().toUpperCase());
-        BankName bankName = BankName.valueOf(createDTO.getBankName().toUpperCase());
+        FoodTag foodTag = FoodTag.fromFoodNameToCode(createDTO.getFoodTag().toUpperCase());
+        BankName bankName = BankName.fromBankNameToCode(createDTO.getBankName().toUpperCase());
         RoomStatus status = RoomStatus.ACTIVE;
 
         DeliveryRequestDTO.roomSaveDTO roomSaveDTO = DeliveryRequestDTO.roomSaveDTO.builder()
