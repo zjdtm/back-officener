@@ -1,6 +1,5 @@
 package fastcampus.team7.Livable_officener.global.util;
 
-import fastcampus.team7.Livable_officener.domain.Notification;
 import fastcampus.team7.Livable_officener.global.exception.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -8,8 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
@@ -36,6 +35,11 @@ public class APIExceptionHandler {
     @ExceptionHandler
     public ResponseEntity<?> methodArgumentTypeMismatchExceptionHandle(MethodArgumentTypeMismatchException e) {
         return handleExceptionInternal(e, "PathVariable 타입이 올바르지 않습니다.", HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> methodArgumentNotValidException(MethodArgumentNotValidException e) {
+        return handleExceptionInternal(e, e.getAllErrors().get(0).getDefaultMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler
@@ -86,6 +90,11 @@ public class APIExceptionHandler {
 
     @ExceptionHandler
     public ResponseEntity<?> handleNotFoundBuildingException(NotFoundBuildingException e) {
+        return handleExceptionInternal(e, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<?> handleNotFoundCompanyException(NotFoundCompanyException e) {
         return handleExceptionInternal(e, HttpStatus.BAD_REQUEST);
     }
 

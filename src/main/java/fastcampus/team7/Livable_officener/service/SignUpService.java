@@ -110,10 +110,11 @@ public class SignUpService {
         Company company = companyRepository.findByName(request.getCompanyName())
                 .orElseThrow(() -> new NotFoundCompanyException());
 
-        boolean existEmail = userRepository.existsByEmail(request.getEmail());
-
-        if (existEmail) {
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicatedUserEmailException();
+        }
+        if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+            throw new DuplicatedPhoneNumberException();
         }
 
         User user = request.toEntity(building, company, passwordEncoder.encode(request.getPassword()));
