@@ -3,11 +3,9 @@ package fastcampus.team7.Livable_officener.service;
 
 import fastcampus.team7.Livable_officener.domain.Building;
 import fastcampus.team7.Livable_officener.domain.Company;
+import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.*;
-import fastcampus.team7.Livable_officener.global.exception.DuplicatedPhoneNumberException;
-import fastcampus.team7.Livable_officener.global.exception.NotFoundBuildingException;
-import fastcampus.team7.Livable_officener.global.exception.NotFoundCompanyException;
-import fastcampus.team7.Livable_officener.global.exception.NotVerifiedPhoneNumberException;
+import fastcampus.team7.Livable_officener.global.exception.*;
 import fastcampus.team7.Livable_officener.repository.BuildingRepository;
 import fastcampus.team7.Livable_officener.repository.CompanyRepository;
 import fastcampus.team7.Livable_officener.repository.PhoneAuthDTORedisRepository;
@@ -20,14 +18,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
@@ -73,11 +69,11 @@ class SignUpServiceTest {
         given(companyRepository.findCompaniesByBuildingName(buildings.get(0).getName())).willReturn(companies);
 
         // when
-        List<BuildingWithCompaniesDTO> result = signUpService.getBuildingWithCompanies(keyword);
+        Map<String, List<BuildingWithCompaniesDTO>> buildingWithCompanies = signUpService.getBuildingWithCompanies(keyword);
 
         // then
-        BuildingWithCompaniesDTO expectedDto = result.get(0);
-        List<CompanyDTO> companyDTOS = expectedDto.getCompanies();
+        BuildingWithCompaniesDTO expectedDto = buildingWithCompanies.get("buildings").get(0);
+        List<CompanyDTO> companyDTOS = expectedDto.getOffices();
 
         assertThat(expectedDto.getBuildingName()).isEqualTo(building.getName());
         assertThat(expectedDto.getBuildingAddress()).isEqualTo(building.getRegion() + " " + building.getCity() + " " + building.getStreet() + " " + building.getZipcode());
@@ -100,10 +96,10 @@ class SignUpServiceTest {
         given(buildingRepository.findBuildingsByNameContaining(keyword)).willReturn(Collections.emptyList());
 
         // when
-        List<BuildingWithCompaniesDTO> result = signUpService.getBuildingWithCompanies(keyword);
+        Map<String, List<BuildingWithCompaniesDTO>> buildingWithCompanies = signUpService.getBuildingWithCompanies(keyword);
 
         // then
-        assertThat(result).isEmpty();
+        assertThat(buildingWithCompanies.get("buildings")).isEmpty();
     }
 
     @Test
@@ -326,7 +322,7 @@ class SignUpServiceTest {
     }
 
     @Test
-    @DisplayName("회원가입시 이미 등록되어 있는 회원일 경우 예외 발생")
+    @DisplayName("회원가입시 이미 등록되어 있는 회원 이메일인 경우 예외 발생")
     public void givenUserInfo_whenRequestUserInfo_thenDuplicatedUserEmailException() {
 
         // given
@@ -339,7 +335,39 @@ class SignUpServiceTest {
 
         given(buildingRepository.findByName(building.getName())).willReturn(Optional.of(building));
         given(companyRepository.findByName(company.getName())).willReturn(Optional.of(company));
-        given(userRepository.existsByEmail(email)).willThrow(DuplicatedPhoneNumberException.class);
+        given(userRepository.existsByEmail(email)).willThrow(DuplicatedUserEmailException.class);
+
+        // when & then
+        assertThrows(DuplicatedUserEmailException.class, () -> {
+            signUpService.signUp(SignUpRequestDTO.builder()
+                    .agree(true)
+                    .name(name)
+                    .email(email)
+                    .password(password)
+                    .phoneNumber(phoneNumber)
+                    .buildingName(building.getName())
+                    .companyName(company.getName())
+                    .build());
+        });
+
+    }
+
+    @Test
+    @DisplayName("회원가입시 이미 등록되어 있는 핸드폰 번호일 경우 예외 발생")
+    public void givenUserInfo_whenRequestUserInfo_thenDuplicatedPhoneNumberException() {
+
+        // given
+        final String email = "test@gmail.com";
+        final String name = "고길동";
+        final String password = passwordEncoder.encode("고길동123");
+        final String phoneNumber = "01054546789";
+        Building building = saveBuilding("미왕빌딩", "서울", "강남구", "강남대로", "356");
+        Company company = saveCompanies(building, "테스트 오피스", "A동 101호");
+
+        given(buildingRepository.findByName(building.getName())).willReturn(Optional.of(building));
+        given(companyRepository.findByName(company.getName())).willReturn(Optional.of(company));
+        given(userRepository.existsByEmail(email)).willReturn(false);
+        given(userRepository.existsByPhoneNumber(phoneNumber)).willThrow(DuplicatedPhoneNumberException.class);
 
         // when & then
         assertThrows(DuplicatedPhoneNumberException.class, () -> {
@@ -354,6 +382,47 @@ class SignUpServiceTest {
                     .build());
         });
 
+    }
+
+    @Test
+    @DisplayName("회원가입 요청시 정상적으로 저장되는지 테스트")
+    public void givenUserInfo_whenRequestUserInfo_thenSuccess() {
+
+        // given
+        final String email = "test@gmail.com";
+        final String name = "고길동";
+        final String password = passwordEncoder.encode("고길동123");
+        final String phoneNumber = "01054546789";
+        Building building = saveBuilding("미왕빌딩", "서울", "강남구", "강남대로", "356");
+        Company company = saveCompanies(building, "테스트 오피스", "A동 101호");
+
+        User user = User.builder()
+                .name(name)
+                .email(email)
+                .password(password)
+                .phoneNumber(phoneNumber)
+                .building(building)
+                .company(company)
+                .build();
+
+        given(buildingRepository.findByName(building.getName())).willReturn(Optional.of(building));
+        given(companyRepository.findByName(company.getName())).willReturn(Optional.of(company));
+        given(userRepository.existsByEmail(email)).willReturn(false);
+        given(userRepository.existsByPhoneNumber(phoneNumber)).willReturn(false);
+
+        // when
+        signUpService.signUp(SignUpRequestDTO.builder()
+                .agree(true)
+                .name(name)
+                .email(email)
+                .password(password)
+                .phoneNumber(phoneNumber)
+                .buildingName(building.getName())
+                .companyName(company.getName())
+                .build());
+
+        // then
+        verify(userRepository).save(refEq(user));
     }
 
     private Company saveCompanies(Building building, String officeName, String officeUnit) {
