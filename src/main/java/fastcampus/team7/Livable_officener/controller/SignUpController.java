@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
@@ -49,7 +50,7 @@ public class SignUpController {
 
 
     @PostMapping("/signup")
-    public ResponseEntity<APIDataResponse<String>> signUp(@RequestBody SignUpRequestDTO request) {
+    public ResponseEntity<APIDataResponse<String>> signUp(@RequestBody @Valid SignUpRequestDTO request) {
 
         signUpService.signUp(request);
 
@@ -58,7 +59,7 @@ public class SignUpController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<APIDataResponse<LoginResponseDTO>> login(@RequestBody LoginRequestDTO request) {
+    public ResponseEntity<APIDataResponse<LoginResponseDTO>> login(@RequestBody @Valid LoginRequestDTO request) {
 
         LoginResponseDTO result = signUpService.login(request);
 
