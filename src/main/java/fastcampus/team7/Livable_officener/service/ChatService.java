@@ -2,13 +2,14 @@ package fastcampus.team7.Livable_officener.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import fastcampus.team7.Livable_officener.domain.*;
 import fastcampus.team7.Livable_officener.dto.chat.*;
 import fastcampus.team7.Livable_officener.global.constant.ChatType;
 import fastcampus.team7.Livable_officener.global.constant.Role;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
 import fastcampus.team7.Livable_officener.global.exception.*;
+import fastcampus.team7.Livable_officener.global.util.LocalDateTimeDeserializer;
 import fastcampus.team7.Livable_officener.global.websocket.WebSocketSessionManager;
 import fastcampus.team7.Livable_officener.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -16,31 +17,35 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.TextMessage;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
 public class ChatService {
 
-    private static final ObjectMapper objectMapper;
-
-    static {
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-    }
-
+    private final ObjectMapper objectMapper;
     private final ChatRepository chatRepository;
     private final UserRepository userRepository;
     private final ReportRepository reportRepository;
     private final DeliveryRepository roomRepository;
     private final DeliveryParticipantRepository roomParticipantRepository;
     private final WebSocketSessionManager webSocketSessionManager;
+
+    @PostConstruct
+    public void setup() {
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer());
+        objectMapper.registerModule(module);
+        objectMapper.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+    }
 
     @Transactional
     public void send(SendChatDTO sendChatDTO) throws IOException {
@@ -212,7 +217,7 @@ public class ChatService {
 
     private static SendPayloadDTO createSystemMessagePayloadDTO(User sender, ChatType messageType) {
         String content = getSystemMessageContent(sender, messageType);
-        return createSystemMessagePayloadDTO(sender, messageType, content);
+        return new SendPayloadDTO(messageType, content, LocalDateTime.now(), sender.getId());
     }
 
     private static String getSystemMessageContent(User sender, ChatType messageType) {
@@ -230,17 +235,16 @@ public class ChatService {
         return systemMessageArgs;
     }
 
-    private static SendPayloadDTO createSystemMessagePayloadDTO(User sender, ChatType messageType, String content) {
-        SendPayloadDTO systemMessagePayloadDTO = new SendPayloadDTO(messageType, content, LocalDateTime.now());
-        systemMessagePayloadDTO.setSenderId(sender.getId());
-        return systemMessagePayloadDTO;
-    }
-
     private void sendMessage(Room room, User sender, SendPayloadDTO payloadDto) throws IOException {
         TextMessage message = convertPayloadDtoToJsonTextMessage(payloadDto);
 
         webSocketSessionManager.send(room.getId(), message);
         chatRepository.save(Chat.from(room, sender, payloadDto));
+
+        // 함께배달 참여자 중 웹소켓세션이 연결되어있지 않은(=채팅 페이지를 벗어난) 참여자들의 unreadCount 증가
+        roomParticipantRepository.findAllByRoomId(room.getId()).stream()
+                .filter(participant -> webSocketSessionManager.nonexistent(room.getId(), participant.getUser()))
+                .forEach(RoomParticipant::incrementUnreadCount);
     }
 
     private static void validateIfRoomIsActive(Room room) {
