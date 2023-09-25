@@ -1,11 +1,13 @@
 package fastcampus.team7.Livable_officener.global.constant;
 
 public enum ReportType {
-    ABUSE,
     PROMOTION,
-    ADVERTISE,
+    SPAM_CHAT,
+    ABUSE,
     LUSTY,
-    SPAM,
-    POLICY_VIOLATION,
-    PERSONAL_INFO
+    ILLEGAL_INFO,
+    PERSONAL_INFO,
+    INJURY,
+    IRRELEVANT_CONTENT,
+    ETC
 }

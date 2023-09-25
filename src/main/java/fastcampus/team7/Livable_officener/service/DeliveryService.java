@@ -38,8 +38,8 @@ public class DeliveryService {
 
     @Transactional
     public void registerRoom(DeliveryRequestDTO.createDTO createDTO, User user) {
-        FoodTag foodTag = FoodTag.valueOf(createDTO.getFoodTag().toUpperCase());
-        BankName bankName = BankName.valueOf(createDTO.getBankName().toUpperCase());
+        FoodTag foodTag = FoodTag.fromFoodNameToCode(createDTO.getFoodTag().toUpperCase());
+        BankName bankName = BankName.fromBankNameToCode(createDTO.getBankName().toUpperCase());
         RoomStatus status = RoomStatus.ACTIVE;
 
         DeliveryRequestDTO.roomSaveDTO roomSaveDTO = DeliveryRequestDTO.roomSaveDTO.builder()
@@ -138,26 +138,6 @@ public class DeliveryService {
                 .collect(Collectors.toList()));
 
         return response;
-
-    }
-
-    private DeliveryResponseDTO.RoomListResponseDTO convertToRoomListResponseDTO(Room room) {
-        String foodTag = room.getTag().toString();
-        String roomStatus = room.getStatus().toString();
-        return DeliveryResponseDTO.RoomListResponseDTO.builder()
-                .roomId(room.getId())
-                .hostId(1L)
-                .storeName(room.getStoreName())
-                .menuLink(room.getMenuLink())
-                .deliveryFee(room.getDeliveryFee())
-                .tag(foodTag)
-                .attendees(room.getAttendees())
-                .maxAttendees(room.getMaxAttendees())
-                .deadLine(room.getDeadline())
-                .roomStatus(roomStatus)
-                .createdAt(room.getCreatedAt())
-                .updatedAt(room.getUpdatedAt())
-                .build();
     }
 
     @Transactional
@@ -174,6 +154,31 @@ public class DeliveryService {
                 .collect(Collectors.toList()));
 
         return response;
+    }
+
+    private DeliveryResponseDTO.RoomListResponseDTO convertToRoomListResponseDTO(Room room) {
+        String foodTag = room.getTag().toString();
+        String roomStatus = room.getStatus().toString();
+        Long hostId = findHostIdByRoom(room.getId());
+        return DeliveryResponseDTO.RoomListResponseDTO.builder()
+                .roomId(room.getId())
+                .hostId(hostId)
+                .storeName(room.getStoreName())
+                .menuLink(room.getMenuLink())
+                .deliveryFee(room.getDeliveryFee())
+                .tag(foodTag)
+                .attendees(room.getAttendees())
+                .maxAttendees(room.getMaxAttendees())
+                .deadLine(room.getDeadline())
+                .roomStatus(roomStatus)
+                .createdAt(room.getCreatedAt())
+                .updatedAt(room.getUpdatedAt())
+                .build();
+    }
+
+    private Long findHostIdByRoom(Long roomId) {
+        return deliveryParticipantRepository.findUserIdByRoomIdAndRole(roomId, Role.HOST)
+                .orElseThrow(() -> new NotFoundRoomException("해당 roomId로 검색되는 room이 없거나, room이 존재하지 않습니다."));
     }
 
 
@@ -194,6 +199,10 @@ public class DeliveryService {
 
         if (room.getAttendees() >= room.getMaxAttendees()) {
             throw new IllegalArgumentException("함께배달 방의 현재 인원이 최대 인원보다 많거나 같습니다. 만원입니다.");
+        }
+
+        if (user.getId() == findHostIdByRoom(roomId)) {
+            throw new IllegalArgumentException("이미 해당 함께배달 방에 참여중이며, 호스트 입니다.");
         }
 
         room.setAttendees(room.getAttendees() + 1);

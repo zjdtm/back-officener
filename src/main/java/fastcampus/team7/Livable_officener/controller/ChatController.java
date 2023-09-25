@@ -1,19 +1,19 @@
 package fastcampus.team7.Livable_officener.controller;
 
+import fastcampus.team7.Livable_officener.domain.Report;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.chat.ChatroomInfoDTO;
+import fastcampus.team7.Livable_officener.dto.chat.ReportDTO;
 import fastcampus.team7.Livable_officener.global.util.APIDataResponse;
-import fastcampus.team7.Livable_officener.repository.UserRepository;
+import fastcampus.team7.Livable_officener.global.util.APIErrorResponse;
 import fastcampus.team7.Livable_officener.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.io.IOException;
 
 @RequiredArgsConstructor
@@ -21,7 +21,6 @@ import java.io.IOException;
 @RestController
 public class ChatController {
 
-    private final UserRepository userRepository;
     private final ChatService chatService;
 
     @PostMapping("/connect")
@@ -72,7 +71,7 @@ public class ChatController {
     @PostMapping("/exit")
     public ResponseEntity<?> exitChatRoom(
             @PathVariable Long roomId,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal User user) throws IOException {
 
         chatService.exitChatRoom(roomId, user);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -85,5 +84,19 @@ public class ChatController {
 
         chatService.kickRequest(roomId, user);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/report")
+    public ResponseEntity<?> createReport(
+            @PathVariable Long roomId,
+            @AuthenticationPrincipal User user,
+            @Valid @RequestBody ReportDTO reportDTO) {
+
+        if(reportDTO.getReportedUserId().equals(user.getId())) {
+            return APIErrorResponse.of(HttpStatus.BAD_REQUEST, "You cannot report yourself.");
+        }
+
+        Report report = chatService.createReport(roomId, user, reportDTO);
+        return APIDataResponse.of(HttpStatus.CREATED, report);
     }
 }

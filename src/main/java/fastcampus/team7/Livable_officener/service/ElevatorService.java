@@ -44,16 +44,16 @@ public class ElevatorService {
 
     private final UserElevatorRepository userElevatorRepository;
 
-    @PostConstruct
-    public void webClientInit() {
-        client = WebClient.builder()
-                .baseUrl("http://13.125.50.47:8080")
-                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
-                .defaultHeader("ts", GenerateSig.generateTimestamp())
-                .defaultHeader("nonce", GenerateSig.generateNonce())
-                .defaultHeader("signature", GenerateSig.generateSignature(apiKey, apiSecret))
-                .build();
-    }
+//    @PostConstruct
+//    public void webClientInit() {
+//        client = WebClient.builder()
+//                .baseUrl("http://13.125.50.47:8080")
+//                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
+//                .defaultHeader("ts", GenerateSig.generateTimestamp())
+//                .defaultHeader("nonce", GenerateSig.generateNonce())
+//                .defaultHeader("signature", GenerateSig.generateSignature(apiKey, apiSecret))
+//                .build();
+//    }
 
     public ResponseEntity<APIDataResponse<List<ElevatorDTO>>> getAllElevators(String token) {
         User user = userRepository.findByEmail(jwtProvider.getEmail(token))

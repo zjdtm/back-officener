@@ -32,7 +32,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.map;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -64,7 +63,7 @@ class ChatServiceSendTest {
 
     @BeforeEach
     void beforeEach() {
-        sut = new ChatService(mapper, chatRepository,
+        sut = new ChatService(mapper, chatRepository, null, null,
                 roomRepository, roomParticipantRepository,
                 webSocketSessionManager);
     }

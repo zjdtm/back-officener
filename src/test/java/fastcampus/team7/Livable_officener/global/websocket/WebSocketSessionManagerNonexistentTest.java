@@ -6,8 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.socket.WebSocketSession;
 
-import java.util.Random;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -55,9 +53,8 @@ class WebSocketSessionManagerNonexistentTest {
             sut.addSessionToRoom(roomId, session);
         }
 
-
         // when
-        Long userId = (new Random().nextLong() % 6) + 1;
+        Long userId = (long) (Math.random() * 6) + 1L;
         User user = User.builder().id(userId).build();
         boolean nonexistent = sut.nonexistent(roomId, user);
 

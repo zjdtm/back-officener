@@ -32,6 +32,9 @@ public class RoomParticipant extends BaseEntity {
     @Column
     private LocalDateTime receivedAt;
 
+    @Column
+    private LocalDateTime exitedAt;
+
     @Column(nullable = false)
     private int unreadCount;
 
@@ -41,6 +44,10 @@ public class RoomParticipant extends BaseEntity {
 
     public void completeReceive() {
         receivedAt = LocalDateTime.now();
+    }
+
+    public void guestExit() {
+        exitedAt = LocalDateTime.now();
     }
 
     public void resetUnreadCount() {

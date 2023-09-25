@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -137,7 +138,7 @@ public class ChatServiceExitChatRoomTest {
 
     @Test
     @DisplayName("호스트 exit 시 채팅방 삭제 확인")
-    void whenCompleteExitDeleteChatRoom() {
+    void whenCompleteExitDeleteChatRoom() throws IOException {
         // given
         Long roomId = 1L;
         User user = mock(User.class);
@@ -155,6 +156,7 @@ public class ChatServiceExitChatRoomTest {
 
         //when
         sut.exitChatRoom(roomId, user); //
+
         //then
         verify(roomRepository).deleteById(roomId);
     }
