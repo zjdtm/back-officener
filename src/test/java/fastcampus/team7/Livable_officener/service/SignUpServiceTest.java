@@ -136,7 +136,7 @@ class SignUpServiceTest {
         final String name = "고길동";
         final String phoneNumber = "01012345678";
 
-        given(userRepository.findByPhoneNumber(any(String.class))).willThrow(new DuplicatedPhoneNumberException());
+        given(userRepository.existsByPhoneNumber(any(String.class))).willThrow(new DuplicatedPhoneNumberException());
 
         // when
         DuplicatedPhoneNumberException exception = assertThrows(DuplicatedPhoneNumberException.class, () -> {
@@ -203,31 +203,29 @@ class SignUpServiceTest {
     }
 
     @Test
-    @DisplayName("휴대폰 인증코드 확인 요청시 검증에 실패하는 경우 False 를 반환 하는지 테스트")
+    @DisplayName("휴대폰 인증코드 확인 요청시 검증에 실패하는 경우 '잘못된 인증 코드입니다.' 예외 발생")
     public void givenVerifyCode_whenConfirmRequest_thenNotVerifyCode() {
 
         // given
         final String phoneNumber = "01012345678";
-        final String verifyCode = "135791";
-        final String failureVerifyCode = "888888";
+        final String validVerifyCode = "999999";
+        final String invalidVerifyCode = "135791";
 
-        PhoneAuthDTO phoneAuthDTO = PhoneAuthDTO.builder()
+        given(phoneAuthDTORedisRepository.findById(phoneNumber)).willReturn(
+                Optional.ofNullable(PhoneAuthDTO.builder()
+                        .phoneNumber(phoneNumber)
+                        .verifyCode(validVerifyCode)
+                        .build()));
+
+        PhoneAuthConfirmDTO phoneAuthConfirmFailedDTO = PhoneAuthConfirmDTO.builder()
                 .phoneNumber(phoneNumber)
-                .verifyCode(verifyCode)
+                .verifyCode(invalidVerifyCode)
                 .build();
 
-        PhoneAuthConfirmDTO phoneAuthConfirmDTO = PhoneAuthConfirmDTO.builder()
-                .phoneNumber(phoneNumber)
-                .verifyCode(failureVerifyCode)
-                .build();
-
-        given(phoneAuthDTORedisRepository.findById(phoneNumber)).willReturn(Optional.of(phoneAuthDTO));
-
-        // when
-        boolean isConfirm = signUpService.confirmVerifyCode(phoneAuthConfirmDTO);
-
-        // then
-        assertThat(isConfirm).isFalse();
+        // when & then
+        assertThrows(NotVerifiedPhoneAuthCodeException.class, () -> {
+            signUpService.confirmVerifyCode(phoneAuthConfirmFailedDTO);
+        });
     }
 
     @Test
