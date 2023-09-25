@@ -87,6 +87,7 @@ public class NotificationService {
 
         public NotificationDTO toDTO (Notification entity){
             NotificationDTO DTO = new NotificationDTO();
+            DTO.setId(entity.getId());
             DTO.setReceiverId(entity.getUser().getId());
             DTO.setRoomId(entity.getRoom().getId());
             DTO.setContent(entity.getNotificationContent().getName());
