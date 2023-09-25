@@ -8,7 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -18,37 +20,35 @@ public class SignUpController {
     private SignUpService signUpService;
 
     @GetMapping("/building")
-    public ResponseEntity<APIDataResponse<List<BuildingWithCompaniesDTO>>> getAllBuildings(@RequestParam("name") String keyword) {
+    public ResponseEntity<APIDataResponse<Map<String, List<BuildingWithCompaniesDTO>>>> getAllBuildings(@RequestParam("name") String keyword) {
 
-        List<BuildingWithCompaniesDTO> result = signUpService.getBuildingWithCompanies(keyword);
+        Map<String, List<BuildingWithCompaniesDTO>> buildingWithCompanies = signUpService.getBuildingWithCompanies(keyword);
 
-        return APIDataResponse.of(HttpStatus.OK, result);
+        return APIDataResponse.of(HttpStatus.OK, buildingWithCompanies);
 
     }
 
     @PostMapping("/auth")
-    public ResponseEntity<APIDataResponse<String>> getPhoneAuthCode(@RequestBody PhoneAuthRequestDTO request) {
+    public ResponseEntity<APIDataResponse<PhoneAuthResponseDTO>> getPhoneAuthCode(@RequestBody PhoneAuthRequestDTO request) {
 
-        String phoneAuthCode = signUpService.getPhoneAuthCode(request);
+        PhoneAuthResponseDTO result = signUpService.getPhoneAuthCode(request);
 
-        return APIDataResponse.of(HttpStatus.OK, phoneAuthCode);
+        return APIDataResponse.of(HttpStatus.OK, result);
 
     }
 
     @PostMapping("/confirm")
     public ResponseEntity<APIDataResponse<String>> confirmPhoneAuthCode(@RequestBody PhoneAuthConfirmDTO request) {
 
-        boolean isConfirm = signUpService.confirmVerifyCode(request);
+        signUpService.confirmVerifyCode(request);
 
-        return APIDataResponse.of(
-                isConfirm ? HttpStatus.OK : HttpStatus.BAD_REQUEST,
-                isConfirm ? "인증이 완료되었습니다." : "잘못된 인증 코드입니다.");
+        return APIDataResponse.of(HttpStatus.OK, "인증이 완료되었습니다.");
 
     }
 
 
     @PostMapping("/signup")
-    public ResponseEntity<APIDataResponse<String>> signUp(@RequestBody SignUpRequestDTO request) {
+    public ResponseEntity<APIDataResponse<String>> signUp(@RequestBody @Valid SignUpRequestDTO request) {
 
         signUpService.signUp(request);
 
@@ -57,11 +57,11 @@ public class SignUpController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<APIDataResponse<LoginResponseDTO>> login(@RequestBody LoginRequestDTO request) {
+    public ResponseEntity<APIDataResponse<LoginResponseDTO>> login(@RequestBody @Valid LoginRequestDTO request) {
 
-        LoginResponseDTO response = signUpService.login(request);
+        LoginResponseDTO result = signUpService.login(request);
 
-        return APIDataResponse.of(HttpStatus.OK, response);
+        return APIDataResponse.of(HttpStatus.OK, result);
 
     }
 

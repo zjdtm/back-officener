@@ -16,10 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.StringJoiner;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -38,49 +35,58 @@ public class SignUpService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
-    public List<BuildingWithCompaniesDTO> getBuildingWithCompanies(String keyword) {
+    public Map<String, List<BuildingWithCompaniesDTO>> getBuildingWithCompanies(String keyword) {
 
         List<Building> buildings = buildingRepository.findBuildingsByNameContaining(keyword);
+        Map<String, List<BuildingWithCompaniesDTO>> buildingWithCompaniesMap = new HashMap<>();
 
-        List<BuildingWithCompaniesDTO> buildingDTOs = new ArrayList<>();
+        List<BuildingWithCompaniesDTO> buildingWithCompaniesDTOS = new ArrayList<>();
 
         for (Building building : buildings) {
-            String address = getAddress(building);
 
             BuildingWithCompaniesDTO buildingDTO = BuildingWithCompaniesDTO.builder()
                     .id(building.getId())
                     .buildingName(building.getName())
-                    .buildingAddress(address)
-                    .companies(getCompanies(companyRepository.findCompaniesByBuildingName(building.getName())))
+                    .buildingAddress(building.getAddress())
+                    .offices(getCompanies(companyRepository.findCompaniesByBuildingName(building.getName())))
                     .build();
 
-            buildingDTOs.add(buildingDTO);
+            buildingWithCompaniesDTOS.add(buildingDTO);
         }
 
-        return buildingDTOs;
+        buildingWithCompaniesMap.put("buildings", buildingWithCompaniesDTOS);
+
+        return buildingWithCompaniesMap;
     }
 
-    public String getPhoneAuthCode(PhoneAuthRequestDTO request) {
+    public PhoneAuthResponseDTO getPhoneAuthCode(PhoneAuthRequestDTO request) {
 
         String requestPhoneNumber = request.getPhoneNumber();
 
-        userRepository.findByPhoneNumber(requestPhoneNumber)
-                .ifPresent(e -> new DuplicatedPhoneNumberException());
+        if (userRepository.existsByPhoneNumber(requestPhoneNumber)) {
+            throw new DuplicatedPhoneNumberException();
+        }
 
         PhoneAuthDTO findPhoneAuthDTO = phoneAuthDTORedisRepository.findById(requestPhoneNumber)
                 .orElse(null);
 
         if (findPhoneAuthDTO == null) {
+
             PhoneAuthDTO savedPhoneAuthDTO = phoneAuthDTORedisRepository.save(PhoneAuthDTO.builder()
                     .phoneNumber(requestPhoneNumber)
                     .verifyCode(generateVerifyCode())
                     .build());
-            return savedPhoneAuthDTO.getVerifyCode();
+
+            return PhoneAuthResponseDTO.builder()
+                    .verifyCode(savedPhoneAuthDTO.getVerifyCode())
+                    .build();
         }
 
         findPhoneAuthDTO.changeVerifyCode(generateVerifyCode());
 
-        return findPhoneAuthDTO.getVerifyCode();
+        return PhoneAuthResponseDTO.builder()
+                .verifyCode(findPhoneAuthDTO.getVerifyCode())
+                .build();
 
     }
 
@@ -93,20 +99,27 @@ public class SignUpService {
         PhoneAuthDTO findPhoneAuthDTO = phoneAuthDTORedisRepository.findById(requestPhoneNumber)
                 .orElseThrow(() -> new NotVerifiedPhoneNumberException());
 
-        return findPhoneAuthDTO.getVerifyCode().equals(requestVerifyCode);
+        if (findPhoneAuthDTO.getVerifyCode().equals(requestVerifyCode)) {
+            return true;
+        }
+
+        throw new NotVerifiedPhoneAuthCodeException();
 
     }
 
     public void signUp(SignUpRequestDTO request) {
+
         Building building = buildingRepository.findByName(request.getBuildingName())
                 .orElseThrow(() -> new NotFoundBuildingException());
+
         Company company = companyRepository.findByName(request.getCompanyName())
-                .orElseThrow(() -> new IllegalArgumentException("해당 이름의 회사를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundCompanyException());
 
-        boolean existEmail = userRepository.existsByEmail(request.getEmail());
-
-        if (existEmail) {
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicatedUserEmailException();
+        }
+        if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+            throw new DuplicatedPhoneNumberException();
         }
 
         User user = request.toEntity(building, company, passwordEncoder.encode(request.getPassword()));
@@ -138,25 +151,16 @@ public class SignUpService {
         return newVerifyCode;
     }
 
-    private String getAddress(Building building) {
-        StringJoiner sj = new StringJoiner(" ");
-        sj.add(building.getRegion());
-        sj.add(building.getCity());
-        sj.add(building.getStreet());
-        sj.add(building.getZipcode());
-        return sj.toString();
-    }
-
     private List<CompanyDTO> getCompanies(List<Company> companies) {
-        List<CompanyDTO> companyDTOs = new ArrayList();
+        List<CompanyDTO> companyDTOS = new ArrayList();
         for (Company company : companies) {
             CompanyDTO companyDTO = new CompanyDTO(
                     company.getId(),
                     company.getName(),
                     company.getAddress()
             );
-            companyDTOs.add(companyDTO);
+            companyDTOS.add(companyDTO);
         }
-        return companyDTOs;
+        return companyDTOS;
     }
 }
