@@ -71,7 +71,7 @@ public class ChatController {
     @PostMapping("/exit")
     public ResponseEntity<?> exitChatRoom(
             @PathVariable Long roomId,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal User user) throws IOException {
 
         chatService.exitChatRoom(roomId, user);
         return new ResponseEntity<>(HttpStatus.OK);
