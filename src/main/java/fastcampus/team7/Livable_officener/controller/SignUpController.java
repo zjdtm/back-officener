@@ -40,11 +40,9 @@ public class SignUpController {
     @PostMapping("/confirm")
     public ResponseEntity<APIDataResponse<String>> confirmPhoneAuthCode(@RequestBody PhoneAuthConfirmDTO request) {
 
-        boolean isConfirm = signUpService.confirmVerifyCode(request);
+        signUpService.confirmVerifyCode(request);
 
-        return APIDataResponse.of(
-                isConfirm ? HttpStatus.OK : HttpStatus.BAD_REQUEST,
-                isConfirm ? "인증이 완료되었습니다." : "잘못된 인증 코드입니다.");
+        return APIDataResponse.of(HttpStatus.OK, "인증이 완료되었습니다.");
 
     }
 
