@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import fastcampus.team7.Livable_officener.domain.Chat;
 import fastcampus.team7.Livable_officener.domain.Room;
 import fastcampus.team7.Livable_officener.domain.RoomParticipant;
@@ -31,6 +32,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.map;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -52,7 +54,7 @@ class ChatServiceSendTest {
     static {
         mapper = new ObjectMapper();
         mapper.findAndRegisterModules();
-//        JavaTimeModule module = new JavaTimeModule();
+        mapper.registerModule(new JavaTimeModule());
         SimpleModule module = new SimpleModule();
         module.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer());
         mapper.registerModule(module);
