@@ -63,8 +63,9 @@ public class SignUpService {
 
         String requestPhoneNumber = request.getPhoneNumber();
 
-        userRepository.findByPhoneNumber(requestPhoneNumber)
-                .ifPresent(e -> new DuplicatedPhoneNumberException());
+        if (userRepository.existsByPhoneNumber(requestPhoneNumber)) {
+            throw new DuplicatedPhoneNumberException();
+        }
 
         PhoneAuthDTO findPhoneAuthDTO = phoneAuthDTORedisRepository.findById(requestPhoneNumber)
                 .orElse(null);
@@ -98,7 +99,11 @@ public class SignUpService {
         PhoneAuthDTO findPhoneAuthDTO = phoneAuthDTORedisRepository.findById(requestPhoneNumber)
                 .orElseThrow(() -> new NotVerifiedPhoneNumberException());
 
-        return findPhoneAuthDTO.getVerifyCode().equals(requestVerifyCode);
+        if (findPhoneAuthDTO.getVerifyCode().equals(requestVerifyCode)) {
+            return true;
+        }
+
+        throw new NotVerifiedPhoneAuthCodeException();
 
     }
 
