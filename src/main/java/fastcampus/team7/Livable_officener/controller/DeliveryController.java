@@ -26,8 +26,8 @@ public class DeliveryController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> findRoomDetail(@PathVariable Long id) {
-        final RoomDetailDTO roomDetail = deliveryService.selectRoomDetail(id);
-        return ResponseEntity.ok(roomDetail);
+        final RoomDetailDTO response = deliveryService.selectRoomDetail(id);
+        return APIDataResponse.of(HttpStatus.OK, response);
     }
 
     @GetMapping("/bankList")

@@ -27,7 +27,7 @@ public class RoomDetailDTO {
     private Long maxAttendees;
     private String description;
     private Boolean isJoin;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
 
