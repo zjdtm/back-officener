@@ -1,7 +1,5 @@
-package fastcampus.team7.Livable_officener.global.config;
+package fastcampus.team7.Livable_officener.global.websocket;
 
-import fastcampus.team7.Livable_officener.global.handler.CustomTextWebSocketHandler;
-import fastcampus.team7.Livable_officener.global.interceptor.CustomHandshakeInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;

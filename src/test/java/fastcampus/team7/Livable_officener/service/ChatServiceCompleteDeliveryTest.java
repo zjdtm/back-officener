@@ -1,5 +1,6 @@
 package fastcampus.team7.Livable_officener.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fastcampus.team7.Livable_officener.domain.Chat;
 import fastcampus.team7.Livable_officener.domain.Room;
 import fastcampus.team7.Livable_officener.domain.RoomParticipant;
@@ -16,6 +17,7 @@ import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -33,6 +35,8 @@ class ChatServiceCompleteDeliveryTest {
 
     @InjectMocks
     private ChatService sut;
+    @Mock
+    private ObjectMapper mapper;
     @Mock
     private ChatRepository chatRepository;
     @Mock
@@ -130,6 +134,7 @@ class ChatServiceCompleteDeliveryTest {
         User user = mock(User.class);
         Room room = mock(Room.class);
         RoomParticipant roomParticipant = mock(RoomParticipant.class);
+        String payload = "payload";
 
         given(roomRepository.findById(anyLong()))
                 .willReturn(Optional.of(room));
@@ -141,12 +146,15 @@ class ChatServiceCompleteDeliveryTest {
                 .willReturn(Role.HOST);
         given(room.getId())
                 .willReturn(roomId);
+        given(mapper.writeValueAsString(any())).willReturn(payload);
 
-        // when, then
+        // when
         sut.completeDelivery(roomId, user);
 
+        // then
+        ArgumentCaptor<TextMessage> messageCaptor = ArgumentCaptor.forClass(TextMessage.class);
         verify(room, times(1)).completeDelivery();
-        verify(webSocketSessionManager, times(1)).send(eq(roomId), any(TextMessage.class));
+        verify(webSocketSessionManager, times(1)).send(eq(roomId), messageCaptor.capture());
         verify(chatRepository, times(1)).save(any(Chat.class));
     }
 }
