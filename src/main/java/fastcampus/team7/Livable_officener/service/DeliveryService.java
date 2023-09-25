@@ -182,7 +182,6 @@ public class DeliveryService {
 
 
     public MyChatListResponseDTO getChatRoomList(User user) {
-
         List<ChatRoomListDTO> chatRoomListDTO = deliveryRepository.findChatRoomList(user.getId());
 
         MyChatListResponseDTO myChatListResponseDTO = new MyChatListResponseDTO();

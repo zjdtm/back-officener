@@ -17,7 +17,7 @@ public class ChatRoomListResponseDTO {
         private Long chatRoomId;
         private String storeName;
         private String recentMessage;
-        private Long numUnreadMessages;
+        private Integer numUnreadMessages;
         private FoodTag foodTag;
 
         public static ChatRoomListDTO of(ChatRoomListDTO chat) {
