@@ -26,8 +26,8 @@ public class DeliveryController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> findRoomDetail(@PathVariable Long id) {
-        final RoomDetailDTO roomDetail = deliveryService.selectRoomDetail(id);
-        return ResponseEntity.ok(roomDetail);
+        final RoomDetailDTO response = deliveryService.selectRoomDetail(id);
+        return APIDataResponse.of(HttpStatus.OK, response);
     }
 
     @GetMapping("/bankList")
@@ -53,10 +53,10 @@ public class DeliveryController {
             @AuthenticationPrincipal User user) {
         deliveryService.updateStoreDetail(id, requestDTO, user);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return APIDataResponse.empty(HttpStatus.OK);
     }
 
-    @DeleteMapping("{id}")
+    @PostMapping("{id}/terminate")
     public ResponseEntity<?> deleteDelivery(
             @PathVariable Long id,
             @AuthenticationPrincipal User user) {
