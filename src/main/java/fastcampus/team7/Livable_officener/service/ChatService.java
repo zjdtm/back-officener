@@ -128,6 +128,7 @@ public class ChatService {
         pointedRoomParticipant.guestKick();
 
         webSocketSessionManager.closeSessionForUser(kickDTO.getKickedUserId());
+        roomParticipantRepository.delete(pointedRoomParticipant);
 
         sendSystemMessage(room,user,kickedUser,ChatType.KICK);
     }
