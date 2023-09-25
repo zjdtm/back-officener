@@ -85,4 +85,8 @@ public class Room extends BaseEntity {
         this.maxAttendees = requestDTO.getMaxAttendees();
         this.description = requestDTO.getDesc();
     }
+
+    public void updateRoomStatus(){
+        this.status = RoomStatus.TERMINATED;
+    }
 }

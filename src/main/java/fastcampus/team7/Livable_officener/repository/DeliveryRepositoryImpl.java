@@ -3,7 +3,7 @@ package fastcampus.team7.Livable_officener.repository;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberPath;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import fastcampus.team7.Livable_officener.dto.RoomDetailDTO;
 import fastcampus.team7.Livable_officener.global.constant.Role;
@@ -67,28 +67,20 @@ public class DeliveryRepositoryImpl implements DeliveryRepositoryCustom {
         return queryFactory
                 .select(
                         Projections.constructor(ChatRoomListDTO.class,
-                                chat.room.id,
-                                chat.room.storeName,
-                                ExpressionUtils.as(
-                                        Expressions.asString(
-                                                getRecentMessage(chat.room.id)
-                                        ), "recentMessage"),
-                                chat.room.id.as("numUnreadMessages"),
-                                chat.room.tag
-                        )
+                                room.id,
+                                room.storeName,
+                                chat.content,
+                                roomParticipant.unreadCount.as("numUnreadMessages"),
+                                room.tag
+                        ))
+                .from(room)
+                .innerJoin(roomParticipant).on(
+                        roomParticipant.room.id.eq(room.id),
+                        roomParticipant.user.id.eq(userId)
                 )
-                .from(chat)
-                .where(chat.sender.id.eq(userId))
-                .groupBy(chat.room.id)
+                .leftJoin(chat).on(room.id.eq(chat.room.id), chat.id.eq(
+                        JPAExpressions.select(chat.id.max()).from(chat).where(chat.room.id.eq(room.id))
+                ))
                 .fetch();
-    }
-
-    private String getRecentMessage(NumberPath<Long> roomId) {
-        return queryFactory
-                .select(chat.content)
-                .from(chat)
-                .where(chat.room.id.eq(roomId))
-                .orderBy(roomId.desc())
-                .fetchFirst();
     }
 }

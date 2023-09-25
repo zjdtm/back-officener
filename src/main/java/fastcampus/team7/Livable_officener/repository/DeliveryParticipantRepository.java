@@ -11,8 +11,6 @@ import java.util.Optional;
 
 public interface DeliveryParticipantRepository extends JpaRepository<RoomParticipant, Long>, DeliveryParticipantRepositoryCustom {
 
-    void deleteAllByRoomId(Long roomId);
-
     List<RoomParticipant> findAllByRoomId(Long roomId);
 
     @Query("SELECT rp.user.id FROM RoomParticipant rp WHERE rp.room.id = :roomId AND rp.role = :role")
