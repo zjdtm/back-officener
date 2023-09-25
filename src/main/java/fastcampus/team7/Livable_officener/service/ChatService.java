@@ -2,7 +2,7 @@ package fastcampus.team7.Livable_officener.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import fastcampus.team7.Livable_officener.domain.Chat;
 import fastcampus.team7.Livable_officener.domain.Room;
 import fastcampus.team7.Livable_officener.domain.RoomParticipant;
@@ -12,6 +12,7 @@ import fastcampus.team7.Livable_officener.global.constant.ChatType;
 import fastcampus.team7.Livable_officener.global.constant.Role;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
 import fastcampus.team7.Livable_officener.global.exception.*;
+import fastcampus.team7.Livable_officener.global.util.LocalDateTimeDeserializer;
 import fastcampus.team7.Livable_officener.global.websocket.WebSocketSessionManager;
 import fastcampus.team7.Livable_officener.repository.ChatRepository;
 import fastcampus.team7.Livable_officener.repository.DeliveryParticipantRepository;
@@ -21,26 +22,30 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.TextMessage;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
 public class ChatService {
 
-    private static final ObjectMapper objectMapper;
-
-    static {
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-    }
-
+    private final ObjectMapper objectMapper;
     private final ChatRepository chatRepository;
     private final DeliveryRepository roomRepository;
     private final DeliveryParticipantRepository roomParticipantRepository;
     private final WebSocketSessionManager webSocketSessionManager;
+
+    @PostConstruct
+    public void setup() {
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer());
+        objectMapper.registerModule(module);
+        objectMapper.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+    }
 
     @Transactional
     public void send(SendChatDTO sendChatDTO) throws IOException {
@@ -182,7 +187,7 @@ public class ChatService {
 
     private static SendPayloadDTO createSystemMessagePayloadDTO(User sender, ChatType messageType) {
         String content = getSystemMessageContent(sender, messageType);
-        return createSystemMessagePayloadDTO(sender, messageType, content);
+        return new SendPayloadDTO(messageType, content, LocalDateTime.now(), sender.getId());
     }
 
     private static String getSystemMessageContent(User sender, ChatType messageType) {
@@ -198,12 +203,6 @@ public class ChatService {
             systemMessageArgs = new Object[]{user.getName()};
         }
         return systemMessageArgs;
-    }
-
-    private static SendPayloadDTO createSystemMessagePayloadDTO(User sender, ChatType messageType, String content) {
-        SendPayloadDTO systemMessagePayloadDTO = new SendPayloadDTO(messageType, content, LocalDateTime.now());
-        systemMessagePayloadDTO.setSenderId(sender.getId());
-        return systemMessagePayloadDTO;
     }
 
     private void sendMessage(Room room, User sender, SendPayloadDTO payloadDto) throws IOException {
