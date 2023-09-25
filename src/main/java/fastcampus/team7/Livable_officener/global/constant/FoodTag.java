@@ -4,13 +4,18 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum FoodTag {
+    PORKFEET("족발", "PORKFEET"),
+    SUSHI("회", "SUSHI"),
+    ZZIM("찜", "ZZIM"),
+    PIZZA("피자", "PIZZA"),
     CHICKEN("치킨", "CHICKEN"),
-    DESSERT("디저트", "DESSERT"),
-    MEET("고기", "MEET"),
+    ASIAN("아시안", "ASIAN"),
+    BAEKBAN("백반", "BAEKBAN"),
+    BUNSIK("분식", "BUNSIK"),
+    CAFE("카페", "CAFE"),
     CHINESE("중식", "CHINESE"),
-    JAPANESE("일식", "JAPANESE"),
-    KOREAN("한식", "KOREAN"),
-    BUNSIK("분식", "BUNSIK");
+    MEET("고기", "MEET"),
+    DOSIRAK("도시락", "DOSIRAK");
 
     private final String name;
     private final String code;
