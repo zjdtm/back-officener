@@ -116,6 +116,22 @@ public class ChatService {
         sendSystemMessage(room, user, ChatType.REQUEST_EXIT);
     }
 
+    public void kick(Long roomId, User user, KickDTO kickDTO) throws IOException {
+        Room room = getRoom(roomId);
+        RoomParticipant roomParticipant = getRoomParticipant(room.getId(), user.getId());
+        RoomParticipant pointedRoomParticipant = getRoomParticipant(room.getId(), kickDTO.getKickedUserId());
+        validateIfRoomParticipantIsHost(roomParticipant.getRole(), "강퇴");
+
+        isKicked(pointedRoomParticipant);
+        User kickedUser = validateKickedUser(kickDTO.getKickedUserId());
+
+        pointedRoomParticipant.guestKick();
+
+        webSocketSessionManager.closeSession(roomId, kickDTO.getKickedUserId());
+
+        sendSystemMessage(room,user,kickedUser,ChatType.KICK);
+    }
+
     @Transactional
     public void exitChatRoom(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
@@ -170,6 +186,11 @@ public class ChatService {
                 .orElseThrow(NotFoundReportedUserException::new);
     }
 
+    private User validateKickedUser(Long KickedUserId) {
+        return userRepository.findById(KickedUserId)
+                .orElseThrow(NotFoundKickedUserException::new);
+    }
+
     private void validateAllParticipantsCompletedRemitAndReceive(Long roomId) {
         List<RoomParticipant> participants = roomParticipantRepository.findAllByRoomId(roomId);
 
@@ -204,9 +225,20 @@ public class ChatService {
         }
     }
 
+    private static void isKicked(RoomParticipant pointedRoomParticipant) {
+        if (pointedRoomParticipant.getKickedAt() != null) {
+            throw new AlreadyKickedException();
+        }
+    }
+
     private void sendSystemMessage(Room room, User sender, ChatType messageType) throws IOException {
         SendPayloadDTO payloadDto = createSystemMessagePayloadDTO(sender, messageType);
 
+        sendMessage(room, sender, payloadDto);
+    }
+
+    private void sendSystemMessage(Room room, User sender, User pointedUser, ChatType messageType) throws IOException {
+        SendPayloadDTO payloadDto = createSystemMessagePayloadDTO(sender, pointedUser, messageType);
         sendMessage(room, sender, payloadDto);
     }
 
@@ -215,9 +247,20 @@ public class ChatService {
         return createSystemMessagePayloadDTO(sender, messageType, content);
     }
 
+    private SendPayloadDTO createSystemMessagePayloadDTO(User sender, User pointedUser, ChatType messageType) {
+        String content = getSystemMessageContent(sender, pointedUser, messageType);
+        SendPayloadDTO systemMessagePayloadDTO = new SendPayloadDTO(messageType, content, LocalDateTime.now());
+        systemMessagePayloadDTO.setSenderId(sender.getId());
+        return systemMessagePayloadDTO;
+    }
+
     private static String getSystemMessageContent(User sender, ChatType messageType) {
         Object[] systemMessageArgs = getSystemMessageArgs(messageType, sender);
         return messageType.getSystemMessageContent(systemMessageArgs);
+    }
+
+    private String getSystemMessageContent(User sender, User pointedUser, ChatType messageType) {
+        return messageType.getSystemMessageContent(sender.getName(), pointedUser.getName());
     }
 
     private static Object[] getSystemMessageArgs(ChatType messageType, User user) {
