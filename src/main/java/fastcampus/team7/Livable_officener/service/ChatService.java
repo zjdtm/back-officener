@@ -127,7 +127,7 @@ public class ChatService {
 
         pointedRoomParticipant.guestKick();
 
-        webSocketSessionManager.closeSession(roomId, kickDTO.getKickedUserId());
+        webSocketSessionManager.closeSessionForUser(kickDTO.getKickedUserId());
 
         sendSystemMessage(room,user,kickedUser,ChatType.KICK);
     }

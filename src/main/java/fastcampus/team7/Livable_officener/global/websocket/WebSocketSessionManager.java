@@ -15,6 +15,8 @@ public class WebSocketSessionManager {
 
     private final Map<Long, Collection<WebSocketSession>> roomIdToSessions = new ConcurrentHashMap<>();
 
+    private final Map<Long, WebSocketSession> userIdToSession = new ConcurrentHashMap<>();
+
     public void addSessionToRoom(Long roomId, WebSocketSession session) {
         Collection<WebSocketSession> sessions;
         try {
@@ -34,6 +36,17 @@ public class WebSocketSessionManager {
             throw new IllegalStateException("웹소켓 세션은 채팅방마다 참여자별로 하나만 연결 가능합니다.");
         }
         sessions.add(session);
+    }
+
+    public void closeSessionForUser(Long userId) {
+        WebSocketSession session = userIdToSession.get(userId);
+        if (session != null) {
+            try {
+                session.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private static Long getSessionUserId(WebSocketSession session) {
