@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import fastcampus.team7.Livable_officener.domain.Chat;
 import fastcampus.team7.Livable_officener.domain.Room;
+import fastcampus.team7.Livable_officener.domain.RoomParticipant;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.chat.SendChatDTO;
 import fastcampus.team7.Livable_officener.dto.chat.SendPayloadDTO;
@@ -27,9 +28,7 @@ import org.springframework.web.socket.TextMessage;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -134,4 +133,45 @@ class ChatServiceSendTest {
         assertThat(chat.getCreatedAt()).isEqualTo(sendTimeLocal);
         assertThat(chat.getSender()).isEqualTo(sender);
     }
+
+    @DisplayName("웹소켓 세션이 존재하지 않는 참여자들의 읽지 않은 메시지 수 증가")
+    @Test
+    void givenSomeWithoutWebSocketSession_thenTheirUnreadCountsIncrement() throws IOException {
+        // given
+        final Long roomId = 1L;
+        final int numParticipants = 6;
+        final int numSessions = 3;
+        List<RoomParticipant> participants = new ArrayList<>(numParticipants);
+        for (int i = 1; i <= numParticipants; ++i) {
+            User user = User.builder()
+                    .id((long) i)
+                    .build();
+            RoomParticipant participant = mock(RoomParticipant.class);
+            given(participant.getUser())
+                    .willReturn(user);
+            participants.add(participant);
+            given(webSocketSessionManager.nonexistent(roomId, user))
+                    .willReturn(i <= numSessions);
+        }
+
+        given(roomParticipantRepository.findAllByRoomId(roomId))
+                .willReturn(participants);
+
+        // when
+        Room room = mock(Room.class);
+        given(room.getId())
+                .willReturn(roomId);
+
+        final String payload = "{\"messageType\":\"TALK\",\"content\":\"테스트 메시지\",\"sendTime\":\"2023-09-22T10:08:24.395Z\"}";
+        final TextMessage message = new TextMessage(payload);
+        SendChatDTO dto = new SendChatDTO(room, participants.get(0).getUser(), message);
+        sut.send(dto);
+
+        // then
+        for (int i = 1; i <= numParticipants; ++i) {
+            int callCount = (i <= numSessions) ? 1 : 0;
+            verify(participants.get(i - 1), times(callCount)).incrementUnreadCount();
+        }
+    }
+
 }
