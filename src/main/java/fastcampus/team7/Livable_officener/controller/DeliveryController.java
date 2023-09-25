@@ -53,10 +53,10 @@ public class DeliveryController {
             @AuthenticationPrincipal User user) {
         deliveryService.updateStoreDetail(id, requestDTO, user);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return APIDataResponse.empty(HttpStatus.OK);
     }
 
-    @DeleteMapping("{id}")
+    @PostMapping("{id}/terminate")
     public ResponseEntity<?> deleteDelivery(
             @PathVariable Long id,
             @AuthenticationPrincipal User user) {
