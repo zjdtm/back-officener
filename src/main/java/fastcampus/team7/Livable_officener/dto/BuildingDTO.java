@@ -7,10 +7,12 @@ import lombok.*;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class CompanyDTO {
+public class BuildingDTO {
 
     private Long id;
-    private String officeName;
-    private String officeNum;
+
+    private String buildingName;
+
+    private String buildingAddress;
 
 }

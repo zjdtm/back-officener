@@ -67,20 +67,20 @@ class SignUpControllerTest {
         companyDTOS.add(
                 CompanyDTO.builder()
                         .id(1L)
-                        .name("진회사")
-                        .companyNum("A동 101호")
+                        .officeName("진회사")
+                        .officeNum("A동 101호")
                         .build());
         companyDTOS.add(
                 CompanyDTO.builder()
                         .id(2L)
-                        .name("칠리버블")
-                        .companyNum("A동 102호")
+                        .officeName("칠리버블")
+                        .officeNum("A동 102호")
                         .build());
         companyDTOS.add(
                 CompanyDTO.builder()
                         .id(3L)
-                        .name("식스센스")
-                        .companyNum("A동 103호")
+                        .officeName("식스센스")
+                        .officeNum("A동 103호")
                         .build());
 
         buildingWithCompaniesDTO.setOffices(companyDTOS);
@@ -98,9 +98,9 @@ class SignUpControllerTest {
                 .andExpect(jsonPath("$.data.buildings[0].buildingName", is("미왕 빌딩")))
                 .andExpect(jsonPath("$.data.buildings[0].buildingAddress", is("서울 강남구 강남대로 364")))
                 .andExpect(jsonPath("$.data.buildings[0].offices", hasSize(3)))
-                .andExpect(jsonPath("$.data.buildings[0].offices[0].name", is("진회사")))
-                .andExpect(jsonPath("$.data.buildings[0].offices[1].name", is("칠리버블")))
-                .andExpect(jsonPath("$.data.buildings[0].offices[2].name", is("식스센스")))
+                .andExpect(jsonPath("$.data.buildings[0].offices[0].officeName", is("진회사")))
+                .andExpect(jsonPath("$.data.buildings[0].offices[1].officeName", is("칠리버블")))
+                .andExpect(jsonPath("$.data.buildings[0].offices[2].officeName", is("식스센스")))
                 .andReturn();
 
     }
@@ -257,7 +257,7 @@ class SignUpControllerTest {
 
         // given
         final String email = "test@gmail.com";
-        final String password = "test12!@";             // 대문자가 포함되어 있지 않음
+        final String password = "test";             // 비밀번호 유효성 검증에 맞지 않는 경우
         final String buildingName = "미왕 빌딩";
         final String companyName = "칠리버블";
         final String name = "테스트 유저";
@@ -282,7 +282,7 @@ class SignUpControllerTest {
                 .andExpect(status().is4xxClientError())
                 .andDo(print())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.errorMessage").value("비밀번호는 최소 8자 이상 15자 이하, 대문자, 소문자, 숫자, 특수 문자($@$!%*?&)를 포함해야 합니다."));
+                .andExpect(jsonPath("$.errorMessage").value("비밀번호는 영문, 숫자, 특수기호 를 포함한 8 ~ 16자입니다."));
     }
 
     @Test

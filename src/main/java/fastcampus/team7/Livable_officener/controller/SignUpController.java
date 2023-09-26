@@ -6,8 +6,10 @@ import fastcampus.team7.Livable_officener.service.SignUpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
@@ -57,9 +59,9 @@ public class SignUpController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<APIDataResponse<LoginResponseDTO>> login(@RequestBody @Valid LoginRequestDTO request) {
+    public ResponseEntity<APIDataResponse<Map<String, LoginResponseDTO>>> login(@RequestBody @Valid LoginRequestDTO request) {
 
-        LoginResponseDTO result = signUpService.login(request);
+        Map<String, LoginResponseDTO> result = signUpService.login(request);
 
         return APIDataResponse.of(HttpStatus.OK, result);
 

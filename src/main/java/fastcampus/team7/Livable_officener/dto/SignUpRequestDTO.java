@@ -22,8 +22,8 @@ public class SignUpRequestDTO {
     private String email;
 
     @Pattern(
-            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[$@$!%*?&])[A-Za-z\\d$@$!%*?&]{8,15}$",
-            message = "비밀번호는 최소 8자 이상 15자 이하, 대문자, 소문자, 숫자, 특수 문자($@$!%*?&)를 포함해야 합니다.")
+            regexp = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[\\W_])[a-zA-Z\\d\\W_]{8,16}$",
+            message = "비밀번호는 영문, 숫자, 특수기호 를 포함한 8 ~ 16자입니다.")
     @NotBlank(message = "패스워드를 입력해주세요")
     private String password;
 
