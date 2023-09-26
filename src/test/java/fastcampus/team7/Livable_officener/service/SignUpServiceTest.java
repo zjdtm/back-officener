@@ -77,9 +77,9 @@ class SignUpServiceTest {
 
         assertThat(expectedDto.getBuildingName()).isEqualTo(building.getName());
         assertThat(expectedDto.getBuildingAddress()).isEqualTo(building.getRegion() + " " + building.getCity() + " " + building.getStreet() + " " + building.getZipcode());
-        assertThat(companyDTOS.get(0).getName()).isEqualTo("진회사");
-        assertThat(companyDTOS.get(1).getName()).isEqualTo("칠리버블");
-        assertThat(companyDTOS.get(2).getName()).isEqualTo("식스센스");
+        assertThat(companyDTOS.get(0).getOfficeName()).isEqualTo("진회사");
+        assertThat(companyDTOS.get(1).getOfficeName()).isEqualTo("칠리버블");
+        assertThat(companyDTOS.get(2).getOfficeName()).isEqualTo("식스센스");
 
         then(buildingRepository).should(times(1)).findBuildingsByNameContaining(keyword);
         then(companyRepository).should(times(1)).findCompaniesByBuildingName(buildings.get(0).getName());
