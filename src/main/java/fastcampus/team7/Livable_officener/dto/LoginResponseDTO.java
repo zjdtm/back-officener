@@ -9,5 +9,17 @@ import lombok.*;
 @AllArgsConstructor
 public class LoginResponseDTO {
 
+    private Long id;
+
+    private String email;
+
+    private String name;
+
+    private String phoneNumber;
+
+    private BuildingDTO building;
+
+    private CompanyDTO company;
+
     private String token;
 }

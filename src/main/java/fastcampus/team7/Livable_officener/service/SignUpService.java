@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @Service
@@ -128,18 +129,50 @@ public class SignUpService {
 
     }
 
-    public LoginResponseDTO login(LoginRequestDTO request) {
+    public Map<String, LoginResponseDTO> login(LoginRequestDTO request) {
 
         String requestEmail = request.getEmail();
 
-        userRepository.findByEmail(requestEmail)
+        User user = userRepository.findByEmail(requestEmail)
                 .orElseThrow(() -> new NotFoundUserException());
+
+        BuildingDTO buildingDTO = BuildingDTO.builder()
+                .id(user.getBuilding().getId())
+                .buildingName(user.getBuilding().getName())
+                .buildingAddress(user.getBuilding().getAddress())
+                .build();
+
+        CompanyDTO companyDTO = CompanyDTO.builder()
+                .id(user.getCompany().getId())
+                .officeName(user.getCompany().getName())
+                .officeNum(user.getCompany().getAddress())
+                .build();
 
         String token = jwtProvider.createToken(requestEmail);
 
-        return LoginResponseDTO.builder()
+        LoginResponseDTO responseBody = LoginResponseDTO.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .name(user.getName())
+                .phoneNumber(user.getPhoneNumber())
+                .building(buildingDTO)
+                .company(companyDTO)
                 .token(token)
                 .build();
+
+        Map<String, LoginResponseDTO> loginResponseMap = new HashMap<>();
+        loginResponseMap.put("userInfo", responseBody);
+
+        return loginResponseMap;
+    }
+
+    public void logout(HttpServletRequest request) {
+
+        String bearerToken = jwtProvider.extractHeader(request);
+        String accessToken = jwtProvider.extractToken(bearerToken);
+
+
+
     }
 
     private String generateVerifyCode() {
@@ -163,4 +196,5 @@ public class SignUpService {
         }
         return companyDTOS;
     }
+
 }
