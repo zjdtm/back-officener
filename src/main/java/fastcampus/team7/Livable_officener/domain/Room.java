@@ -80,7 +80,7 @@ public class Room extends BaseEntity {
         this.deliveryFee = requestDTO.getDeliveryFee();
         this.tag = requestDTO.getFoodTag();
         this.bankName = requestDTO.getBankName();
-        this.accountNumber = requestDTO.getAccountNum();
+        this.accountNumber = requestDTO.getAccountNumber();
         this.deadline = requestDTO.getDeadline();
         this.maxAttendees = requestDTO.getMaxAttendees();
         this.description = requestDTO.getDesc();
