@@ -17,7 +17,7 @@ public class UpdateStoreDetailDTO {
     private Long deliveryFee;
     private FoodTag foodTag;
     private BankName bankName;
-    private String accountNum;
+    private String accountNumber;
     private LocalDateTime deadline;
     private Long maxAttendees;
     private String desc;
