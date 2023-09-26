@@ -50,6 +50,10 @@ public class RoomParticipant extends BaseEntity {
         exitedAt = LocalDateTime.now();
     }
 
+    public void guestKick() {
+        kickedAt = LocalDateTime.now();
+    }
+
     public void resetUnreadCount() {
         unreadCount = 0;
     }

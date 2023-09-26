@@ -42,9 +42,23 @@ public class WebSocketSessionManager {
         sessions.add(session);
     }
 
+    public void closeSessionForUser(Long roomId, User kickedUser) {
+        for (WebSocketSession session : getWebSocketSessions(roomId)) {
+            if (kickedUser.equals(getSessionUser(session))) {
+                removeSessionFromRoom(roomId, session);
+                return;
+            }
+        }
+    }
+
     public void removeSessionFromRoom(Long roomId, WebSocketSession session) {
         Collection<WebSocketSession> sessions = getWebSocketSessions(roomId);
         sessions.remove(session);
+        try {
+            session.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void send(Long roomId, TextMessage message) throws IOException {

@@ -3,6 +3,7 @@ package fastcampus.team7.Livable_officener.controller;
 import fastcampus.team7.Livable_officener.domain.Report;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.chat.ChatroomInfoDTO;
+import fastcampus.team7.Livable_officener.dto.chat.KickDTO;
 import fastcampus.team7.Livable_officener.dto.chat.ReportDTO;
 import fastcampus.team7.Livable_officener.global.util.APIDataResponse;
 import fastcampus.team7.Livable_officener.global.util.APIErrorResponse;
@@ -86,6 +87,16 @@ public class ChatController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @PostMapping("/kick")
+    public ResponseEntity<?> kick(
+            @PathVariable Long roomId,
+            @AuthenticationPrincipal User user,
+            @RequestBody KickDTO kickDTO) throws IOException {
+
+        chatService.kick(roomId, user, kickDTO);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @PostMapping("/report")
     public ResponseEntity<?> createReport(
             @PathVariable Long roomId,
@@ -93,7 +104,7 @@ public class ChatController {
             @Valid @RequestBody ReportDTO reportDTO) {
 
         if(reportDTO.getReportedUserId().equals(user.getId())) {
-            return APIErrorResponse.of(HttpStatus.BAD_REQUEST, "You cannot report yourself.");
+            return APIErrorResponse.of(HttpStatus.BAD_REQUEST, "자기 자신을 신고할 수는 없습니다.");
         }
 
         Report report = chatService.createReport(roomId, user, reportDTO);
