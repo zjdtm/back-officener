@@ -166,15 +166,6 @@ public class SignUpService {
         return loginResponseMap;
     }
 
-    public void logout(HttpServletRequest request) {
-
-        String bearerToken = jwtProvider.extractHeader(request);
-        String accessToken = jwtProvider.extractToken(bearerToken);
-
-
-
-    }
-
     private String generateVerifyCode() {
         Random random = new Random();
         String newVerifyCode = "";
