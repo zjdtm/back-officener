@@ -5,13 +5,11 @@ import fastcampus.team7.Livable_officener.domain.Building;
 import fastcampus.team7.Livable_officener.domain.Company;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.*;
-import fastcampus.team7.Livable_officener.global.exception.DuplicatedPhoneNumberException;
-import fastcampus.team7.Livable_officener.global.exception.NotFoundBuildingException;
+import fastcampus.team7.Livable_officener.global.exception.*;
 import fastcampus.team7.Livable_officener.repository.BuildingRepository;
 import fastcampus.team7.Livable_officener.repository.CompanyRepository;
 import fastcampus.team7.Livable_officener.repository.PhoneAuthDTORedisRepository;
 import fastcampus.team7.Livable_officener.repository.UserRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,18 +18,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class SignUpServiceTest {
@@ -52,8 +48,8 @@ class SignUpServiceTest {
     PasswordEncoder passwordEncoder;
 
     @Test
-    @DisplayName("[GET] /api/building?name={buildingName} - Service 성공 테스트")
-    public void searchBuildingWithCompanies_Success() {
+    @DisplayName("키워드 입력시 건물명이 키워드에 포함되어 있는 경우 모든 건물과 회사의 정보들이 출력되는지 테스트")
+    public void givenKeyword_whenSearch_thenReturnBuildingWithCompanies() {
 
         // given
         final String keyword = "미";
@@ -73,17 +69,17 @@ class SignUpServiceTest {
         given(companyRepository.findCompaniesByBuildingName(buildings.get(0).getName())).willReturn(companies);
 
         // when
-        List<BuildingWithCompaniesDTO> result = signUpService.getBuildingWithCompanies(keyword);
+        Map<String, List<BuildingWithCompaniesDTO>> buildingWithCompanies = signUpService.getBuildingWithCompanies(keyword);
 
         // then
-        BuildingWithCompaniesDTO expectedDto = result.get(0);
-        List<CompanyDTO> companyDTOS = expectedDto.getCompanies();
+        BuildingWithCompaniesDTO expectedDto = buildingWithCompanies.get("buildings").get(0);
+        List<CompanyDTO> companyDTOS = expectedDto.getOffices();
 
         assertThat(expectedDto.getBuildingName()).isEqualTo(building.getName());
         assertThat(expectedDto.getBuildingAddress()).isEqualTo(building.getRegion() + " " + building.getCity() + " " + building.getStreet() + " " + building.getZipcode());
-        assertThat(companyDTOS.get(0).getName()).isEqualTo("진회사");
-        assertThat(companyDTOS.get(1).getName()).isEqualTo("칠리버블");
-        assertThat(companyDTOS.get(2).getName()).isEqualTo("식스센스");
+        assertThat(companyDTOS.get(0).getOfficeName()).isEqualTo("진회사");
+        assertThat(companyDTOS.get(1).getOfficeName()).isEqualTo("칠리버블");
+        assertThat(companyDTOS.get(2).getOfficeName()).isEqualTo("식스센스");
 
         then(buildingRepository).should(times(1)).findBuildingsByNameContaining(keyword);
         then(companyRepository).should(times(1)).findCompaniesByBuildingName(buildings.get(0).getName());
@@ -91,8 +87,8 @@ class SignUpServiceTest {
     }
 
     @Test
-    @DisplayName("[GET] /api/building?name={buildingName} - Service 실패 테스트")
-    public void searchBuildingWithCompanies_Failure() {
+    @DisplayName("키워드 입력시 건물명이 키워드에 포함되어 있는 경우를 찾지 못할 경우 빈 값이 출력되는지 테스트")
+    public void givenKeyword_whenSearch_thenReturnEmptyBuilding() {
 
         // given
         final String keyword = "존재하지 않는 빌딩";
@@ -100,17 +96,18 @@ class SignUpServiceTest {
         given(buildingRepository.findBuildingsByNameContaining(keyword)).willReturn(Collections.emptyList());
 
         // when
-        List<BuildingWithCompaniesDTO> result = signUpService.getBuildingWithCompanies(keyword);
+        Map<String, List<BuildingWithCompaniesDTO>> buildingWithCompanies = signUpService.getBuildingWithCompanies(keyword);
 
         // then
-        assertThat(result).isEmpty();
+        assertThat(buildingWithCompanies.get("buildings")).isEmpty();
     }
 
     @Test
-    @DisplayName("휴대폰 인증번호 요청시 적절한 인증번호 값이 출력되는지 테스트")
-    public void whenPhoneNumberSend_thenSuccessPhoneAuthCode() {
+    @DisplayName("휴대폰 인증번호 요청시 응답값의 인증코드와 저장된 인증코드가 같은지 테스트")
+    public void givenPhoneNumberAndName_whenRequest_thenReturnVerifyCode() {
 
         // given
+        final String name = "고길동";
         final String phoneNumber = "010-1234-5678";
         final String verifyCode = "982752";
         PhoneAuthDTO phoneAuthDTO = PhoneAuthDTO.builder()
@@ -121,96 +118,309 @@ class SignUpServiceTest {
         given(phoneAuthDTORedisRepository.save(any(PhoneAuthDTO.class))).willReturn(phoneAuthDTO);
 
         // when
-        String result = signUpService.getPhoneAuthCode(PhoneAuthRequestDTO.builder()
-                .name("고길동")
+        PhoneAuthResponseDTO result = signUpService.getPhoneAuthCode(PhoneAuthRequestDTO.builder()
+                .name(name)
                 .phoneNumber(phoneNumber)
                 .build());
 
         // then
-        assertThat(result).isEqualTo(verifyCode);
+        assertThat(result.getVerifyCode()).isEqualTo(verifyCode);
 
     }
 
     @Test
     @DisplayName("휴대폰 인증번호 요청시 이미 등록된 핸드폰 번호 일 경우 예외 발생")
-    public void whenPhoneNumberSend_thenFailedDuplicatedPhoneNumber() {
+    public void givenPhoneNumberAndName_whenRequest_thenExceptionDuplicatedPhoneNumber() {
 
         // given
-        given(userRepository.findByPhoneNumber(any(String.class))).willThrow(new DuplicatedPhoneNumberException());
+        final String name = "고길동";
+        final String phoneNumber = "01012345678";
 
-        // when & then
-        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> {
+        given(userRepository.existsByPhoneNumber(any(String.class))).willThrow(new DuplicatedPhoneNumberException());
+
+        // when
+        DuplicatedPhoneNumberException exception = assertThrows(DuplicatedPhoneNumberException.class, () -> {
             signUpService.getPhoneAuthCode(PhoneAuthRequestDTO.builder()
-                    .name("고길동")
-                    .phoneNumber("01012345678")
+                    .name(name)
+                    .phoneNumber(phoneNumber)
                     .build());
         });
 
-        assertEquals("이미 등록된 휴대폰 번호입니다.", exception.getMessage());
+        // then
+        assertThat(exception.getMessage()).isEqualTo(DuplicatedPhoneNumberException.DEFAULT_MESSAGE);
 
     }
 
     @Test
-    @DisplayName("회원 정보 입력시 저장에 성공하는지 테스트")
-    public void givenUserInfo_whenSaveUser_thenSuccessTest() {
+    @DisplayName("휴대폰 인증코드 확인 요청시 성공하는 경우 True 를 반환하는지 테스트")
+    public void givenVerifyCode_whenConfirmRequest_thenConfirmSuccess() {
 
         // given
-        final String name = "고길동";
-        final String email = "test@gmail.com";
-        final String password = passwordEncoder.encode("test12#$");
         final String phoneNumber = "01012345678";
-        Building building = saveBuilding("미왕빌딩", "서울", "강남구", "강남대로", "364");
-        User user = User.builder()
-                .name(name)
-                .email(email)
-                .building(building)
-                .password(password)
+        final String verifyCode = "135791";
+
+        PhoneAuthDTO phoneAuthDTO = PhoneAuthDTO.builder()
                 .phoneNumber(phoneNumber)
+                .verifyCode(verifyCode)
                 .build();
 
-        given(userRepository.save(any(User.class))).willReturn(user);
-        given(buildingRepository.findByName(any(String.class))).willReturn(Optional.of(building));
-        given(userRepository.findByEmail(email)).willReturn(Optional.of(user));
+        given(phoneAuthDTORedisRepository.findById(phoneNumber)).willReturn(Optional.of(phoneAuthDTO));
+
+        PhoneAuthConfirmDTO phoneAuthConfirmDTO = PhoneAuthConfirmDTO.builder()
+                .phoneNumber(phoneNumber)
+                .verifyCode(verifyCode)
+                .build();
+
+
+        // when
+        boolean isConfirm = signUpService.confirmVerifyCode(phoneAuthConfirmDTO);
+
+        // then
+        assertThat(isConfirm).isTrue();
+
+    }
+
+    @Test
+    @DisplayName("휴대폰 인증코드 확인 요청시 휴대폰 번호로 요청한 적이 없는 경우 '인증되지 않은 핸드폰 번호입니다.' 예외 발생")
+    public void givenVerifyCode_whenConfirmRequest_thenExceptionPhoneNumber() {
+
+        // given
+        final String phoneNumber = "01012345678";
+        final String verifyCode = "135791";
+
+        given(phoneAuthDTORedisRepository.findById(phoneNumber)).willThrow(new NotVerifiedPhoneNumberException());
+
+        PhoneAuthConfirmDTO phoneAuthConfirmDTO = PhoneAuthConfirmDTO.builder()
+                .phoneNumber(phoneNumber)
+                .verifyCode(verifyCode)
+                .build();
+
+        // when & then
+        assertThrows(NotVerifiedPhoneNumberException.class, () -> {
+            signUpService.confirmVerifyCode(phoneAuthConfirmDTO);
+        });
+
+    }
+
+    @Test
+    @DisplayName("휴대폰 인증코드 확인 요청시 검증에 실패하는 경우 '잘못된 인증 코드입니다.' 예외 발생")
+    public void givenVerifyCode_whenConfirmRequest_thenNotVerifyCode() {
+
+        // given
+        final String phoneNumber = "01012345678";
+        final String validVerifyCode = "999999";
+        final String invalidVerifyCode = "135791";
+
+        given(phoneAuthDTORedisRepository.findById(phoneNumber)).willReturn(
+                Optional.ofNullable(PhoneAuthDTO.builder()
+                        .phoneNumber(phoneNumber)
+                        .verifyCode(validVerifyCode)
+                        .build()));
+
+        PhoneAuthConfirmDTO phoneAuthConfirmFailedDTO = PhoneAuthConfirmDTO.builder()
+                .phoneNumber(phoneNumber)
+                .verifyCode(invalidVerifyCode)
+                .build();
+
+        // when & then
+        assertThrows(NotVerifiedPhoneAuthCodeException.class, () -> {
+            signUpService.confirmVerifyCode(phoneAuthConfirmFailedDTO);
+        });
+    }
+
+    @Test
+    @DisplayName("회원가입 요청시 회원가입에 성공하는지 테스트")
+    public void givenUserInfo_whenRequest_thenSuccessSignUp() {
+
+        // given
+        final String email = "test@gmail.com";
+        final String name = "고길동";
+        final String password = passwordEncoder.encode("고길동123");
+        final String phoneNumber = "01054546789";
+        Building building = saveBuilding("미왕빌딩", "서울", "강남구", "강남대로", "356");
+        Company company = saveCompanies(building, "테스트 오피스", "A동 101호");
+
+        given(buildingRepository.findByName(building.getName())).willReturn(Optional.of(building));
+        given(companyRepository.findByName(company.getName())).willReturn(Optional.of(company));
+        given(userRepository.existsByEmail(email)).willReturn(false);
 
         // when
         signUpService.signUp(SignUpRequestDTO.builder()
                 .agree(true)
                 .name(name)
-                .buildingName("미왕빌딩")
-                .phoneNumber(phoneNumber)
-                .password(password)
-                .companyName("칠리버블")
                 .email(email)
+                .password(password)
+                .phoneNumber(phoneNumber)
+                .buildingName(building.getName())
+                .companyName(company.getName())
                 .build());
 
         // then
-        User findUser = userRepository.findByEmail(email).get();
-        assertThat(findUser.getName()).isEqualTo(name);
-        assertThat(findUser.getPassword()).isEqualTo(password);
+        verify(userRepository).save(any());
+
     }
 
     @Test
-    @DisplayName("회원 정보 입력시 존재하지 않는 빌딩이 존재할 경우 예외 발생")
-    public void givenUserInfo_whenSaveUser_thenFailure() {
+    @DisplayName("회원가입시 요청 Request 에 있는 건물명 이 존재하지 않는 건물일 경우 예외 발생")
+    public void givenUserInfo_whenRequestUserInfo_thenNotFoundBuildingException() {
 
         // given
-        final String name = "고길동";
         final String email = "test@gmail.com";
-        final String password = passwordEncoder.encode("test12#$");
-        final String phoneNumber = "01012345678";
+        final String name = "고길동";
+        final String password = passwordEncoder.encode("고길동123");
+        final String phoneNumber = "01054546789";
+        Building building = saveBuilding("미왕빌딩", "서울", "강남구", "강남대로", "356");
+        Company company = saveCompanies(building, "테스트 오피스", "A동 101호");
+
+        given(buildingRepository.findByName(building.getName())).willThrow(NotFoundBuildingException.class);
 
         // when & then
-        assertThrows(NotFoundBuildingException.class, () ->
-                signUpService.signUp(SignUpRequestDTO.builder()
-                        .agree(true)
-                        .name(name)
-                        .buildingName("미왕빌딩")
-                        .phoneNumber(phoneNumber)
-                        .password(password)
-                        .companyName("칠리버블")
-                        .email(email)
-                        .build())
-        );
+        assertThrows(NotFoundBuildingException.class, () -> {
+            signUpService.signUp(SignUpRequestDTO.builder()
+                    .agree(true)
+                    .name(name)
+                    .email(email)
+                    .password(password)
+                    .phoneNumber(phoneNumber)
+                    .buildingName(building.getName())
+                    .companyName(company.getName())
+                    .build());
+        });
+
+    }
+
+    @Test
+    @DisplayName("회원가입시 요청 Request 에 있는 회사명 이 존재하지 않는 회사일 경우 예외 발생")
+    public void givenUserInfo_whenRequestUserInfo_thenNotFoundCompanyException() {
+
+        // given
+        final String email = "test@gmail.com";
+        final String name = "고길동";
+        final String password = passwordEncoder.encode("고길동123");
+        final String phoneNumber = "01054546789";
+        Building building = saveBuilding("미왕빌딩", "서울", "강남구", "강남대로", "356");
+        Company company = saveCompanies(building, "테스트 오피스", "A동 101호");
+
+        given(buildingRepository.findByName(building.getName())).willReturn(Optional.of(building));
+        given(companyRepository.findByName(company.getName())).willThrow(NotFoundCompanyException.class);
+
+        // when & then
+        assertThrows(NotFoundCompanyException.class, () -> {
+            signUpService.signUp(SignUpRequestDTO.builder()
+                    .agree(true)
+                    .name(name)
+                    .email(email)
+                    .password(password)
+                    .phoneNumber(phoneNumber)
+                    .buildingName(building.getName())
+                    .companyName(company.getName())
+                    .build());
+        });
+
+    }
+
+    @Test
+    @DisplayName("회원가입시 이미 등록되어 있는 회원 이메일인 경우 예외 발생")
+    public void givenUserInfo_whenRequestUserInfo_thenDuplicatedUserEmailException() {
+
+        // given
+        final String email = "test@gmail.com";
+        final String name = "고길동";
+        final String password = passwordEncoder.encode("고길동123");
+        final String phoneNumber = "01054546789";
+        Building building = saveBuilding("미왕빌딩", "서울", "강남구", "강남대로", "356");
+        Company company = saveCompanies(building, "테스트 오피스", "A동 101호");
+
+        given(buildingRepository.findByName(building.getName())).willReturn(Optional.of(building));
+        given(companyRepository.findByName(company.getName())).willReturn(Optional.of(company));
+        given(userRepository.existsByEmail(email)).willThrow(DuplicatedUserEmailException.class);
+
+        // when & then
+        assertThrows(DuplicatedUserEmailException.class, () -> {
+            signUpService.signUp(SignUpRequestDTO.builder()
+                    .agree(true)
+                    .name(name)
+                    .email(email)
+                    .password(password)
+                    .phoneNumber(phoneNumber)
+                    .buildingName(building.getName())
+                    .companyName(company.getName())
+                    .build());
+        });
+
+    }
+
+    @Test
+    @DisplayName("회원가입시 이미 등록되어 있는 핸드폰 번호일 경우 예외 발생")
+    public void givenUserInfo_whenRequestUserInfo_thenDuplicatedPhoneNumberException() {
+
+        // given
+        final String email = "test@gmail.com";
+        final String name = "고길동";
+        final String password = passwordEncoder.encode("고길동123");
+        final String phoneNumber = "01054546789";
+        Building building = saveBuilding("미왕빌딩", "서울", "강남구", "강남대로", "356");
+        Company company = saveCompanies(building, "테스트 오피스", "A동 101호");
+
+        given(buildingRepository.findByName(building.getName())).willReturn(Optional.of(building));
+        given(companyRepository.findByName(company.getName())).willReturn(Optional.of(company));
+        given(userRepository.existsByEmail(email)).willReturn(false);
+        given(userRepository.existsByPhoneNumber(phoneNumber)).willThrow(DuplicatedPhoneNumberException.class);
+
+        // when & then
+        assertThrows(DuplicatedPhoneNumberException.class, () -> {
+            signUpService.signUp(SignUpRequestDTO.builder()
+                    .agree(true)
+                    .name(name)
+                    .email(email)
+                    .password(password)
+                    .phoneNumber(phoneNumber)
+                    .buildingName(building.getName())
+                    .companyName(company.getName())
+                    .build());
+        });
+
+    }
+
+    @Test
+    @DisplayName("회원가입 요청시 정상적으로 저장되는지 테스트")
+    public void givenUserInfo_whenRequestUserInfo_thenSuccess() {
+
+        // given
+        final String email = "test@gmail.com";
+        final String name = "고길동";
+        final String password = passwordEncoder.encode("고길동123");
+        final String phoneNumber = "01054546789";
+        Building building = saveBuilding("미왕빌딩", "서울", "강남구", "강남대로", "356");
+        Company company = saveCompanies(building, "테스트 오피스", "A동 101호");
+
+        User user = User.builder()
+                .name(name)
+                .email(email)
+                .password(password)
+                .phoneNumber(phoneNumber)
+                .building(building)
+                .company(company)
+                .build();
+
+        given(buildingRepository.findByName(building.getName())).willReturn(Optional.of(building));
+        given(companyRepository.findByName(company.getName())).willReturn(Optional.of(company));
+        given(userRepository.existsByEmail(email)).willReturn(false);
+        given(userRepository.existsByPhoneNumber(phoneNumber)).willReturn(false);
+
+        // when
+        signUpService.signUp(SignUpRequestDTO.builder()
+                .agree(true)
+                .name(name)
+                .email(email)
+                .password(password)
+                .phoneNumber(phoneNumber)
+                .buildingName(building.getName())
+                .companyName(company.getName())
+                .build());
+
+        // then
+        verify(userRepository).save(refEq(user));
     }
 
     private Company saveCompanies(Building building, String officeName, String officeUnit) {

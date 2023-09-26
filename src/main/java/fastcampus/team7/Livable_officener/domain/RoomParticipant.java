@@ -57,4 +57,8 @@ public class RoomParticipant extends BaseEntity {
     public void resetUnreadCount() {
         unreadCount = 0;
     }
+
+    public void incrementUnreadCount() {
+        unreadCount++;
+    }
 }

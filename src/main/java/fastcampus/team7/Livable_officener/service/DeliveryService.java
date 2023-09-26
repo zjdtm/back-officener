@@ -107,8 +107,7 @@ public class DeliveryService {
     public void deleteDelivery(Long roomId, User user) {
         Room room = checkHost(roomId, user);
 
-        deliveryParticipantRepository.deleteAllByRoomId(roomId);
-        deliveryRepository.delete(room);
+        room.updateRoomStatus();
     }
 
     private Room checkHost(Long roomId, User user) {
@@ -183,7 +182,6 @@ public class DeliveryService {
 
 
     public MyChatListResponseDTO getChatRoomList(User user) {
-
         List<ChatRoomListDTO> chatRoomListDTO = deliveryRepository.findChatRoomList(user.getId());
 
         MyChatListResponseDTO myChatListResponseDTO = new MyChatListResponseDTO();

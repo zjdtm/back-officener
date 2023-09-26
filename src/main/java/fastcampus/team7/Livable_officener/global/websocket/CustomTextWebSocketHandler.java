@@ -1,9 +1,8 @@
-package fastcampus.team7.Livable_officener.global.handler;
+package fastcampus.team7.Livable_officener.global.websocket;
 
 import fastcampus.team7.Livable_officener.domain.Room;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.chat.SendChatDTO;
-import fastcampus.team7.Livable_officener.global.websocket.WebSocketSessionManager;
 import fastcampus.team7.Livable_officener.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,15 +27,17 @@ public class CustomTextWebSocketHandler extends TextWebSocketHandler {
         Room room = getRoom(session);
         webSocketSessionManager.addSessionToRoom(room.getId(), session);
 
-        User sender = getSender(session);
-        log.info("클라이언트 연결 roomId: {}, senderId: {}, sessionId: {}", room.getId(), sender.getId(), session.getId());
+        User user = WebSocketSessionManager.getSessionUser(session);
+        log.info("[웹소켓 연결 성공] roomId: {}, username: {}, sessionId: {}",
+                room.getId(), user.getName(), session.getId());
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
         Room room = getRoom(session);
-        User sender = getSender(session);
-        log.info("roomId: {}, senderId: {}, payload: {}", room.getId(), sender.getId(), message.getPayload());
+        User sender = WebSocketSessionManager.getSessionUser(session);
+        log.info("[웹소켓 송신] roomId: {}, username: {}, payload: {}",
+                room.getId(), sender.getName(), message.getPayload());
 
         chatService.send(new SendChatDTO(room, sender, message));
     }
@@ -46,16 +47,13 @@ public class CustomTextWebSocketHandler extends TextWebSocketHandler {
         Room room = getRoom(session);
         webSocketSessionManager.removeSessionFromRoom(room.getId(), session);
 
-        User sender = getSender(session);
-        log.info("클라이언트 연결 해제 roomId: {}, senderId: {}, sessionId: {}",
-                room.getId(), sender.getId(), session.getId());
+        User user = WebSocketSessionManager.getSessionUser(session);
+        log.info("[웹소켓 연결 해제] roomId: {}, username: {}, sessionId: {}",
+                room.getId(), user.getName(), session.getId());
     }
 
     private Room getRoom(WebSocketSession session) {
         return (Room) session.getAttributes().get("room");
     }
 
-    private User getSender(WebSocketSession session) {
-        return (User) session.getAttributes().get("sender");
-    }
 }

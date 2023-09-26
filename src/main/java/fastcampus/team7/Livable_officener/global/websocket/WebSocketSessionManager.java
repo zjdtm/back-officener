@@ -2,6 +2,7 @@ package fastcampus.team7.Livable_officener.global.websocket;
 
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -15,7 +16,10 @@ public class WebSocketSessionManager {
 
     private final Map<Long, Collection<WebSocketSession>> roomIdToSessions = new ConcurrentHashMap<>();
 
-    private final Map<Long, WebSocketSession> userIdToSession = new ConcurrentHashMap<>();
+    public static User getSessionUser(WebSocketSession session) {
+        Authentication auth = Objects.requireNonNull((Authentication) session.getPrincipal());
+        return (User) auth.getPrincipal();
+    }
 
     public void addSessionToRoom(Long roomId, WebSocketSession session) {
         Collection<WebSocketSession> sessions;
@@ -28,9 +32,9 @@ public class WebSocketSessionManager {
             return;
         }
 
-        Long requestUserId = getSessionUserId(session);
+        User requestUser = getSessionUser(session);
         Optional<WebSocketSession> duplicateUserSession = sessions.stream()
-                .filter(sess -> getSessionUserId(sess).equals(requestUserId))
+                .filter(sess -> getSessionUser(sess).equals(requestUser))
                 .findFirst();
         if (duplicateUserSession.isPresent()) {
             throw new IllegalStateException("웹소켓 세션은 채팅방마다 참여자별로 하나만 연결 가능합니다.");
@@ -38,25 +42,23 @@ public class WebSocketSessionManager {
         sessions.add(session);
     }
 
-    public void closeSessionForUser(Long userId) {
-        WebSocketSession session = userIdToSession.get(userId);
-        if (session != null) {
-            try {
-                session.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+    public void closeSessionForUser(Long roomId, User kickedUser) {
+        for (WebSocketSession session : getWebSocketSessions(roomId)) {
+            if (kickedUser.equals(getSessionUser(session))) {
+                removeSessionFromRoom(roomId, session);
+                return;
             }
         }
-    }
-
-    private static Long getSessionUserId(WebSocketSession session) {
-        User user = (User) session.getAttributes().get("user");
-        return user.getId();
     }
 
     public void removeSessionFromRoom(Long roomId, WebSocketSession session) {
         Collection<WebSocketSession> sessions = getWebSocketSessions(roomId);
         sessions.remove(session);
+        try {
+            session.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void send(Long roomId, TextMessage message) throws IOException {
@@ -64,6 +66,15 @@ public class WebSocketSessionManager {
         for (WebSocketSession webSocketSession : webSocketSessions) {
             webSocketSession.sendMessage(message);
         }
+    }
+
+    public boolean nonexistent(Long roomId, User user) {
+        for (WebSocketSession session : getWebSocketSessions(roomId)) {
+            if (user.equals(getSessionUser(session))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private Collection<WebSocketSession> getWebSocketSessions(Long roomId) {

@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor
@@ -27,7 +26,7 @@ public class RoomDetailDTO {
     private Long maxAttendees;
     private String description;
     private Boolean isJoin;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
 
