@@ -93,7 +93,7 @@ public class NotificationService {
             DTO.setContent(entity.getNotificationContent().getName());
             DTO.setType(entity.getNotificationType().getName());
             DTO.setRead(entity.isRead());
-            DTO.setMenuTag(entity.getFoodTag().getName());
+            DTO.setMenuTag(entity.getFoodTag().toString());
             DTO.setCreatedAt(entity.getCreatedAt());
             return DTO;
         }
