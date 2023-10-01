@@ -4,6 +4,9 @@ import fastcampus.team7.Livable_officener.domain.Building;
 import fastcampus.team7.Livable_officener.domain.Company;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.*;
+import fastcampus.team7.Livable_officener.dto.BuildingWithCompaniesDTO;
+import fastcampus.team7.Livable_officener.dto.LoginDTO.LoginRequestDTO;
+import fastcampus.team7.Livable_officener.dto.LoginDTO.LoginResponseDTO;
 import fastcampus.team7.Livable_officener.global.exception.*;
 import fastcampus.team7.Livable_officener.global.sercurity.JwtProvider;
 import fastcampus.team7.Livable_officener.global.util.RedisUtil;
@@ -18,9 +21,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import static fastcampus.team7.Livable_officener.dto.BuildingWithCompaniesDTO.*;
+import static fastcampus.team7.Livable_officener.dto.BuildingWithCompaniesDTO.BuildingWithCompaniesResponseDTO.CompanyResponseDTO;
+import static fastcampus.team7.Livable_officener.dto.PhoneAuthDTO.*;
 
 @Service
 @RequiredArgsConstructor
@@ -40,28 +45,33 @@ public class SignUpService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
-    public Map<String, List<BuildingWithCompaniesDTO>> getBuildingWithCompanies(String keyword) {
+    public BuildingWithCompaniesDTO getBuildingWithCompanies(String keyword) {
 
         List<Building> buildings = buildingRepository.findBuildingsByNameContaining(keyword);
-        Map<String, List<BuildingWithCompaniesDTO>> buildingWithCompaniesMap = new HashMap<>();
+        List<BuildingWithCompaniesResponseDTO> buildingWithCompaniesDTOList = new ArrayList<>();
+        BuildingWithCompaniesDTO response = new BuildingWithCompaniesDTO();
 
-        List<BuildingWithCompaniesDTO> buildingWithCompaniesDTOS = new ArrayList<>();
-
-        for (Building building : buildings) {
-
-            BuildingWithCompaniesDTO buildingDTO = BuildingWithCompaniesDTO.builder()
-                    .id(building.getId())
-                    .buildingName(building.getName())
-                    .buildingAddress(building.getAddress())
-                    .offices(getCompanies(companyRepository.findCompaniesByBuildingName(building.getName())))
-                    .build();
-
-            buildingWithCompaniesDTOS.add(buildingDTO);
+        if (buildings.isEmpty()) {
+            response.setBuildings(List.of());
+            return response;
         }
 
-        buildingWithCompaniesMap.put("buildings", buildingWithCompaniesDTOS);
+        for (Building building : buildings) {
+            List<CompanyResponseDTO> officeDTOs = getOfficeDTOs(building);
 
-        return buildingWithCompaniesMap;
+            buildingWithCompaniesDTOList.add(
+                    BuildingWithCompaniesResponseDTO.builder()
+                            .id(building.getId())
+                            .buildingName(building.getName())
+                            .buildingAddress(building.getAddress())
+                            .offices(officeDTOs)
+                            .build()
+            );
+        }
+
+        response.setBuildings(buildingWithCompaniesDTOList);
+
+        return response;
     }
 
     public PhoneAuthResponseDTO getPhoneAuthCode(PhoneAuthRequestDTO request) {
@@ -126,7 +136,7 @@ public class SignUpService {
 
     }
 
-    public Map<String, LoginResponseDTO> login(LoginRequestDTO request) {
+    public LoginDTO login(LoginRequestDTO request) {
 
         String requestEmail = request.getEmail();
         String requestPassword = request.getPassword();
@@ -138,13 +148,13 @@ public class SignUpService {
             throw new InvalidPasswordException();
         }
 
-        BuildingDTO buildingDTO = BuildingDTO.builder()
+        BuildingResponseDTO buildingDTO = BuildingResponseDTO.builder()
                 .id(user.getBuilding().getId())
                 .buildingName(user.getBuilding().getName())
                 .buildingAddress(user.getBuilding().getAddress())
                 .build();
 
-        CompanyDTO companyDTO = CompanyDTO.builder()
+        CompanyResponseDTO companyDTO = CompanyResponseDTO.builder()
                 .id(user.getCompany().getId())
                 .officeName(user.getCompany().getName())
                 .officeNum(user.getCompany().getAddress())
@@ -158,14 +168,14 @@ public class SignUpService {
                 .name(user.getName())
                 .phoneNumber(user.getPhoneNumber())
                 .building(buildingDTO)
-                .company(companyDTO)
+                .office(companyDTO)
                 .token(token)
                 .build();
 
-        Map<String, LoginResponseDTO> loginResponseMap = new HashMap<>();
-        loginResponseMap.put("userInfo", responseBody);
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setUserInfo(responseBody);
 
-        return loginResponseMap;
+        return loginDTO;
     }
 
     public void logout(User user, String authorization) {
@@ -177,17 +187,24 @@ public class SignUpService {
 
     }
 
-    private List<CompanyDTO> getCompanies(List<Company> companies) {
-        List<CompanyDTO> companyDTOS = new ArrayList();
-        for (Company company : companies) {
-            CompanyDTO companyDTO = new CompanyDTO(
-                    company.getId(),
-                    company.getName(),
-                    company.getAddress()
-            );
-            companyDTOS.add(companyDTO);
-        }
-        return companyDTOS;
-    }
 
+    private List<CompanyResponseDTO> getOfficeDTOs(Building building) {
+
+        List<Company> companies = companyRepository.findCompaniesByBuildingName(building.getName());
+        List<CompanyResponseDTO> officeDTOs = new ArrayList<>();
+
+        for (Company company : companies) {
+
+            CompanyResponseDTO officeDTO = CompanyResponseDTO.builder()
+                    .id(company.getId())
+                    .officeName(company.getName())
+                    .officeNum(company.getAddress())
+                    .build();
+
+            officeDTOs.add(officeDTO);
+        }
+
+        return officeDTOs;
+
+    }
 }
