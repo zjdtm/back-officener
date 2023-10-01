@@ -118,4 +118,8 @@ public class APIExceptionHandler {
         return handleExceptionInternal(e, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler
+    public ResponseEntity<?> handleInvalidPasswordException(InvalidPasswordException e) {
+        return handleExceptionInternal(e, HttpStatus.BAD_REQUEST);
+    }
 }

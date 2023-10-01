@@ -1,6 +1,8 @@
 package fastcampus.team7.Livable_officener.global.sercurity;
 
-import fastcampus.team7.Livable_officener.global.constant.JwtExceptionCode;
+import fastcampus.team7.Livable_officener.global.constant.FilterExceptionCode;
+import fastcampus.team7.Livable_officener.global.exception.AlreadyLogoutException;
+import fastcampus.team7.Livable_officener.global.util.RedisUtil;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
@@ -28,13 +30,15 @@ public class JwtProvider {
 
     private Key secretKey;
 
-    private final long exp = 1000L * 60 * 60;
+    private final long exp = 1000L * 60 * 5;
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
 
     private static final String BEARER_TOKEN_PREFIX = "Bearer ";
 
     private final CustomUserDetailsService userDetailsService;
+
+    private final RedisUtil redisUtil;
 
     @PostConstruct
     protected void init() {
@@ -67,8 +71,34 @@ public class JwtProvider {
                 .getSubject();
     }
 
+    public Long getExpirationTime(String token) {
+        return Jwts
+                .parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getExpiration()
+                .getTime();
+    }
+
+    /**
+     *
+     * @param request HttpServletRequest
+     * @return "Authorization" 헤더에서 "Bearer {token} 형식으로 추출
+     */
     public String resolveToken(HttpServletRequest request) {
         return request.getHeader(AUTHORIZATION_HEADER);
+    }
+
+    /**
+     *
+     * @param token "Bearer {token}" 형식
+     * @return accessToken 을 추출
+     */
+    public String getBearerTokenPrefix(String token) {
+        String accessToken = token.split(" ")[1].trim();
+        return accessToken;
     }
 
     public boolean validateToken(String token) {
@@ -76,27 +106,31 @@ public class JwtProvider {
             if (!token.startsWith(BEARER_TOKEN_PREFIX)) {
                 return false;
             }
-            token = token.split(" ")[1].trim();
+            String accessToken = getBearerTokenPrefix(token);
+
+            if (redisUtil.hasBlackList(accessToken)) {
+                throw new AlreadyLogoutException(FilterExceptionCode.ALREADY_LOGGED_OUT);
+            }
 
             Jws<Claims> claims = Jwts
                     .parserBuilder()
                     .setSigningKey(secretKey)
                     .build()
-                    .parseClaimsJws(token);
+                    .parseClaimsJws(accessToken);
 
             return !claims.getBody().getExpiration().before(new Date());
         } catch (SignatureException e) {
             log.info("JwtProvider SignatureException 예외 발생");
-            throw new JwtException(JwtExceptionCode.WRONG_TYPE_TOKEN.getMessage());
+            throw new JwtException(FilterExceptionCode.WRONG_TYPE_TOKEN.getMessage());
         } catch (MalformedJwtException e) {
             log.info("JwtProvider MalformedJwtException 예외 발생");
-            throw new JwtException(JwtExceptionCode.UNSUPPORTED_TOKEN.getMessage());
+            throw new JwtException(FilterExceptionCode.UNSUPPORTED_TOKEN.getMessage());
         } catch (ExpiredJwtException e) {
             log.info("JwtProvider ExpiredJwtException 예외 발생");
-            throw new JwtException(JwtExceptionCode.EXPIRED_TOKEN.getMessage());
+            throw new JwtException(FilterExceptionCode.EXPIRED_TOKEN.getMessage());
         } catch (IllegalArgumentException e) {
             log.info("JwtProvider IllegalArgumentException 예외 발생");
-            throw new JwtException(JwtExceptionCode.UNKNOWN_ERROR.getMessage());
+            throw new JwtException(FilterExceptionCode.UNKNOWN_ERROR.getMessage());
         }
     }
 

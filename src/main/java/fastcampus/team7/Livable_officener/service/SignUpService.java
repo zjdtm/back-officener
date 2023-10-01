@@ -6,17 +6,18 @@ import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.*;
 import fastcampus.team7.Livable_officener.global.exception.*;
 import fastcampus.team7.Livable_officener.global.sercurity.JwtProvider;
+import fastcampus.team7.Livable_officener.global.util.RedisUtil;
 import fastcampus.team7.Livable_officener.repository.BuildingRepository;
 import fastcampus.team7.Livable_officener.repository.CompanyRepository;
 import fastcampus.team7.Livable_officener.repository.PhoneAuthDTORedisRepository;
 import fastcampus.team7.Livable_officener.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @Service
@@ -29,9 +30,10 @@ public class SignUpService {
     private final CompanyRepository companyRepository;
 
     private final UserRepository userRepository;
-    private final PhoneAuthDTORedisRepository phoneAuthDTORedisRepository;
 
     private final JwtProvider jwtProvider;
+
+    private final RedisUtil redisUtil;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -68,25 +70,18 @@ public class SignUpService {
             throw new DuplicatedPhoneNumberException();
         }
 
-        PhoneAuthDTO findPhoneAuthDTO = phoneAuthDTORedisRepository.findById(requestPhoneNumber)
-                .orElse(null);
+        String phoneAuthCode = redisUtil.getPhoneAuthCode(requestPhoneNumber);
 
-        if (findPhoneAuthDTO == null) {
-
-            PhoneAuthDTO savedPhoneAuthDTO = phoneAuthDTORedisRepository.save(PhoneAuthDTO.builder()
-                    .phoneNumber(requestPhoneNumber)
-                    .verifyCode(generateVerifyCode())
-                    .build());
+        if (ObjectUtils.isEmpty(phoneAuthCode)) {
+            redisUtil.setPhoneAuthCode(requestPhoneNumber);
 
             return PhoneAuthResponseDTO.builder()
-                    .verifyCode(savedPhoneAuthDTO.getVerifyCode())
+                    .verifyCode(redisUtil.getPhoneAuthCode(requestPhoneNumber))
                     .build();
         }
 
-        findPhoneAuthDTO.changeVerifyCode(generateVerifyCode());
-
         return PhoneAuthResponseDTO.builder()
-                .verifyCode(findPhoneAuthDTO.getVerifyCode())
+                .verifyCode(redisUtil.changePhoneAuthCode(requestPhoneNumber))
                 .build();
 
     }
@@ -97,14 +92,23 @@ public class SignUpService {
         String requestPhoneNumber = request.getPhoneNumber();
         String requestVerifyCode = request.getVerifyCode();
 
-        PhoneAuthDTO findPhoneAuthDTO = phoneAuthDTORedisRepository.findById(requestPhoneNumber)
-                .orElseThrow(() -> new NotVerifiedPhoneNumberException());
+        if (!redisUtil.hasPhoneAuthCode(requestPhoneNumber)) {
+            throw new NotVerifiedPhoneNumberException();
+        }
+//        PhoneAuthDTO findPhoneAuthDTO = phoneAuthDTORedisRepository.findById(requestPhoneNumber)
+//                .orElseThrow(() -> new NotVerifiedPhoneNumberException());
 
-        if (findPhoneAuthDTO.getVerifyCode().equals(requestVerifyCode)) {
-            return true;
+//        if (findPhoneAuthDTO.getVerifyCode().equals(requestVerifyCode)) {
+//            return true;
+//        }
+//
+//        throw new NotVerifiedPhoneAuthCodeException();
+
+        if (!redisUtil.getPhoneAuthCode(requestPhoneNumber).equals(requestVerifyCode)) {
+            throw new NotVerifiedPhoneAuthCodeException();
         }
 
-        throw new NotVerifiedPhoneAuthCodeException();
+        return true;
 
     }
 
@@ -132,9 +136,14 @@ public class SignUpService {
     public Map<String, LoginResponseDTO> login(LoginRequestDTO request) {
 
         String requestEmail = request.getEmail();
+        String requestPassword = request.getPassword();
 
         User user = userRepository.findByEmail(requestEmail)
                 .orElseThrow(() -> new NotFoundUserException());
+
+        if (!passwordEncoder.matches(requestPassword, user.getPassword())) {
+            throw new InvalidPasswordException();
+        }
 
         BuildingDTO buildingDTO = BuildingDTO.builder()
                 .id(user.getBuilding().getId())
@@ -166,13 +175,13 @@ public class SignUpService {
         return loginResponseMap;
     }
 
-    private String generateVerifyCode() {
-        Random random = new Random();
-        String newVerifyCode = "";
-        for (int i = 0; i < 6; i++) {
-            newVerifyCode += Integer.toString(random.nextInt(10));
-        }
-        return newVerifyCode;
+    public void logout(User user, String authorization) {
+
+        String bearerTokenPrefix = jwtProvider.getBearerTokenPrefix(authorization);
+        Long expirationTime = jwtProvider.getExpirationTime(bearerTokenPrefix);
+
+        redisUtil.setBlackList(bearerTokenPrefix, user.getEmail(), expirationTime);
+
     }
 
     private List<CompanyDTO> getCompanies(List<Company> companies) {
