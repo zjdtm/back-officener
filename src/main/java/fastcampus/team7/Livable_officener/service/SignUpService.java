@@ -9,7 +9,6 @@ import fastcampus.team7.Livable_officener.global.sercurity.JwtProvider;
 import fastcampus.team7.Livable_officener.global.util.RedisUtil;
 import fastcampus.team7.Livable_officener.repository.BuildingRepository;
 import fastcampus.team7.Livable_officener.repository.CompanyRepository;
-import fastcampus.team7.Livable_officener.repository.PhoneAuthDTORedisRepository;
 import fastcampus.team7.Livable_officener.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +17,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -73,10 +75,9 @@ public class SignUpService {
         String phoneAuthCode = redisUtil.getPhoneAuthCode(requestPhoneNumber);
 
         if (ObjectUtils.isEmpty(phoneAuthCode)) {
-            redisUtil.setPhoneAuthCode(requestPhoneNumber);
 
             return PhoneAuthResponseDTO.builder()
-                    .verifyCode(redisUtil.getPhoneAuthCode(requestPhoneNumber))
+                    .verifyCode(redisUtil.setPhoneAuthCode(requestPhoneNumber))
                     .build();
         }
 
@@ -95,14 +96,6 @@ public class SignUpService {
         if (!redisUtil.hasPhoneAuthCode(requestPhoneNumber)) {
             throw new NotVerifiedPhoneNumberException();
         }
-//        PhoneAuthDTO findPhoneAuthDTO = phoneAuthDTORedisRepository.findById(requestPhoneNumber)
-//                .orElseThrow(() -> new NotVerifiedPhoneNumberException());
-
-//        if (findPhoneAuthDTO.getVerifyCode().equals(requestVerifyCode)) {
-//            return true;
-//        }
-//
-//        throw new NotVerifiedPhoneAuthCodeException();
 
         if (!redisUtil.getPhoneAuthCode(requestPhoneNumber).equals(requestVerifyCode)) {
             throw new NotVerifiedPhoneAuthCodeException();

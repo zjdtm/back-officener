@@ -15,8 +15,9 @@ public class RedisUtil {
     private final RedisTemplate<String, String> redisBlackListTemplate;
 
     // 핸드폰 인증 코드 Redis 단
-    public void setPhoneAuthCode(String key) {
+    public String setPhoneAuthCode(String key) {
         redisPhoneAuthCodeTemplate.opsForValue().set(key, generateVerifyCode(), 1, TimeUnit.MINUTES);
+        return getPhoneAuthCode(key);
     }
 
     public String getPhoneAuthCode(String key) {
