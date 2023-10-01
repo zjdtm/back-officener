@@ -5,6 +5,9 @@ import fastcampus.team7.Livable_officener.domain.Building;
 import fastcampus.team7.Livable_officener.domain.Company;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.*;
+import fastcampus.team7.Livable_officener.dto.PhoneAuthDTO.PhoneAuthConfirmDTO;
+import fastcampus.team7.Livable_officener.dto.PhoneAuthDTO.PhoneAuthRequestDTO;
+import fastcampus.team7.Livable_officener.dto.PhoneAuthDTO.PhoneAuthResponseDTO;
 import fastcampus.team7.Livable_officener.global.exception.*;
 import fastcampus.team7.Livable_officener.global.util.RedisUtil;
 import fastcampus.team7.Livable_officener.repository.BuildingRepository;
@@ -25,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,20 +70,22 @@ class SignUpServiceTest {
         given(companyRepository.findCompaniesByBuildingName(buildings.get(0).getName())).willReturn(companies);
 
         // when
-        Map<String, List<BuildingWithCompaniesDTO>> buildingWithCompanies = signUpService.getBuildingWithCompanies(keyword);
+        BuildingWithCompaniesDTO buildingWithCompanies = signUpService.getBuildingWithCompanies(keyword);
 
         // then
-        BuildingWithCompaniesDTO expectedDto = buildingWithCompanies.get("buildings").get(0);
-        List<CompanyDTO> companyDTOS = expectedDto.getOffices();
+        assertThat(buildingWithCompanies.getBuildings().get(0)
+                .getId()).isEqualTo(building.getId());
+        assertThat(buildingWithCompanies.getBuildings().get(0)
+                .getBuildingAddress()).isEqualTo(building.getAddress());
+        assertThat(buildingWithCompanies.getBuildings().get(0)
+                .getBuildingName()).isEqualTo(building.getName());
 
-        assertThat(expectedDto.getBuildingName()).isEqualTo(building.getName());
-        assertThat(expectedDto.getBuildingAddress()).isEqualTo(building.getRegion() + " " + building.getCity() + " " + building.getStreet() + " " + building.getZipcode());
-        assertThat(companyDTOS.get(0).getOfficeName()).isEqualTo("진회사");
-        assertThat(companyDTOS.get(1).getOfficeName()).isEqualTo("칠리버블");
-        assertThat(companyDTOS.get(2).getOfficeName()).isEqualTo("식스센스");
-
-        then(buildingRepository).should(times(1)).findBuildingsByNameContaining(keyword);
-        then(companyRepository).should(times(1)).findCompaniesByBuildingName(buildings.get(0).getName());
+        assertThat(buildingWithCompanies.getBuildings().get(0)
+                .getOffices().get(0).getId()).isEqualTo(companies.get(0).getId());
+        assertThat(buildingWithCompanies.getBuildings().get(0)
+                .getOffices().get(0).getOfficeName()).isEqualTo(companies.get(0).getName());
+        assertThat(buildingWithCompanies.getBuildings().get(0)
+                .getOffices().get(0).getOfficeNum()).isEqualTo(companies.get(0).getAddress());
 
     }
 
@@ -95,10 +99,10 @@ class SignUpServiceTest {
         given(buildingRepository.findBuildingsByNameContaining(keyword)).willReturn(Collections.emptyList());
 
         // when
-        Map<String, List<BuildingWithCompaniesDTO>> buildingWithCompanies = signUpService.getBuildingWithCompanies(keyword);
+        BuildingWithCompaniesDTO buildingWithCompanies = signUpService.getBuildingWithCompanies(keyword);
 
         // then
-        assertThat(buildingWithCompanies.get("buildings")).isEmpty();
+        assertThat(buildingWithCompanies.getBuildings()).isEmpty();
     }
 
     @Test
