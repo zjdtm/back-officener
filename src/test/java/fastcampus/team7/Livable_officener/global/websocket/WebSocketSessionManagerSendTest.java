@@ -42,10 +42,8 @@ class WebSocketSessionManagerSendTest {
         Collection<WebSocketSession> sessions = Collections.synchronizedList(new ArrayList<>());
         for (int i = 1; i <= numSessions; ++i) {
             User user = mock(User.class);
-            Authentication auth = mock(Authentication.class);
             WebSocketSession session = mock(WebSocketSession.class);
-            given(session.getPrincipal()).willReturn(auth);
-            given(auth.getPrincipal()).willReturn(user);
+            given(session.getPrincipal()).willReturn(user);
             sut.addSessionToRoom(1L, session);
         }
 

@@ -2,7 +2,6 @@ package fastcampus.team7.Livable_officener.global.websocket;
 
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -17,8 +16,7 @@ public class WebSocketSessionManager {
     private final Map<Long, Collection<WebSocketSession>> roomIdToSessions = new ConcurrentHashMap<>();
 
     public static User getSessionUser(WebSocketSession session) {
-        Authentication auth = Objects.requireNonNull((Authentication) session.getPrincipal());
-        return (User) auth.getPrincipal();
+        return (User) session.getPrincipal();
     }
 
     public void addSessionToRoom(Long roomId, WebSocketSession session) {

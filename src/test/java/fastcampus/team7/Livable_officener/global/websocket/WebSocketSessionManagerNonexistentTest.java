@@ -22,10 +22,8 @@ class WebSocketSessionManagerNonexistentTest {
         final int numSessions = 5;
         for (int i = 1; i <= numSessions; ++i) {
             User user = User.builder().id((long) i).build();
-            Authentication auth = mock(Authentication.class);
             WebSocketSession session = mock(WebSocketSession.class);
-            given(session.getPrincipal()).willReturn(auth);
-            given(auth.getPrincipal()).willReturn(user);
+            given(session.getPrincipal()).willReturn(user);
             sut.addSessionToRoom(roomId, session);
         }
 
@@ -46,10 +44,8 @@ class WebSocketSessionManagerNonexistentTest {
         final int numSessions = 6;
         for (int i = 1; i <= numSessions; ++i) {
             User user = User.builder().id((long) i).build();
-            Authentication auth = mock(Authentication.class);
             WebSocketSession session = mock(WebSocketSession.class);
-            given(session.getPrincipal()).willReturn(auth);
-            given(auth.getPrincipal()).willReturn(user);
+            given(session.getPrincipal()).willReturn(user);
             sut.addSessionToRoom(roomId, session);
         }
 
