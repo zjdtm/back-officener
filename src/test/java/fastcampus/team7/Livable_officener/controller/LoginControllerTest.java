@@ -1,6 +1,8 @@
 package fastcampus.team7.Livable_officener.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.net.HttpHeaders;
+import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.LoginDTO;
 import fastcampus.team7.Livable_officener.dto.LoginDTO.LoginRequestDTO;
 import fastcampus.team7.Livable_officener.global.exception.InvalidPasswordException;
@@ -22,7 +24,9 @@ import static fastcampus.team7.Livable_officener.dto.BuildingWithCompaniesDTO.Bu
 import static fastcampus.team7.Livable_officener.dto.BuildingWithCompaniesDTO.BuildingWithCompaniesResponseDTO.CompanyResponseDTO;
 import static fastcampus.team7.Livable_officener.dto.LoginDTO.LoginResponseDTO;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -208,6 +212,28 @@ class LoginControllerTest {
                 .andExpect(jsonPath("$.data.userInfo.building.buildingName").value(buildingResponseDTO.getBuildingName()))
                 .andExpect(jsonPath("$.data.userInfo.office.officeName").value(companyResponseDTO.getOfficeName()))
                 .andExpect(jsonPath("$.data.userInfo.token").value(token));
+    }
+
+    @Test
+    @WithMockUser
+    @DisplayName("로그아웃 요청 성공시 응답값으로 '로그아웃에 성공했습니다.' 를 받는지 테스트")
+    void givenAccessToken_whenLogoutRequest_thenLogoutSuccess() throws Exception {
+
+        // given
+        doNothing().when(signUpService).logout(any(User.class), anyString());
+
+        // when & then
+        mvc.perform(post("/api/logout")
+                        .with(csrf())
+                        .header(HttpHeaders.AUTHORIZATION,
+                                "Bearer " + jwtProvider.createToken(anyString())
+                        )
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.data").value("로그아웃에 성공하였습니다."));
     }
 
 }
