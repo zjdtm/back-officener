@@ -1,6 +1,6 @@
 package fastcampus.team7.Livable_officener.controller;
 
-import fastcampus.team7.Livable_officener.dto.NotificationDTO;
+import fastcampus.team7.Livable_officener.dto.notification.NotificationDTO;
 import fastcampus.team7.Livable_officener.global.util.APIDataResponse;
 import fastcampus.team7.Livable_officener.service.NotificationService;
 import lombok.RequiredArgsConstructor;

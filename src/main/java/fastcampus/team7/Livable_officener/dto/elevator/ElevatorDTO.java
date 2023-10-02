@@ -1,4 +1,4 @@
-package fastcampus.team7.Livable_officener.dto;
+package fastcampus.team7.Livable_officener.dto.elevator;
 
 import fastcampus.team7.Livable_officener.global.constant.Direction;
 import fastcampus.team7.Livable_officener.global.constant.ElevatorStatus;

@@ -2,7 +2,8 @@ package fastcampus.team7.Livable_officener.service;
 
 import fastcampus.team7.Livable_officener.domain.Notification;
 import fastcampus.team7.Livable_officener.domain.User;
-import fastcampus.team7.Livable_officener.dto.NotificationDTO;
+import fastcampus.team7.Livable_officener.dto.notification.NotificationDTO;
+import fastcampus.team7.Livable_officener.global.exception.NotFoundUserException;
 import fastcampus.team7.Livable_officener.global.sercurity.JwtProvider;
 import fastcampus.team7.Livable_officener.global.util.APIDataResponse;
 import fastcampus.team7.Livable_officener.repository.NotificationRepository;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,13 +25,16 @@ public class NotificationService {
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
 
+    @Transactional
     public ResponseEntity<APIDataResponse<List<NotificationDTO>>> getNotifyList(String token){
         String email = jwtProvider.getEmail(token);
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("해당하는 유저가 없습니다."));;
+                .orElseThrow(() -> new NotFoundUserException());
         Long id = user.getId();
         List<Notification> notifications = notificationRepository.findByUserId(id)
-                .orElseThrow(() -> new RuntimeException("해당하는 유저에 알림이 없습니다."));
+                .orElse(null);
+        System.out.println(notifications);
+
 
         List<NotificationDTO> notificationDTOS = new ArrayList<>();
 
@@ -43,14 +48,15 @@ public class NotificationService {
         return responseEntity;
     }
 
+    @Transactional
     public ResponseEntity<APIDataResponse<String>> readAll(String token){
         String email = jwtProvider.getEmail(token);
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("해당하는 유저가 없습니다."));;
+                .orElseThrow(() -> new NotFoundUserException());
         Long id = user.getId();
 
         List<Notification> notifications = notificationRepository.findByUserId(id)
-                .orElseThrow(() -> new RuntimeException("해당하는 유저에 알림이 없습니다."));
+                .orElse(null);
 
         for(Notification notification : notifications){
             notification.setRead(true);
@@ -63,15 +69,16 @@ public class NotificationService {
         return responseEntity;
     }
 
+    @Transactional
     public ResponseEntity<APIDataResponse<String>> readNotify(String token,Long notifyId){
             String email = jwtProvider.getEmail(token);
             User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("해당하는 유저가 없습니다."));
-            ;
+                    .orElseThrow(() -> new NotFoundUserException());
+
             Long id = user.getId();
 
             Notification notification = notificationRepository.findById(notifyId)
-                    .orElseThrow(() -> new RuntimeException("해당하는 유저에 알림이 없습니다."));
+                    .orElse(null);
 
             if (notification.getUser().getId() == id) {
                 notification.setRead(true);

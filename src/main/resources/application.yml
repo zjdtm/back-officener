@@ -1,7 +1,3 @@
-api:
-  key: HDE3ab698f24d4211ee92a
-  secret: 3ab6991d4d4211ee92a802b67259d33a
-
 spring:
   datasource:
     username: root

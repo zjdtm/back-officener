@@ -1,4 +1,4 @@
-package fastcampus.team7.Livable_officener.dto;
+package fastcampus.team7.Livable_officener.dto.notification;
 
 import lombok.Data;
 
