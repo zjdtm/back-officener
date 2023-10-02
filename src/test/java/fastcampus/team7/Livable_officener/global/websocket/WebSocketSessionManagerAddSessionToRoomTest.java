@@ -36,17 +36,13 @@ class WebSocketSessionManagerAddSessionToRoomTest {
         final Long roomId = 1L;
         final Long userId = 1L;
         User user = User.builder().id(userId).build();
-        Authentication auth = mock(Authentication.class);
         WebSocketSession session = mock(WebSocketSession.class);
-        given(session.getPrincipal()).willReturn(auth);
-        given(auth.getPrincipal()).willReturn(user);
+        given(session.getPrincipal()).willReturn(user);
         sut.addSessionToRoom(roomId, session);
 
         User newUser = User.builder().id(userId).build();
-        Authentication newAuth = mock(Authentication.class);
         WebSocketSession newSession = mock(WebSocketSession.class);
-        given(newSession.getPrincipal()).willReturn(newAuth);
-        given(newAuth.getPrincipal()).willReturn(newUser);
+        given(newSession.getPrincipal()).willReturn(newUser);
 
         // when, then
         assertThatThrownBy(() -> sut.addSessionToRoom(roomId, newSession))
@@ -60,18 +56,14 @@ class WebSocketSessionManagerAddSessionToRoomTest {
         Long roomId = 1L;
         Long userId = 1L;
         User user = User.builder().id(userId).build();
-        Authentication auth = mock(Authentication.class);
         WebSocketSession session = mock(WebSocketSession.class);
-        given(session.getPrincipal()).willReturn(auth);
-        given(auth.getPrincipal()).willReturn(user);
+        given(session.getPrincipal()).willReturn(user);
         sut.addSessionToRoom(roomId, session);
 
         Long newUserId = 2L;
         User newUser = User.builder().id(newUserId).build();
-        Authentication newAuth = mock(Authentication.class);
         WebSocketSession newSession = mock(WebSocketSession.class);
-        given(newSession.getPrincipal()).willReturn(newAuth);
-        given(newAuth.getPrincipal()).willReturn(newUser);
+        given(newSession.getPrincipal()).willReturn(newUser);
 
         // when
         sut.addSessionToRoom(roomId, newSession);
