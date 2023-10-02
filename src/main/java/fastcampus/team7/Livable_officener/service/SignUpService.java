@@ -180,7 +180,7 @@ public class SignUpService {
 
     public void logout(User user, String authorization) {
 
-        String bearerTokenPrefix = jwtProvider.getBearerTokenPrefix(authorization);
+        String bearerTokenPrefix = jwtProvider.parseAccessToken(authorization);
         Long expirationTime = jwtProvider.getExpirationTime(bearerTokenPrefix);
 
         redisUtil.setBlackList(bearerTokenPrefix, user.getEmail(), expirationTime);
