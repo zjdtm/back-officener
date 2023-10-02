@@ -1,18 +1,24 @@
 package fastcampus.team7.Livable_officener.controller;
 
-import fastcampus.team7.Livable_officener.dto.*;
+import fastcampus.team7.Livable_officener.domain.User;
+import fastcampus.team7.Livable_officener.dto.BuildingWithCompaniesDTO;
+import fastcampus.team7.Livable_officener.dto.LoginDTO;
+import fastcampus.team7.Livable_officener.dto.LoginDTO.LoginRequestDTO;
+import fastcampus.team7.Livable_officener.dto.PhoneAuthDTO.PhoneAuthConfirmDTO;
+import fastcampus.team7.Livable_officener.dto.SignUpRequestDTO;
 import fastcampus.team7.Livable_officener.global.util.APIDataResponse;
 import fastcampus.team7.Livable_officener.service.SignUpService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.List;
-import java.util.Map;
+
+import static fastcampus.team7.Livable_officener.dto.PhoneAuthDTO.PhoneAuthRequestDTO;
+import static fastcampus.team7.Livable_officener.dto.PhoneAuthDTO.PhoneAuthResponseDTO;
 
 @RestController
 @RequestMapping("/api")
@@ -22,11 +28,11 @@ public class SignUpController {
     private SignUpService signUpService;
 
     @GetMapping("/building")
-    public ResponseEntity<APIDataResponse<Map<String, List<BuildingWithCompaniesDTO>>>> getAllBuildings(@RequestParam("name") String keyword) {
+    public ResponseEntity<APIDataResponse<BuildingWithCompaniesDTO>> getAllBuildings(@RequestParam("name") String keyword) {
 
-        Map<String, List<BuildingWithCompaniesDTO>> buildingWithCompanies = signUpService.getBuildingWithCompanies(keyword);
+        BuildingWithCompaniesDTO result = signUpService.getBuildingWithCompanies(keyword);
 
-        return APIDataResponse.of(HttpStatus.OK, buildingWithCompanies);
+        return APIDataResponse.of(HttpStatus.OK, result);
 
     }
 
@@ -59,12 +65,22 @@ public class SignUpController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<APIDataResponse<Map<String, LoginResponseDTO>>> login(@RequestBody @Valid LoginRequestDTO request) {
+    public ResponseEntity<APIDataResponse<LoginDTO>> login(@RequestBody @Valid LoginRequestDTO request) {
 
-        Map<String, LoginResponseDTO> result = signUpService.login(request);
+        LoginDTO result = signUpService.login(request);
 
         return APIDataResponse.of(HttpStatus.OK, result);
 
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<APIDataResponse<String>> logout(
+            @AuthenticationPrincipal User user,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
+
+        signUpService.logout(user, authorization);
+
+        return APIDataResponse.of(HttpStatus.OK, "로그아웃에 성공하였습니다.");
     }
 
 }

@@ -4,20 +4,28 @@ import fastcampus.team7.Livable_officener.domain.Building;
 import fastcampus.team7.Livable_officener.domain.Company;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.*;
+import fastcampus.team7.Livable_officener.dto.BuildingWithCompaniesDTO;
+import fastcampus.team7.Livable_officener.dto.LoginDTO.LoginRequestDTO;
+import fastcampus.team7.Livable_officener.dto.LoginDTO.LoginResponseDTO;
 import fastcampus.team7.Livable_officener.global.exception.*;
 import fastcampus.team7.Livable_officener.global.sercurity.JwtProvider;
+import fastcampus.team7.Livable_officener.global.util.RedisUtil;
 import fastcampus.team7.Livable_officener.repository.BuildingRepository;
 import fastcampus.team7.Livable_officener.repository.CompanyRepository;
-import fastcampus.team7.Livable_officener.repository.PhoneAuthDTORedisRepository;
 import fastcampus.team7.Livable_officener.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import static fastcampus.team7.Livable_officener.dto.BuildingWithCompaniesDTO.*;
+import static fastcampus.team7.Livable_officener.dto.BuildingWithCompaniesDTO.BuildingWithCompaniesResponseDTO.CompanyResponseDTO;
+import static fastcampus.team7.Livable_officener.dto.PhoneAuthDTO.*;
 
 @Service
 @RequiredArgsConstructor
@@ -29,35 +37,41 @@ public class SignUpService {
     private final CompanyRepository companyRepository;
 
     private final UserRepository userRepository;
-    private final PhoneAuthDTORedisRepository phoneAuthDTORedisRepository;
 
     private final JwtProvider jwtProvider;
+
+    private final RedisUtil redisUtil;
 
     private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
-    public Map<String, List<BuildingWithCompaniesDTO>> getBuildingWithCompanies(String keyword) {
+    public BuildingWithCompaniesDTO getBuildingWithCompanies(String keyword) {
 
         List<Building> buildings = buildingRepository.findBuildingsByNameContaining(keyword);
-        Map<String, List<BuildingWithCompaniesDTO>> buildingWithCompaniesMap = new HashMap<>();
+        List<BuildingWithCompaniesResponseDTO> buildingWithCompaniesDTOList = new ArrayList<>();
+        BuildingWithCompaniesDTO response = new BuildingWithCompaniesDTO();
 
-        List<BuildingWithCompaniesDTO> buildingWithCompaniesDTOS = new ArrayList<>();
-
-        for (Building building : buildings) {
-
-            BuildingWithCompaniesDTO buildingDTO = BuildingWithCompaniesDTO.builder()
-                    .id(building.getId())
-                    .buildingName(building.getName())
-                    .buildingAddress(building.getAddress())
-                    .offices(getCompanies(companyRepository.findCompaniesByBuildingName(building.getName())))
-                    .build();
-
-            buildingWithCompaniesDTOS.add(buildingDTO);
+        if (buildings.isEmpty()) {
+            response.setBuildings(List.of());
+            return response;
         }
 
-        buildingWithCompaniesMap.put("buildings", buildingWithCompaniesDTOS);
+        for (Building building : buildings) {
+            List<CompanyResponseDTO> officeDTOs = getOfficeDTOs(building);
 
-        return buildingWithCompaniesMap;
+            buildingWithCompaniesDTOList.add(
+                    BuildingWithCompaniesResponseDTO.builder()
+                            .id(building.getId())
+                            .buildingName(building.getName())
+                            .buildingAddress(building.getAddress())
+                            .offices(officeDTOs)
+                            .build()
+            );
+        }
+
+        response.setBuildings(buildingWithCompaniesDTOList);
+
+        return response;
     }
 
     public PhoneAuthResponseDTO getPhoneAuthCode(PhoneAuthRequestDTO request) {
@@ -68,25 +82,17 @@ public class SignUpService {
             throw new DuplicatedPhoneNumberException();
         }
 
-        PhoneAuthDTO findPhoneAuthDTO = phoneAuthDTORedisRepository.findById(requestPhoneNumber)
-                .orElse(null);
+        String phoneAuthCode = redisUtil.getPhoneAuthCode(requestPhoneNumber);
 
-        if (findPhoneAuthDTO == null) {
-
-            PhoneAuthDTO savedPhoneAuthDTO = phoneAuthDTORedisRepository.save(PhoneAuthDTO.builder()
-                    .phoneNumber(requestPhoneNumber)
-                    .verifyCode(generateVerifyCode())
-                    .build());
+        if (ObjectUtils.isEmpty(phoneAuthCode)) {
 
             return PhoneAuthResponseDTO.builder()
-                    .verifyCode(savedPhoneAuthDTO.getVerifyCode())
+                    .verifyCode(redisUtil.setPhoneAuthCode(requestPhoneNumber))
                     .build();
         }
 
-        findPhoneAuthDTO.changeVerifyCode(generateVerifyCode());
-
         return PhoneAuthResponseDTO.builder()
-                .verifyCode(findPhoneAuthDTO.getVerifyCode())
+                .verifyCode(redisUtil.changePhoneAuthCode(requestPhoneNumber))
                 .build();
 
     }
@@ -97,14 +103,15 @@ public class SignUpService {
         String requestPhoneNumber = request.getPhoneNumber();
         String requestVerifyCode = request.getVerifyCode();
 
-        PhoneAuthDTO findPhoneAuthDTO = phoneAuthDTORedisRepository.findById(requestPhoneNumber)
-                .orElseThrow(() -> new NotVerifiedPhoneNumberException());
-
-        if (findPhoneAuthDTO.getVerifyCode().equals(requestVerifyCode)) {
-            return true;
+        if (!redisUtil.hasPhoneAuthCode(requestPhoneNumber)) {
+            throw new NotVerifiedPhoneNumberException();
         }
 
-        throw new NotVerifiedPhoneAuthCodeException();
+        if (!redisUtil.getPhoneAuthCode(requestPhoneNumber).equals(requestVerifyCode)) {
+            throw new NotVerifiedPhoneAuthCodeException();
+        }
+
+        return true;
 
     }
 
@@ -129,20 +136,25 @@ public class SignUpService {
 
     }
 
-    public Map<String, LoginResponseDTO> login(LoginRequestDTO request) {
+    public LoginDTO login(LoginRequestDTO request) {
 
         String requestEmail = request.getEmail();
+        String requestPassword = request.getPassword();
 
         User user = userRepository.findByEmail(requestEmail)
                 .orElseThrow(() -> new NotFoundUserException());
 
-        BuildingDTO buildingDTO = BuildingDTO.builder()
+        if (!passwordEncoder.matches(requestPassword, user.getPassword())) {
+            throw new InvalidPasswordException();
+        }
+
+        BuildingResponseDTO buildingDTO = BuildingResponseDTO.builder()
                 .id(user.getBuilding().getId())
                 .buildingName(user.getBuilding().getName())
                 .buildingAddress(user.getBuilding().getAddress())
                 .build();
 
-        CompanyDTO companyDTO = CompanyDTO.builder()
+        CompanyResponseDTO companyDTO = CompanyResponseDTO.builder()
                 .id(user.getCompany().getId())
                 .officeName(user.getCompany().getName())
                 .officeNum(user.getCompany().getAddress())
@@ -156,36 +168,43 @@ public class SignUpService {
                 .name(user.getName())
                 .phoneNumber(user.getPhoneNumber())
                 .building(buildingDTO)
-                .company(companyDTO)
+                .office(companyDTO)
                 .token(token)
                 .build();
 
-        Map<String, LoginResponseDTO> loginResponseMap = new HashMap<>();
-        loginResponseMap.put("userInfo", responseBody);
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setUserInfo(responseBody);
 
-        return loginResponseMap;
+        return loginDTO;
     }
 
-    private String generateVerifyCode() {
-        Random random = new Random();
-        String newVerifyCode = "";
-        for (int i = 0; i < 6; i++) {
-            newVerifyCode += Integer.toString(random.nextInt(10));
-        }
-        return newVerifyCode;
+    public void logout(User user, String authorization) {
+
+        String bearerTokenPrefix = jwtProvider.getBearerTokenPrefix(authorization);
+        Long expirationTime = jwtProvider.getExpirationTime(bearerTokenPrefix);
+
+        redisUtil.setBlackList(bearerTokenPrefix, user.getEmail(), expirationTime);
+
     }
 
-    private List<CompanyDTO> getCompanies(List<Company> companies) {
-        List<CompanyDTO> companyDTOS = new ArrayList();
+
+    private List<CompanyResponseDTO> getOfficeDTOs(Building building) {
+
+        List<Company> companies = companyRepository.findCompaniesByBuildingName(building.getName());
+        List<CompanyResponseDTO> officeDTOs = new ArrayList<>();
+
         for (Company company : companies) {
-            CompanyDTO companyDTO = new CompanyDTO(
-                    company.getId(),
-                    company.getName(),
-                    company.getAddress()
-            );
-            companyDTOS.add(companyDTO);
-        }
-        return companyDTOS;
-    }
 
+            CompanyResponseDTO officeDTO = CompanyResponseDTO.builder()
+                    .id(company.getId())
+                    .officeName(company.getName())
+                    .officeNum(company.getAddress())
+                    .build();
+
+            officeDTOs.add(officeDTO);
+        }
+
+        return officeDTOs;
+
+    }
 }

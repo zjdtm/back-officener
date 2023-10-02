@@ -1,23 +1,41 @@
 package fastcampus.team7.Livable_officener.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.redis.core.RedisHash;
+import lombok.*;
 
-import java.io.Serializable;
+public class PhoneAuthDTO {
 
-@Getter
-@Builder
-@RedisHash(timeToLive = 60)
-public class PhoneAuthDTO implements Serializable {
+    @Getter
+    @Setter
+    @Builder
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @AllArgsConstructor
+    public static class PhoneAuthRequestDTO {
 
-    @Id
-    private String phoneNumber;
+        private String name;
 
-    private String verifyCode;
-
-    public void changeVerifyCode(String newVerifyCode) {
-        this.verifyCode = newVerifyCode;
+        private String phoneNumber;
     }
+
+    @Getter
+    @Setter
+    @Builder
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @AllArgsConstructor
+    public static class PhoneAuthResponseDTO {
+
+        private String verifyCode;
+
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @AllArgsConstructor
+    public static class PhoneAuthConfirmDTO {
+
+        private String phoneNumber;
+
+        private String verifyCode;
+    }
+
 }

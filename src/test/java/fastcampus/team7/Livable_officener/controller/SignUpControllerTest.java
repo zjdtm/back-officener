@@ -2,6 +2,7 @@ package fastcampus.team7.Livable_officener.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fastcampus.team7.Livable_officener.dto.*;
+import fastcampus.team7.Livable_officener.dto.BuildingWithCompaniesDTO;
 import fastcampus.team7.Livable_officener.global.exception.DuplicatedPhoneNumberException;
 import fastcampus.team7.Livable_officener.global.exception.NotVerifiedPhoneAuthCodeException;
 import fastcampus.team7.Livable_officener.global.exception.NotVerifiedPhoneNumberException;
@@ -19,11 +20,12 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.*;
 
+import static fastcampus.team7.Livable_officener.dto.BuildingWithCompaniesDTO.BuildingWithCompaniesResponseDTO.CompanyResponseDTO;
+import static fastcampus.team7.Livable_officener.dto.PhoneAuthDTO.*;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -54,43 +56,42 @@ class SignUpControllerTest {
 
         // given
         final String keyword = "미";
-        Map<String, List<BuildingWithCompaniesDTO>> response = new HashMap<>();
-        List<BuildingWithCompaniesDTO> buildingWithCompaniesDTOList = new ArrayList<>();
-        BuildingWithCompaniesDTO buildingWithCompaniesDTO = BuildingWithCompaniesDTO
-                .builder()
-                .id(1L)
-                .buildingName("미왕 빌딩")
-                .buildingAddress("서울 강남구 강남대로 364")
-                .build();
 
-        List<CompanyDTO> companyDTOS = new ArrayList<>();
-        companyDTOS.add(
-                CompanyDTO.builder()
+        List<CompanyResponseDTO> companyResponseDTOS = new ArrayList<>();
+        companyResponseDTOS.add(
+                CompanyResponseDTO.builder()
                         .id(1L)
                         .officeName("진회사")
                         .officeNum("A동 101호")
                         .build());
-        companyDTOS.add(
-                CompanyDTO.builder()
+        companyResponseDTOS.add(
+                CompanyResponseDTO.builder()
                         .id(2L)
                         .officeName("칠리버블")
                         .officeNum("A동 102호")
                         .build());
-        companyDTOS.add(
-                CompanyDTO.builder()
+        companyResponseDTOS.add(
+                CompanyResponseDTO.builder()
                         .id(3L)
                         .officeName("식스센스")
                         .officeNum("A동 103호")
                         .build());
 
-        buildingWithCompaniesDTO.setOffices(companyDTOS);
-        buildingWithCompaniesDTOList.add(buildingWithCompaniesDTO);
-        response.put("buildings", buildingWithCompaniesDTOList);
+        BuildingWithCompaniesDTO.BuildingWithCompaniesResponseDTO buildingWithCompaniesResponseDTO = BuildingWithCompaniesDTO.BuildingWithCompaniesResponseDTO.builder()
+                .id(1L)
+                .buildingName("미왕 빌딩")
+                .buildingAddress("서울 강남구 강남대로 364")
+                .offices(companyResponseDTOS)
+                .build();
 
-        // when
-        when(signUpService.getBuildingWithCompanies(keyword)).thenReturn(response);
+        List<BuildingWithCompaniesDTO.BuildingWithCompaniesResponseDTO> buildingWithCompaniesResponseDTOList = List.of(buildingWithCompaniesResponseDTO);
 
-        // then
+        BuildingWithCompaniesDTO response = new BuildingWithCompaniesDTO();
+        response.setBuildings(buildingWithCompaniesResponseDTOList);
+
+        given(signUpService.getBuildingWithCompanies(keyword)).willReturn(response);
+
+        // when & then
         mvc.perform(get("/api/building").param("name", keyword))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -113,11 +114,11 @@ class SignUpControllerTest {
 
         // given
         final String keyword = "없는 빌딩";
-        Map<String, List<BuildingWithCompaniesDTO>> response = new HashMap<>();
-        response.put("buildings", Collections.emptyList());
+        BuildingWithCompaniesDTO buildingWithCompaniesDTO = new BuildingWithCompaniesDTO();
+        buildingWithCompaniesDTO.setBuildings(List.of());
 
         // when
-        when(signUpService.getBuildingWithCompanies(keyword)).thenReturn(response);
+        given(signUpService.getBuildingWithCompanies(keyword)).willReturn(buildingWithCompaniesDTO);
 
         // then
         mvc.perform(get("/api/building").param("name", keyword))

@@ -5,10 +5,13 @@ import fastcampus.team7.Livable_officener.domain.Building;
 import fastcampus.team7.Livable_officener.domain.Company;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.*;
+import fastcampus.team7.Livable_officener.dto.PhoneAuthDTO.PhoneAuthConfirmDTO;
+import fastcampus.team7.Livable_officener.dto.PhoneAuthDTO.PhoneAuthRequestDTO;
+import fastcampus.team7.Livable_officener.dto.PhoneAuthDTO.PhoneAuthResponseDTO;
 import fastcampus.team7.Livable_officener.global.exception.*;
+import fastcampus.team7.Livable_officener.global.util.RedisUtil;
 import fastcampus.team7.Livable_officener.repository.BuildingRepository;
 import fastcampus.team7.Livable_officener.repository.CompanyRepository;
-import fastcampus.team7.Livable_officener.repository.PhoneAuthDTORedisRepository;
 import fastcampus.team7.Livable_officener.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,9 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SignUpServiceTest {
@@ -40,12 +41,12 @@ class SignUpServiceTest {
     @Mock
     BuildingRepository buildingRepository;
     @Mock
-    PhoneAuthDTORedisRepository phoneAuthDTORedisRepository;
-    @Mock
     UserRepository userRepository;
-
     @Mock
     PasswordEncoder passwordEncoder;
+
+    @Mock
+    RedisUtil redisUtil;
 
     @Test
     @DisplayName("키워드 입력시 건물명이 키워드에 포함되어 있는 경우 모든 건물과 회사의 정보들이 출력되는지 테스트")
@@ -69,20 +70,22 @@ class SignUpServiceTest {
         given(companyRepository.findCompaniesByBuildingName(buildings.get(0).getName())).willReturn(companies);
 
         // when
-        Map<String, List<BuildingWithCompaniesDTO>> buildingWithCompanies = signUpService.getBuildingWithCompanies(keyword);
+        BuildingWithCompaniesDTO buildingWithCompanies = signUpService.getBuildingWithCompanies(keyword);
 
         // then
-        BuildingWithCompaniesDTO expectedDto = buildingWithCompanies.get("buildings").get(0);
-        List<CompanyDTO> companyDTOS = expectedDto.getOffices();
+        assertThat(buildingWithCompanies.getBuildings().get(0)
+                .getId()).isEqualTo(building.getId());
+        assertThat(buildingWithCompanies.getBuildings().get(0)
+                .getBuildingAddress()).isEqualTo(building.getAddress());
+        assertThat(buildingWithCompanies.getBuildings().get(0)
+                .getBuildingName()).isEqualTo(building.getName());
 
-        assertThat(expectedDto.getBuildingName()).isEqualTo(building.getName());
-        assertThat(expectedDto.getBuildingAddress()).isEqualTo(building.getRegion() + " " + building.getCity() + " " + building.getStreet() + " " + building.getZipcode());
-        assertThat(companyDTOS.get(0).getOfficeName()).isEqualTo("진회사");
-        assertThat(companyDTOS.get(1).getOfficeName()).isEqualTo("칠리버블");
-        assertThat(companyDTOS.get(2).getOfficeName()).isEqualTo("식스센스");
-
-        then(buildingRepository).should(times(1)).findBuildingsByNameContaining(keyword);
-        then(companyRepository).should(times(1)).findCompaniesByBuildingName(buildings.get(0).getName());
+        assertThat(buildingWithCompanies.getBuildings().get(0)
+                .getOffices().get(0).getId()).isEqualTo(companies.get(0).getId());
+        assertThat(buildingWithCompanies.getBuildings().get(0)
+                .getOffices().get(0).getOfficeName()).isEqualTo(companies.get(0).getName());
+        assertThat(buildingWithCompanies.getBuildings().get(0)
+                .getOffices().get(0).getOfficeNum()).isEqualTo(companies.get(0).getAddress());
 
     }
 
@@ -96,35 +99,56 @@ class SignUpServiceTest {
         given(buildingRepository.findBuildingsByNameContaining(keyword)).willReturn(Collections.emptyList());
 
         // when
-        Map<String, List<BuildingWithCompaniesDTO>> buildingWithCompanies = signUpService.getBuildingWithCompanies(keyword);
+        BuildingWithCompaniesDTO buildingWithCompanies = signUpService.getBuildingWithCompanies(keyword);
 
         // then
-        assertThat(buildingWithCompanies.get("buildings")).isEmpty();
+        assertThat(buildingWithCompanies.getBuildings()).isEmpty();
     }
 
     @Test
-    @DisplayName("휴대폰 인증번호 요청시 응답값의 인증코드와 저장된 인증코드가 같은지 테스트")
+    @DisplayName("휴대폰 인증번호 요청시 인증코드가 성공적으로 반환되는지 테스트")
     public void givenPhoneNumberAndName_whenRequest_thenReturnVerifyCode() {
 
         // given
-        final String name = "고길동";
         final String phoneNumber = "010-1234-5678";
         final String verifyCode = "982752";
-        PhoneAuthDTO phoneAuthDTO = PhoneAuthDTO.builder()
-                .phoneNumber(phoneNumber)
-                .verifyCode(verifyCode)
-                .build();
 
-        given(phoneAuthDTORedisRepository.save(any(PhoneAuthDTO.class))).willReturn(phoneAuthDTO);
+        given(redisUtil.setPhoneAuthCode(phoneNumber)).willReturn(verifyCode);
 
         // when
         PhoneAuthResponseDTO result = signUpService.getPhoneAuthCode(PhoneAuthRequestDTO.builder()
-                .name(name)
+                .name(anyString())
                 .phoneNumber(phoneNumber)
                 .build());
 
         // then
+        verify(redisUtil, times(1)).setPhoneAuthCode(phoneNumber);
         assertThat(result.getVerifyCode()).isEqualTo(verifyCode);
+
+    }
+
+    @Test
+    @DisplayName("휴대폰 인증번호 요청시 이미 등록된 휴대폰 번호일 경우 인증코드 업데이트 성공하는지 테스트")
+    public void givenPhoneNumberAndName_whenRequest_thenUpdateVerifyCode() {
+
+        // given
+        final String phoneNumber = "010-1234-5678";
+        final String verifyCode = "982752";
+        final String changedVerifyCode = "876678";
+
+        given(redisUtil.getPhoneAuthCode(phoneNumber)).willReturn(verifyCode);
+        given(redisUtil.changePhoneAuthCode(phoneNumber)).willReturn(changedVerifyCode);
+
+        // when
+        PhoneAuthResponseDTO result = signUpService.getPhoneAuthCode(PhoneAuthRequestDTO.builder()
+                .name(anyString())
+                .phoneNumber(phoneNumber)
+                .build());
+
+        // then
+        verify(redisUtil, times(1)).changePhoneAuthCode(phoneNumber);
+        assertThat(result.getVerifyCode()).isNotEqualTo(verifyCode);
+        assertThat(result.getVerifyCode()).isEqualTo(changedVerifyCode);
 
     }
 
@@ -152,19 +176,15 @@ class SignUpServiceTest {
     }
 
     @Test
-    @DisplayName("휴대폰 인증코드 확인 요청시 성공하는 경우 True 를 반환하는지 테스트")
+    @DisplayName("휴대폰 인증코드 확인 요청시 성공하는지 테스트")
     public void givenVerifyCode_whenConfirmRequest_thenConfirmSuccess() {
 
         // given
         final String phoneNumber = "01012345678";
         final String verifyCode = "135791";
 
-        PhoneAuthDTO phoneAuthDTO = PhoneAuthDTO.builder()
-                .phoneNumber(phoneNumber)
-                .verifyCode(verifyCode)
-                .build();
-
-        given(phoneAuthDTORedisRepository.findById(phoneNumber)).willReturn(Optional.of(phoneAuthDTO));
+        given(redisUtil.hasPhoneAuthCode(phoneNumber)).willReturn(true);
+        given(redisUtil.getPhoneAuthCode(phoneNumber)).willReturn(verifyCode);
 
         PhoneAuthConfirmDTO phoneAuthConfirmDTO = PhoneAuthConfirmDTO.builder()
                 .phoneNumber(phoneNumber)
@@ -188,7 +208,7 @@ class SignUpServiceTest {
         final String phoneNumber = "01012345678";
         final String verifyCode = "135791";
 
-        given(phoneAuthDTORedisRepository.findById(phoneNumber)).willThrow(new NotVerifiedPhoneNumberException());
+        given(redisUtil.hasPhoneAuthCode(phoneNumber)).willReturn(false);
 
         PhoneAuthConfirmDTO phoneAuthConfirmDTO = PhoneAuthConfirmDTO.builder()
                 .phoneNumber(phoneNumber)
@@ -211,11 +231,8 @@ class SignUpServiceTest {
         final String validVerifyCode = "999999";
         final String invalidVerifyCode = "135791";
 
-        given(phoneAuthDTORedisRepository.findById(phoneNumber)).willReturn(
-                Optional.ofNullable(PhoneAuthDTO.builder()
-                        .phoneNumber(phoneNumber)
-                        .verifyCode(validVerifyCode)
-                        .build()));
+        given(redisUtil.hasPhoneAuthCode(phoneNumber)).willReturn(true);
+        given(redisUtil.getPhoneAuthCode(phoneNumber)).willReturn(validVerifyCode);
 
         PhoneAuthConfirmDTO phoneAuthConfirmFailedDTO = PhoneAuthConfirmDTO.builder()
                 .phoneNumber(phoneNumber)
