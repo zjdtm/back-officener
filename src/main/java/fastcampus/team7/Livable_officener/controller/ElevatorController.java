@@ -1,11 +1,9 @@
 package fastcampus.team7.Livable_officener.controller;
 
-import fastcampus.team7.Livable_officener.dto.ElevatorDTO;
-import fastcampus.team7.Livable_officener.global.sercurity.JwtProvider;
+import fastcampus.team7.Livable_officener.dto.elevator.ElevatorDTO;
 import fastcampus.team7.Livable_officener.global.util.APIDataResponse;
 import fastcampus.team7.Livable_officener.repository.ElevatorRepository;
 import fastcampus.team7.Livable_officener.service.ElevatorService;
-import io.netty.handler.codec.http.HttpResponseStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;

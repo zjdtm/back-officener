@@ -3,23 +3,19 @@ package fastcampus.team7.Livable_officener.service;
 import fastcampus.team7.Livable_officener.domain.Elevator;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.domain.UserElevator;
-import fastcampus.team7.Livable_officener.dto.ElevatorDTO;
+import fastcampus.team7.Livable_officener.dto.elevator.ElevatorDTO;
 import fastcampus.team7.Livable_officener.global.constant.ElevatorStatus;
 import fastcampus.team7.Livable_officener.global.sercurity.JwtProvider;
 import fastcampus.team7.Livable_officener.global.util.APIDataResponse;
-import fastcampus.team7.Livable_officener.global.util.GenerateSig;
 import fastcampus.team7.Livable_officener.repository.ElevatorRepository;
 import fastcampus.team7.Livable_officener.repository.UserElevatorRepository;
 import fastcampus.team7.Livable_officener.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,14 +24,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ElevatorService {
 
-    @Value("${api.key}")
-    private String apiKey;
-
-    @Value("${api.secret}")
-    private String apiSecret;
-
-    private WebClient client;
-
     private final ElevatorRepository elevatorRepository;
 
     private final JwtProvider jwtProvider;
@@ -43,17 +31,6 @@ public class ElevatorService {
     private final UserRepository userRepository;
 
     private final UserElevatorRepository userElevatorRepository;
-
-//    @PostConstruct
-//    public void webClientInit() {
-//        client = WebClient.builder()
-//                .baseUrl("http://13.125.50.47:8080")
-//                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
-//                .defaultHeader("ts", GenerateSig.generateTimestamp())
-//                .defaultHeader("nonce", GenerateSig.generateNonce())
-//                .defaultHeader("signature", GenerateSig.generateSignature(apiKey, apiSecret))
-//                .build();
-//    }
 
     public ResponseEntity<APIDataResponse<List<ElevatorDTO>>> getAllElevators(String token) {
         User user = userRepository.findByEmail(jwtProvider.getEmail(token))
