@@ -10,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -19,7 +20,7 @@ import java.util.Collections;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @SuperBuilder
 @Table(name = "member")
-public class User extends BaseEntity implements UserDetails {
+public class User extends BaseEntity implements UserDetails, Principal {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Building building;
@@ -40,6 +41,11 @@ public class User extends BaseEntity implements UserDetails {
     private String phoneNumber;
 
     private String profileImage;
+
+    @Override
+    public String toString() {
+        return String.format("[%s#%s]", name, email);
+    }
 
     @Override
     public boolean equals(Object o) {
