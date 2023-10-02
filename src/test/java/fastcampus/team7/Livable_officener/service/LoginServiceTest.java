@@ -143,9 +143,6 @@ public class LoginServiceTest {
         Building building = saveBuilding("미왕빌딩", "서울", "강남구", "강남대로", "356");
         Company company = saveCompanies(building, "테스트 오피스", "A동 101호");
 
-        String token = jwtProvider.createToken(email);
-        String bearerTokenPrefix = jwtProvider.getBearerTokenPrefix(token);
-
         User user = User.builder()
                 .name(name)
                 .email(email)
@@ -155,16 +152,19 @@ public class LoginServiceTest {
                 .company(company)
                 .build();
 
-        given(jwtProvider.getBearerTokenPrefix(token)).willReturn(bearerTokenPrefix);
-        given(jwtProvider.getExpirationTime(bearerTokenPrefix));
+        String accessToken = jwtProvider.createToken(email);
+        String bearerTokenPrefix = "fewpp3onpgonwpgnipngiwpip";
+
+        given(jwtProvider.getBearerTokenPrefix("Bearer " + accessToken)).willReturn(bearerTokenPrefix);
+        given(jwtProvider.getExpirationTime(bearerTokenPrefix)).willReturn(10L);
 
         // when
-        signUpService.logout(user, "Bearer " + token);
+        signUpService.logout(user, "Bearer " + accessToken);
 
         // then
-        verify(jwtProvider.getBearerTokenPrefix(token), times(1));
-        verify(jwtProvider.getExpirationTime(bearerTokenPrefix), times(1));
-
+        verify(jwtProvider, times(1)).getBearerTokenPrefix("Bearer " + accessToken);
+        verify(jwtProvider, times(1)).getExpirationTime(bearerTokenPrefix);
+        verify(redisUtil, times(1)).setBlackList(bearerTokenPrefix, user.getEmail(), 10L);
 
     }
 
