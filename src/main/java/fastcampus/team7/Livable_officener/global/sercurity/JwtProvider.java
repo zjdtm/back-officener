@@ -18,6 +18,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.security.Principal;
 import java.util.Date;
 
 @Component
@@ -138,4 +139,9 @@ public class JwtProvider {
         }
     }
 
+    public Principal resolveUser(String accessToken) {
+        final Jws<Claims> claimsJws = getClaimsJwsByAccessToken(accessToken);
+        final String username = claimsJws.getBody().getSubject();
+        return (Principal) userDetailsService.loadUserByUsername(username);
+    }
 }
