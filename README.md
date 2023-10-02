@@ -1,11 +1,11 @@
-![143489714](https://github.com/FC-Chilli-Bubble/back-officener/assets/72866347/bc3de48b-0831-423d-a8d7-ea24861a9740)
+![143489714](https://github.com/FC-Chilli-Bubble/back-officener/assets/72866347/bc3de48b-0831-423d-a8d7-ea24861a9740)  <br/>
 
 
 
-🗓️ 프로젝트 기간
-2023-08-14 ~ 2023-10-06
+🗓️ 프로젝트 기간  <br/>
+2023-08-14 ~ 2023-10-06  <br/>
 
-🙌🏻 프로젝트 설명
+🙌🏻 프로젝트 설명  <br/>
 패스트 캠퍼스 파이널 프로젝트  <br/>
 리버블 - 오피스 앱의 유저 리텐션을 증가시키기 위한 프로젝트  <br/>
 PM, UX/UI 파트와 함께 협업하여 보다 실무에 가까운 프로젝트를 경험해봅니다. <br/>
