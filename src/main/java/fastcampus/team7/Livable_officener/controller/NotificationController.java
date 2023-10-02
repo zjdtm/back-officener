@@ -16,7 +16,7 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-    @GetMapping("/api/notify/list")
+    @GetMapping("/api/notify")
     public ResponseEntity<APIDataResponse<List<NotificationDTO>>> getNotifyList(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
         String token = authorization.split(" ")[1];
