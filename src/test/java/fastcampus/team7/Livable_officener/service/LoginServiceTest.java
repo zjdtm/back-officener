@@ -155,14 +155,14 @@ public class LoginServiceTest {
         String accessToken = jwtProvider.createToken(email);
         String bearerTokenPrefix = "fewpp3onpgonwpgnipngiwpip";
 
-        given(jwtProvider.getBearerTokenPrefix("Bearer " + accessToken)).willReturn(bearerTokenPrefix);
+        given(jwtProvider.parseAccessToken("Bearer " + accessToken)).willReturn(bearerTokenPrefix);
         given(jwtProvider.getExpirationTime(bearerTokenPrefix)).willReturn(10L);
 
         // when
         signUpService.logout(user, "Bearer " + accessToken);
 
         // then
-        verify(jwtProvider, times(1)).getBearerTokenPrefix("Bearer " + accessToken);
+        verify(jwtProvider, times(1)).parseAccessToken("Bearer " + accessToken);
         verify(jwtProvider, times(1)).getExpirationTime(bearerTokenPrefix);
         verify(redisUtil, times(1)).setBlackList(bearerTokenPrefix, user.getEmail(), 10L);
 
