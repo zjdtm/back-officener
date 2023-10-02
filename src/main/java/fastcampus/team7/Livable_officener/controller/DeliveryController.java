@@ -31,8 +31,8 @@ public class DeliveryController {
     }
 
     @GetMapping("/bankList")
-    public ResponseEntity<APIDataResponse<Map<String, List<Map<String, String>>>>> bankList() {
-        Map<String, List<Map<String, String>>> response = deliveryService.loadBankList();
+    public ResponseEntity<APIDataResponse<DeliveryResponseDTO.BankListResponseDTO>> bankList() {
+        DeliveryResponseDTO.BankListResponseDTO response = deliveryService.loadBankList();
         return APIDataResponse.of(HttpStatus.OK, response);
     }
 
