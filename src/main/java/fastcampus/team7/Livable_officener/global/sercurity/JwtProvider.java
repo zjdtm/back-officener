@@ -119,7 +119,7 @@ public class JwtProvider {
 
         try {
             Jws<Claims> claimsJws = jwtParser.parseClaimsJws(accessToken);
-            if (!claimsJws.getBody().getExpiration().before(new Date())) {
+            if (claimsJws.getBody().getExpiration().before(new Date())) {
                 throw new ExpiredJwtException(claimsJws.getHeader(), claimsJws.getBody(), "유효기간 지난 토큰");
             }
             return claimsJws;
