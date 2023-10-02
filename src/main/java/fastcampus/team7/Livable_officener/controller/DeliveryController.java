@@ -3,6 +3,9 @@ package fastcampus.team7.Livable_officener.controller;
 
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.*;
+import fastcampus.team7.Livable_officener.dto.delivery.ChatRoomListResponseDTO;
+import fastcampus.team7.Livable_officener.dto.delivery.RoomDetailDTO;
+import fastcampus.team7.Livable_officener.dto.delivery.UpdateStoreDetailDTO;
 import fastcampus.team7.Livable_officener.global.util.APIDataResponse;
 import fastcampus.team7.Livable_officener.service.DeliveryService;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
@@ -49,7 +53,7 @@ public class DeliveryController {
     @PutMapping("/{id}")
     public ResponseEntity<?> modifyStoreDetail(
             @PathVariable Long id,
-            @RequestBody UpdateStoreDetailDTO requestDTO,
+            @Valid @RequestBody UpdateStoreDetailDTO requestDTO,
             @AuthenticationPrincipal User user) {
         deliveryService.updateStoreDetail(id, requestDTO, user);
 

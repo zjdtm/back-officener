@@ -2,6 +2,8 @@ package fastcampus.team7.Livable_officener.service;
 
 import fastcampus.team7.Livable_officener.domain.*;
 import fastcampus.team7.Livable_officener.dto.*;
+import fastcampus.team7.Livable_officener.dto.delivery.RoomDetailDTO;
+import fastcampus.team7.Livable_officener.dto.delivery.UpdateStoreDetailDTO;
 import fastcampus.team7.Livable_officener.global.constant.BankName;
 import fastcampus.team7.Livable_officener.global.constant.FoodTag;
 import fastcampus.team7.Livable_officener.global.constant.Role;
@@ -25,7 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static fastcampus.team7.Livable_officener.dto.ChatRoomListResponseDTO.*;
+import static fastcampus.team7.Livable_officener.dto.delivery.ChatRoomListResponseDTO.*;
 
 @Slf4j
 @RequiredArgsConstructor
