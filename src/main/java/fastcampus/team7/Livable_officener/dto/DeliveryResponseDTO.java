@@ -1,5 +1,6 @@
 package fastcampus.team7.Livable_officener.dto;
 
+import fastcampus.team7.Livable_officener.domain.Bank;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -32,5 +33,25 @@ public class DeliveryResponseDTO {
         private int totalPage;
         private Long totalElements;
         private List<RoomListResponseDTO> rooms;
+    }
+
+    @RequiredArgsConstructor
+    @Getter @Setter
+    public static class BankDTO {
+        private String bankName;
+
+        public BankDTO(String bankName) {
+            this.bankName = bankName;
+        }
+    }
+
+    @RequiredArgsConstructor
+    @Getter @Setter
+    public static class BankListResponseDTO {
+        private List<Bank> bankList;
+
+        public BankListResponseDTO(List<Bank> bankList) {
+            this.bankList = bankList;
+        }
     }
 }

@@ -79,21 +79,9 @@ public class DeliveryService {
     }
 
     @Transactional
-    public Map<String, List<Map<String, String>>> loadBankList() {
+    public DeliveryResponseDTO.BankListResponseDTO loadBankList() {
         List<Bank> bankList = bankRepository.findAll();
-
-        List<Map<String, String>> responseData = bankList.stream()
-                .map(bank -> {
-                    Map<String, String> bankMap = new HashMap<>();
-                    bankMap.put("bankName", bank.getName().getName());
-                    return bankMap;
-                })
-                .collect(Collectors.toList());
-
-        Map<String, List<Map<String, String>>> response = new HashMap<>();
-        response.put("banks", responseData);
-
-        return response;
+        return new DeliveryResponseDTO.BankListResponseDTO(bankList);
     }
 
     @Transactional
