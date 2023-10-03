@@ -2,6 +2,7 @@ package fastcampus.team7.Livable_officener.service;
 
 import fastcampus.team7.Livable_officener.domain.*;
 import fastcampus.team7.Livable_officener.dto.*;
+import fastcampus.team7.Livable_officener.dto.delivery.*;
 import fastcampus.team7.Livable_officener.global.constant.BankName;
 import fastcampus.team7.Livable_officener.global.constant.FoodTag;
 import fastcampus.team7.Livable_officener.global.constant.Role;
@@ -19,9 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -37,12 +36,12 @@ public class DeliveryService {
     private final BankRepository bankRepository;
 
     @Transactional
-    public void registerRoom(DeliveryRequestDTO.createDTO createDTO, User user) {
+    public void registerRoom(CreateDTO createDTO, User user) {
         FoodTag foodTag = FoodTag.fromFoodNameToCode(createDTO.getFoodTag().toUpperCase());
         BankName bankName = BankName.fromBankNameToCode(createDTO.getBankName().toUpperCase());
         RoomStatus status = RoomStatus.ACTIVE;
 
-        DeliveryRequestDTO.roomSaveDTO roomSaveDTO = DeliveryRequestDTO.roomSaveDTO.builder()
+        RoomSaveDTO roomSaveDTO = RoomSaveDTO.builder()
                 .storeName(createDTO.getStoreName())
                 .menuLink(createDTO.getMenuLink())
                 .deliveryFee(createDTO.getDeliveryFee())
@@ -60,7 +59,7 @@ public class DeliveryService {
         Room savedRoom = deliveryRepository.save(roomSaveDTO.toEntity());
         Long roomId = savedRoom.getId();
 
-        DeliveryRequestDTO.roomParticipantSaveDTO roomParticipantSaveDTO = DeliveryRequestDTO.roomParticipantSaveDTO.builder()
+        RoomParticipantSaveDTO roomParticipantSaveDTO = RoomParticipantSaveDTO.builder()
                 .roomId(roomId)
                 .userId(user.getId())
                 .role(Role.HOST)
@@ -79,9 +78,9 @@ public class DeliveryService {
     }
 
     @Transactional
-    public DeliveryResponseDTO.BankListResponseDTO loadBankList() {
+    public BankListResponseDTO loadBankList() {
         List<Bank> bankList = bankRepository.findAll();
-        return new DeliveryResponseDTO.BankListResponseDTO(bankList);
+        return new BankListResponseDTO(bankList);
     }
 
     @Transactional
@@ -112,10 +111,10 @@ public class DeliveryService {
         return room;
     }
 
-    public DeliveryResponseDTO.PagedRoomListResponseDTO getRoomList(Pageable pageable) {
+    public PagedRoomListResponseDTO getRoomList(Pageable pageable) {
         Page<Room> rooms = deliveryRepository.findAll(pageable);
 
-        DeliveryResponseDTO.PagedRoomListResponseDTO response = new DeliveryResponseDTO.PagedRoomListResponseDTO();
+        PagedRoomListResponseDTO response = new PagedRoomListResponseDTO();
         response.setCurrentPage(rooms.getNumber());
         response.setTotalPage(rooms.getTotalPages());
         response.setTotalElements(rooms.getTotalElements());
@@ -128,10 +127,10 @@ public class DeliveryService {
     }
 
     @Transactional
-    public DeliveryResponseDTO.PagedRoomListResponseDTO getFilteredRoomList(Pageable pageable, User user) {
+    public PagedRoomListResponseDTO getFilteredRoomList(Pageable pageable, User user) {
         Page<Room> rooms = deliveryRepository.findRoomsByUserId(user.getId(), pageable);
 
-        DeliveryResponseDTO.PagedRoomListResponseDTO response = new DeliveryResponseDTO.PagedRoomListResponseDTO();
+        PagedRoomListResponseDTO response = new PagedRoomListResponseDTO();
         response.setCurrentPage(rooms.getNumber());
         response.setTotalPage(rooms.getTotalPages());
         response.setTotalElements(rooms.getTotalElements());
@@ -143,11 +142,11 @@ public class DeliveryService {
         return response;
     }
 
-    private DeliveryResponseDTO.RoomListResponseDTO convertToRoomListResponseDTO(Room room) {
+    private RoomListResponseDTO convertToRoomListResponseDTO(Room room) {
         String foodTag = room.getTag().toString();
         String roomStatus = room.getStatus().toString();
         Long hostId = findHostIdByRoom(room.getId());
-        return DeliveryResponseDTO.RoomListResponseDTO.builder()
+        return RoomListResponseDTO.builder()
                 .roomId(room.getId())
                 .hostId(hostId)
                 .storeName(room.getStoreName())
