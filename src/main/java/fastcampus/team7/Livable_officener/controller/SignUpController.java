@@ -1,11 +1,11 @@
 package fastcampus.team7.Livable_officener.controller;
 
 import fastcampus.team7.Livable_officener.domain.User;
-import fastcampus.team7.Livable_officener.dto.BuildingWithCompaniesDTO;
-import fastcampus.team7.Livable_officener.dto.LoginDTO;
-import fastcampus.team7.Livable_officener.dto.LoginDTO.LoginRequestDTO;
-import fastcampus.team7.Livable_officener.dto.PhoneAuthDTO.PhoneAuthConfirmDTO;
-import fastcampus.team7.Livable_officener.dto.SignUpRequestDTO;
+import fastcampus.team7.Livable_officener.dto.signup.BuildingWithCompaniesDTO;
+import fastcampus.team7.Livable_officener.dto.login.LoginDTO;
+import fastcampus.team7.Livable_officener.dto.login.LoginDTO.LoginRequestDTO;
+import fastcampus.team7.Livable_officener.dto.signup.PhoneAuthDTO.PhoneAuthConfirmDTO;
+import fastcampus.team7.Livable_officener.dto.signup.SignUpRequestDTO;
 import fastcampus.team7.Livable_officener.global.util.APIDataResponse;
 import fastcampus.team7.Livable_officener.service.SignUpService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-import static fastcampus.team7.Livable_officener.dto.PhoneAuthDTO.PhoneAuthRequestDTO;
-import static fastcampus.team7.Livable_officener.dto.PhoneAuthDTO.PhoneAuthResponseDTO;
+import static fastcampus.team7.Livable_officener.dto.signup.PhoneAuthDTO.PhoneAuthRequestDTO;
+import static fastcampus.team7.Livable_officener.dto.signup.PhoneAuthDTO.PhoneAuthResponseDTO;
 
 @RestController
 @RequestMapping("/api")
