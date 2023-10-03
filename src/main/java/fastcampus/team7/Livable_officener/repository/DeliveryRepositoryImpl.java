@@ -5,7 +5,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import fastcampus.team7.Livable_officener.dto.RoomDetailDTO;
+import fastcampus.team7.Livable_officener.dto.delivery.RoomDetailDTO;
 import fastcampus.team7.Livable_officener.global.constant.Role;
 import lombok.RequiredArgsConstructor;
 
@@ -14,7 +14,7 @@ import java.util.List;
 import static fastcampus.team7.Livable_officener.domain.QChat.chat;
 import static fastcampus.team7.Livable_officener.domain.QRoom.room;
 import static fastcampus.team7.Livable_officener.domain.QRoomParticipant.roomParticipant;
-import static fastcampus.team7.Livable_officener.dto.ChatRoomListResponseDTO.ChatRoomListDTO;
+import static fastcampus.team7.Livable_officener.dto.delivery.ChatRoomListResponseDTO.ChatRoomListDTO;
 
 @RequiredArgsConstructor
 public class DeliveryRepositoryImpl implements DeliveryRepositoryCustom {
