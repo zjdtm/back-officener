@@ -12,11 +12,10 @@ public enum ChatType {
     COMPLETE_REMITTANCE(true, "%s님이 송금을 완료했어요! 호스트님 확인해주세요.", 1),
     COMPLETE_DELIVERY(true, "배달이 완료되었어요. 음식을 수령해주세요.", 0),
     COMPLETE_RECEIPT(true, "%s님이 수령을 완료했어요!", 1),
-    REQUEST_EXIT(true, "%s님이 나가기 요청을 했어요! 호스트님 확인해주세요", 1),
-    EXIT(true,"%s님이 채팅방에서 나갔습니다.",1),
-    KICK(true,"%s님이 %s님을 강퇴 했습니다.",2)
+    REQUEST_EXIT(true, "%s님이 나가기 요청을 했어요! 호스트님 확인해주세요.", 1),
+    EXIT(true, "%s님이 채팅방에서 나갔습니다.", 1),
+    KICK(true, "%s님이 %s님을 강퇴 했습니다.", 2)
     ;
-
 
     private final boolean isSystemMessage;
     private final String contentFormat;
