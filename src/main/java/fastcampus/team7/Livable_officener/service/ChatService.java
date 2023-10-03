@@ -27,6 +27,8 @@ import java.util.Optional;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
+import static fastcampus.team7.Livable_officener.global.constant.ChatType.*;
+
 @RequiredArgsConstructor
 @Service
 public class ChatService {
@@ -74,7 +76,7 @@ public class ChatService {
 
         room.closeParticipation();
 
-        sendFixedSystemMessage(room, user, ChatType.CLOSE_PARTICIPATION);
+        sendFixedSystemMessage(room, CLOSE_PARTICIPATION, user);
     }
 
     @Transactional
@@ -86,7 +88,7 @@ public class ChatService {
         isRemitCompleted(roomParticipant);
         roomParticipant.completeRemit();
 
-        sendFixedSystemMessage(room, user, ChatType.COMPLETE_REMITTANCE);
+        sendFixedSystemMessage(room, COMPLETE_REMITTANCE, user);
     }
 
     @Transactional
@@ -98,7 +100,7 @@ public class ChatService {
 
         room.completeDelivery();
 
-        sendFixedSystemMessage(room, user, ChatType.COMPLETE_DELIVERY);
+        sendFixedSystemMessage(room, COMPLETE_DELIVERY, user);
     }
 
     @Transactional
@@ -109,7 +111,7 @@ public class ChatService {
         isReceiveCompleted(roomParticipant);
         roomParticipant.completeReceive();
 
-        sendFixedSystemMessage(room, user, ChatType.COMPLETE_RECEIPT);
+        sendFixedSystemMessage(room, COMPLETE_RECEIPT, user);
     }
 
     @Transactional
@@ -118,7 +120,7 @@ public class ChatService {
         RoomParticipant roomParticipant = getRoomParticipant(room.getId(), user.getId());
         validateIfRoomParticipantIsGuest(roomParticipant.getRole(), "나가기요청");
 
-        sendFixedSystemMessage(room, user, ChatType.REQUEST_EXIT);
+        sendFixedSystemMessage(room, REQUEST_EXIT, user);
     }
 
     public void kick(Long roomId, User user, KickDTO kickDTO) throws IOException {
@@ -135,7 +137,7 @@ public class ChatService {
         webSocketSessionManager.closeSessionForUser(roomId, kickedUser);
         roomParticipantRepository.delete(pointedRoomParticipant);
 
-        sendFixedSystemMessage(room,user,kickedUser,ChatType.KICK);
+        sendFixedSystemMessage(room, KICK, user, kickedUser);
     }
 
     @Transactional
@@ -148,7 +150,7 @@ public class ChatService {
             roomRepository.deleteById(roomId);
         } else if (roomParticipant.getRole() == Role.GUEST) {
             roomParticipant.guestExit();
-            sendFixedSystemMessage(room, user, ChatType.EXIT);
+            sendFixedSystemMessage(room, EXIT, user);
         }
     }
 
@@ -237,44 +239,11 @@ public class ChatService {
         }
     }
 
-    private void sendFixedSystemMessage(Room room, User sender, ChatType messageType) throws IOException {
-        SendPayloadDTO payloadDto = createSystemMessagePayloadDTO(sender, messageType);
-
+    private void sendFixedSystemMessage(Room room, ChatType messageType, User... args) throws IOException {
+        String content = messageType.getSystemMessageContent(args);
+        User sender = args[0];
+        SendPayloadDTO payloadDto = new SendPayloadDTO(messageType, content, LocalDateTime.now(), sender.getId());
         sendMessage(room, sender, payloadDto);
-    }
-
-    private void sendFixedSystemMessage(Room room, User sender, User pointedUser, ChatType messageType) throws IOException {
-        SendPayloadDTO payloadDto = createSystemMessagePayloadDTO(sender, pointedUser, messageType);
-        sendMessage(room, sender, payloadDto);
-    }
-
-    private static SendPayloadDTO createSystemMessagePayloadDTO(User sender, ChatType messageType) {
-        String content = getSystemMessageContent(sender, messageType);
-        return new SendPayloadDTO(messageType, content, LocalDateTime.now(), sender.getId());
-    }
-
-    private SendPayloadDTO createSystemMessagePayloadDTO(User sender, User pointedUser, ChatType messageType) {
-        String content = getSystemMessageContent(sender, pointedUser, messageType);
-        return new SendPayloadDTO(messageType, content, LocalDateTime.now(), sender.getId());
-    }
-
-    private static String getSystemMessageContent(User sender, ChatType messageType) {
-        Object[] systemMessageArgs = getSystemMessageArgs(messageType, sender);
-        return messageType.getSystemMessageContent(systemMessageArgs);
-    }
-
-    private String getSystemMessageContent(User sender, User pointedUser, ChatType messageType) {
-        return messageType.getSystemMessageContent(sender.getName(), pointedUser.getName());
-    }
-
-    private static Object[] getSystemMessageArgs(ChatType messageType, User user) {
-        Object[] systemMessageArgs;
-        if (messageType == ChatType.COMPLETE_DELIVERY) {
-            systemMessageArgs = null;
-        } else {
-            systemMessageArgs = new Object[]{user.getName()};
-        }
-        return systemMessageArgs;
     }
 
     private void sendMessage(Room room, User sender, SendPayloadDTO payloadDto) throws IOException {

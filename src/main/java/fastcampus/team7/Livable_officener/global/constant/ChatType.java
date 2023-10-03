@@ -1,6 +1,7 @@
 package fastcampus.team7.Livable_officener.global.constant;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import fastcampus.team7.Livable_officener.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.Nullable;
 
@@ -21,15 +22,23 @@ public enum ChatType {
     private final String contentFormat;
     private final int requiredNumArgs;
 
-    public String getSystemMessageContent(@Nullable Object... args) {
+    public String getSystemMessageContent(@Nullable User... args) {
         if (!isSystemMessage) {
             throw new IllegalCallerException("TALK is not a system message.");
         }
+
         int numArgs = (args == null) ? 0 : args.length;
-        if (numArgs != requiredNumArgs) {
-            throw new IllegalArgumentException("Unmatched the number of arguments");
+        if (numArgs < requiredNumArgs) {
+            throw new IllegalArgumentException("Insufficient arguments");
         }
-        return String.format(contentFormat, args);
+
+        if (numArgs == 0) {
+            return contentFormat;
+        }
+
+        Object[] copiedArgs = new Object[requiredNumArgs];
+        System.arraycopy(args, 0, copiedArgs, 0, requiredNumArgs);
+        return String.format(contentFormat, copiedArgs);
     }
 
     @JsonCreator

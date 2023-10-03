@@ -44,7 +44,7 @@ public class User extends BaseEntity implements UserDetails, Principal {
 
     @Override
     public String toString() {
-        return String.format("[%s#%s]", name, email);
+        return name;
     }
 
     @Override
