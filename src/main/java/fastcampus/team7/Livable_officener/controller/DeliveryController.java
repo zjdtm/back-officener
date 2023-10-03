@@ -36,7 +36,7 @@ public class DeliveryController {
         return APIDataResponse.of(HttpStatus.OK, response);
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<APIDataResponse<String>> create(
             @RequestBody CreateDTO createDTO,
             @AuthenticationPrincipal User user) {
@@ -65,7 +65,7 @@ public class DeliveryController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("/list")
+    @GetMapping
     public ResponseEntity<APIDataResponse<PagedRoomListResponseDTO>> list(@RequestParam(defaultValue = "0") int page,
                                                                           @RequestParam(defaultValue = "10") int size) {
         PagedRoomListResponseDTO response = deliveryService.getRoomList(PageRequest.of(page, size));
