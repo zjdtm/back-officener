@@ -74,7 +74,7 @@ public class ChatService {
 
         room.closeParticipation();
 
-        sendSystemMessage(room, user, ChatType.CLOSE_PARTICIPATION);
+        sendFixedSystemMessage(room, user, ChatType.CLOSE_PARTICIPATION);
     }
 
     @Transactional
@@ -86,7 +86,7 @@ public class ChatService {
         isRemitCompleted(roomParticipant);
         roomParticipant.completeRemit();
 
-        sendSystemMessage(room, user, ChatType.COMPLETE_REMITTANCE);
+        sendFixedSystemMessage(room, user, ChatType.COMPLETE_REMITTANCE);
     }
 
     @Transactional
@@ -98,7 +98,7 @@ public class ChatService {
 
         room.completeDelivery();
 
-        sendSystemMessage(room, user, ChatType.COMPLETE_DELIVERY);
+        sendFixedSystemMessage(room, user, ChatType.COMPLETE_DELIVERY);
     }
 
     @Transactional
@@ -109,7 +109,7 @@ public class ChatService {
         isReceiveCompleted(roomParticipant);
         roomParticipant.completeReceive();
 
-        sendSystemMessage(room, user, ChatType.COMPLETE_RECEIPT);
+        sendFixedSystemMessage(room, user, ChatType.COMPLETE_RECEIPT);
     }
 
     @Transactional
@@ -118,7 +118,7 @@ public class ChatService {
         RoomParticipant roomParticipant = getRoomParticipant(room.getId(), user.getId());
         validateIfRoomParticipantIsGuest(roomParticipant.getRole(), "나가기요청");
 
-        sendSystemMessage(room, user, ChatType.REQUEST_EXIT);
+        sendFixedSystemMessage(room, user, ChatType.REQUEST_EXIT);
     }
 
     public void kick(Long roomId, User user, KickDTO kickDTO) throws IOException {
@@ -135,7 +135,7 @@ public class ChatService {
         webSocketSessionManager.closeSessionForUser(roomId, kickedUser);
         roomParticipantRepository.delete(pointedRoomParticipant);
 
-        sendSystemMessage(room,user,kickedUser,ChatType.KICK);
+        sendFixedSystemMessage(room,user,kickedUser,ChatType.KICK);
     }
 
     @Transactional
@@ -148,7 +148,7 @@ public class ChatService {
             roomRepository.deleteById(roomId);
         } else if (roomParticipant.getRole() == Role.GUEST) {
             roomParticipant.guestExit();
-            sendSystemMessage(room, user, ChatType.EXIT);
+            sendFixedSystemMessage(room, user, ChatType.EXIT);
         }
     }
 
@@ -237,13 +237,13 @@ public class ChatService {
         }
     }
 
-    private void sendSystemMessage(Room room, User sender, ChatType messageType) throws IOException {
+    private void sendFixedSystemMessage(Room room, User sender, ChatType messageType) throws IOException {
         SendPayloadDTO payloadDto = createSystemMessagePayloadDTO(sender, messageType);
 
         sendMessage(room, sender, payloadDto);
     }
 
-    private void sendSystemMessage(Room room, User sender, User pointedUser, ChatType messageType) throws IOException {
+    private void sendFixedSystemMessage(Room room, User sender, User pointedUser, ChatType messageType) throws IOException {
         SendPayloadDTO payloadDto = createSystemMessagePayloadDTO(sender, pointedUser, messageType);
         sendMessage(room, sender, payloadDto);
     }
@@ -280,7 +280,7 @@ public class ChatService {
     private void sendMessage(Room room, User sender, SendPayloadDTO payloadDto) throws IOException {
         TextMessage message = convertPayloadDtoToJsonTextMessage(payloadDto);
 
-        webSocketSessionManager.send(room.getId(), message);
+        webSocketSessionManager.sendFixedMessage(room.getId(), message);
         chatRepository.save(Chat.from(room, sender, payloadDto));
 
         // 함께배달 참여자 중 웹소켓세션이 연결되어있지 않은(=채팅 페이지를 벗어난) 참여자들의 unreadCount 증가
