@@ -69,8 +69,8 @@ public class ChatService {
     public void closeParticipation(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
 
-        RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
-        validateIfRoomParticipantIsHost(roomParticipant.getRole(), "참여마감하기");
+        RoomParticipant participant = getRoomParticipant(roomId, user.getId());
+        validateIfRoomParticipantIsHost(participant.getRole(), "참여마감하기");
 
         room.closeParticipation();
 
