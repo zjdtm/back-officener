@@ -1,4 +1,4 @@
-package fastcampus.team7.Livable_officener.dto;
+package fastcampus.team7.Livable_officener.dto.signup;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
