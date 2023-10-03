@@ -30,7 +30,7 @@ public class ChatController {
             @AuthenticationPrincipal User user) {
 
         ChatroomInfoDTO dto = chatService.getChatroomInfo(roomId, user);
-        return APIDataResponse.of(HttpStatus.OK, dto);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @PostMapping("/closed")
@@ -103,7 +103,7 @@ public class ChatController {
             @AuthenticationPrincipal User user,
             @Valid @RequestBody ReportDTO reportDTO) {
 
-        if(reportDTO.getReportedUserId().equals(user.getId())) {
+        if (reportDTO.getReportedUserId().equals(user.getId())) {
             return APIErrorResponse.of(HttpStatus.BAD_REQUEST, "자기 자신을 신고할 수는 없습니다.");
         }
 
