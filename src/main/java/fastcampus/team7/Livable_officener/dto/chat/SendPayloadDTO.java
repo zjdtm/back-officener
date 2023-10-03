@@ -20,6 +20,10 @@ public class SendPayloadDTO {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long senderId;
 
+    public SendPayloadDTO(ChatType messageType, String content, Long senderId) {
+        this (messageType, content, LocalDateTime.now(), senderId);
+    }
+
     public void setSenderId(Long senderId) {
         this.senderId = senderId;
     }

@@ -242,7 +242,7 @@ public class ChatService {
     private void sendFixedSystemMessage(Room room, ChatType messageType, User... args) throws IOException {
         String content = messageType.getSystemMessageContent(args);
         User sender = args[0];
-        SendPayloadDTO payloadDto = new SendPayloadDTO(messageType, content, LocalDateTime.now(), sender.getId());
+        SendPayloadDTO payloadDto = new SendPayloadDTO(messageType, content, sender.getId());
         sendMessage(room, sender, payloadDto);
     }
 
