@@ -17,4 +17,8 @@ public enum NotificationType {
     public String getName() {
         return name;
     }
+
+    public NotificationContent getContent() {
+        return NotificationContent.valueOf(name);
+    }
 }
