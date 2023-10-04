@@ -5,7 +5,7 @@ import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import fastcampus.team7.Livable_officener.dto.fcm.FCMNotificationDTO;
-import fastcampus.team7.Livable_officener.dto.fcm.FCMRegistrationDTO;
+import fastcampus.team7.Livable_officener.dto.fcm.FCMSubscribeDTO;
 import fastcampus.team7.Livable_officener.global.fcm.FCMTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ public class FCMService {
     private final FirebaseMessaging firebaseMessaging;
 
     @Transactional
-    public void registerFcmToken(FCMRegistrationDTO dto) {
+    public void registerFcmToken(FCMSubscribeDTO dto) {
         fcmTokenRepository.save(dto);
     }
 

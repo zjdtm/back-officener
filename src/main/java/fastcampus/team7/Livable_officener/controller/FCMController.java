@@ -1,7 +1,7 @@
 package fastcampus.team7.Livable_officener.controller;
 
 import fastcampus.team7.Livable_officener.domain.User;
-import fastcampus.team7.Livable_officener.dto.fcm.FCMRegistrationDTO;
+import fastcampus.team7.Livable_officener.dto.fcm.FCMSubscribeDTO;
 import fastcampus.team7.Livable_officener.service.FCMService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,11 +17,11 @@ public class FCMController {
     private final FCMService fcmService;
 
     @PostMapping("/fcm-token")
-    public ResponseEntity<?> registerFcmToken(
+    public ResponseEntity<?> subscribe(
             @RequestBody String fcmToken,
             @AuthenticationPrincipal User user) {
 
-        FCMRegistrationDTO dto = new FCMRegistrationDTO(user.getEmail(), fcmToken);
+        FCMSubscribeDTO dto = new FCMSubscribeDTO(user.getEmail(), fcmToken);
         fcmService.registerFcmToken(dto);
 
         return new ResponseEntity<>(HttpStatus.CREATED);

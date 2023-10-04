@@ -1,8 +1,7 @@
 package fastcampus.team7.Livable_officener.global.fcm;
 
-import fastcampus.team7.Livable_officener.dto.fcm.FCMRegistrationDTO;
+import fastcampus.team7.Livable_officener.dto.fcm.FCMSubscribeDTO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -14,7 +13,7 @@ public class FCMTokenRepository {
 
     private final StringRedisTemplate fcmTokenRedisTemplate;
 
-    public void save(FCMRegistrationDTO dto) {
+    public void save(FCMSubscribeDTO dto) {
         fcmTokenRedisTemplate.opsForValue()
                 .set(dto.getEmail(), dto.getFcmToken());
     }

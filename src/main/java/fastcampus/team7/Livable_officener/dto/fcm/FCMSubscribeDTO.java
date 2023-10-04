@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class FCMRegistrationDTO {
+public class FCMSubscribeDTO {
 
     private String email;
     private String fcmToken;
