@@ -107,7 +107,7 @@ class ChatServiceGetRoomInfoTest {
         // then
         verify(roomParticipant, times(1)).resetUnreadCount();
         assertThat(roomParticipant.getUnreadCount()).isSameAs(0);
-        verify(chatRepository, times(1)).findByRoomIdOrderByCreatedAtDesc(eq(roomId));
+        verify(chatRepository, times(1)).findByRoomIdAndJoinedAtAfterOrderByCreatedAtDesc(eq(roomId), any());
         verify(roomParticipantRepository, times(1)).findAllByRoomId(eq(roomId));
         assertThat(chatroomInfo).isNotNull();
     }

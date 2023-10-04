@@ -88,9 +88,7 @@ public class ChatService {
         chatRepository.save(Chat.from(room, sender, payloadDto));
 
         // 웹소켓 연결되지 않은 참여자의 읽지 않은 메시지 수 갱신
-        roomParticipantRepository.findAllByRoomId(room.getId()).stream()
-                .filter(participant -> webSocketSessionManager.nonexistent(room.getId(), participant.getUser()))
-                .forEach(RoomParticipant::incrementUnreadCount);
+        incrementUnreadCountOfUnconnectedParticipant(room);
 
         // 웹소켓 연결된 각 회원에 대하여 시스템 메시지 내용 생성
         // SendPayloadDTO의 content 갱신
@@ -268,15 +266,37 @@ public class ChatService {
     }
 
     private void sendFixedMessage(Room room, User sender, SendPayloadDTO payloadDto) throws IOException {
-        TextMessage message = convertPayloadDtoToJsonTextMessage(payloadDto);
-
-        webSocketSessionManager.sendToAll(room.getId(), message);
         chatRepository.save(Chat.from(room, sender, payloadDto));
 
-        // 함께배달 참여자 중 웹소켓세션이 연결되어있지 않은(=채팅 페이지를 벗어난) 참여자들의 unreadCount 증가
+        incrementUnreadCountOfUnconnectedParticipant(room);
+
+        TextMessage message = convertPayloadDtoToJsonTextMessage(payloadDto);
+        webSocketSessionManager.sendToAll(room.getId(), message);
+    }
+
+    private TextMessage convertPayloadDtoToJsonTextMessage(SendPayloadDTO payloadDTO) throws JsonProcessingException {
+        String payload = objectMapper.writeValueAsString(payloadDTO);
+        return new TextMessage(payload);
+    }
+
+    /**
+     * 함께배달 참여자 중 웹소켓세션이 연결되어있지 않은(=채팅 페이지를 벗어난) 참여자들의 unreadCount 증가
+     */
+    private void incrementUnreadCountOfUnconnectedParticipant(Room room) {
         roomParticipantRepository.findAllByRoomId(room.getId()).stream()
                 .filter(participant -> webSocketSessionManager.nonexistent(room.getId(), participant.getUser()))
                 .forEach(RoomParticipant::incrementUnreadCount);
+    }
+
+    @Transactional
+    public ChatroomInfoDTO getChatroomInfo(Long roomId, User user) {
+        Room room = getRoom(roomId);
+        validateIfRoomIsActive(room);
+
+        RoomParticipant participant = getRoomParticipant(roomId, user.getId());
+        participant.resetUnreadCount();
+
+        return createChatRoomInfoDTO(roomId, user.getId(), participant.getCreatedAt());
     }
 
     private static void validateIfRoomIsActive(Room room) {
@@ -285,24 +305,8 @@ public class ChatService {
         }
     }
 
-    private TextMessage convertPayloadDtoToJsonTextMessage(SendPayloadDTO payloadDTO) throws JsonProcessingException {
-        String payload = objectMapper.writeValueAsString(payloadDTO);
-        return new TextMessage(payload);
-    }
-
-    @Transactional
-    public ChatroomInfoDTO getChatroomInfo(Long roomId, User user) {
-        Room room = getRoom(roomId);
-        validateIfRoomIsActive(room);
-
-        RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
-        roomParticipant.resetUnreadCount();
-
-        return createChatRoomInfoDTO(roomId, user.getId());
-    }
-
-    private ChatroomInfoDTO createChatRoomInfoDTO(Long roomId, Long userId) {
-        List<GetMessageDTO> messages = chatRepository.findByRoomIdOrderByCreatedAtDesc(roomId).stream()
+    private ChatroomInfoDTO createChatRoomInfoDTO(Long roomId, Long userId, LocalDateTime joinedAt) {
+        List<GetMessageDTO> messages = chatRepository.findByRoomIdAndJoinedAtAfterOrderByCreatedAtDesc(roomId, joinedAt).stream()
                 .map(GetMessageDTO::from)
                 .collect(Collectors.toList());
         List<GetParticipantDTO> members = roomParticipantRepository.findAllByRoomId(roomId).stream()
