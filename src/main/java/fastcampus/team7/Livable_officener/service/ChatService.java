@@ -135,7 +135,9 @@ public class ChatService {
         roomParticipant.completeRemit();
 
         saveNotification(user, room, notificationType);
-        pushNotificationToHost(room, notificationType);
+        if (fcmService.isSubscribed(user.getId())) {
+            pushNotificationToHost(room, notificationType);
+        }
 
         sendFixedSystemMessage(room, COMPLETE_REMITTANCE, user);
     }
@@ -162,8 +164,11 @@ public class ChatService {
             User guest = getUser(guestId);
             saveNotification(guest, room, notificationType);
 
-            dto.setReceiverId(guestId);
-            fcmService.sendFcmNotification(dto);
+            boolean isSubscribed = fcmService.isSubscribed(guestId);
+            if (isSubscribed) {
+                dto.setReceiverId(guestId);
+                fcmService.sendFcmNotification(dto);
+            }
         }
     }
 
@@ -183,7 +188,9 @@ public class ChatService {
         roomParticipant.completeReceive();
 
         saveNotification(user, room, notificationType);
-        pushNotificationToHost(room, notificationType);
+        if (fcmService.isSubscribed(user.getId())) {
+            pushNotificationToHost(room, notificationType);
+        }
 
         sendFixedSystemMessage(room, COMPLETE_RECEIPT, user);
     }
@@ -197,7 +204,9 @@ public class ChatService {
         validateIfRoomParticipantIsGuest(roomParticipant.getRole(), notificationType.getName());
 
         saveNotification(user, room, notificationType);
-        pushNotificationToHost(room, notificationType);
+        if (fcmService.isSubscribed(user.getId())) {
+            pushNotificationToHost(room, notificationType);
+        }
 
         sendFixedSystemMessage(room, REQUEST_EXIT, user);
     }
