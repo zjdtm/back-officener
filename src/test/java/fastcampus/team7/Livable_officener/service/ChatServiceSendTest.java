@@ -17,6 +17,7 @@ import fastcampus.team7.Livable_officener.global.websocket.WebSocketSessionManag
 import fastcampus.team7.Livable_officener.repository.ChatRepository;
 import fastcampus.team7.Livable_officener.repository.DeliveryParticipantRepository;
 import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
+import fastcampus.team7.Livable_officener.repository.NotificationRepository;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -47,6 +48,11 @@ class ChatServiceSendTest {
     private static DeliveryRepository roomRepository;
     @Mock
     private static DeliveryParticipantRepository roomParticipantRepository;
+
+    @Mock
+    private static NotificationRepository notificationRepository;
+    @Mock
+    private static FCMService fcmService;
     @Mock
     private static WebSocketSessionManager webSocketSessionManager;
 
@@ -65,6 +71,7 @@ class ChatServiceSendTest {
     void beforeEach() {
         sut = new ChatService(mapper, chatRepository, null, null,
                 roomRepository, roomParticipantRepository,
+                notificationRepository, fcmService,
                 webSocketSessionManager);
     }
 
