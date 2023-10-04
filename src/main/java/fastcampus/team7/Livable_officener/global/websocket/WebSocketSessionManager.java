@@ -2,6 +2,8 @@ package fastcampus.team7.Livable_officener.global.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fastcampus.team7.Livable_officener.domain.User;
+import fastcampus.team7.Livable_officener.dto.chat.SendPayloadDTO;
+import fastcampus.team7.Livable_officener.global.constant.ChatType;
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -85,5 +87,17 @@ public class WebSocketSessionManager {
             throw new NotFoundRoomException();
         }
         return ret;
+    }
+
+    public void sendDynamicMessageToAll(Long roomId, SendPayloadDTO payloadDto) throws IOException {
+        ChatType messageType = payloadDto.getMessageType();
+        for (WebSocketSession session : getWebSocketSessions(roomId)) {
+            User user = getSessionUser(session);
+            String content = messageType.getSystemMessageContent(user);
+            payloadDto.setContent(content);
+            String payload = objectMapper.writeValueAsString(payloadDto);
+            TextMessage message = new TextMessage(payload);
+            session.sendMessage(message);
+        }
     }
 }

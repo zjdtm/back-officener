@@ -76,7 +76,27 @@ public class ChatService {
 
         room.closeParticipation();
 
-        sendFixedSystemMessage(room, CLOSE_PARTICIPATION, user);
+        sendDynamicSystemMessage(room, CLOSE_PARTICIPATION, user);
+    }
+
+    private void sendDynamicSystemMessage(Room room, ChatType messageType, User sender) throws IOException {
+        // 빈 content의 SendPayloadDTO 생성
+        SendPayloadDTO payloadDto = new SendPayloadDTO(messageType, sender.getId());
+
+        // 채팅 메시지 DB에 저장
+        chatRepository.save(Chat.from(room, sender, payloadDto));
+
+        // 웹소켓 연결되지 않은 참여자의 읽지 않은 메시지 수 갱신
+        roomParticipantRepository.findAllByRoomId(room.getId()).stream()
+                .filter(participant -> webSocketSessionManager.nonexistent(room.getId(), participant.getUser()))
+                .forEach(RoomParticipant::incrementUnreadCount);
+
+        // 웹소켓 연결된 각 회원에 대하여 시스템 메시지 내용 생성
+        // SendPayloadDTO의 content 갱신
+        // SendPayloadDTO 직렬화
+        // TextMessage로 변환
+        // 송신
+        webSocketSessionManager.sendDynamicMessageToAll(room.getId(), payloadDto);
     }
 
     @Transactional
