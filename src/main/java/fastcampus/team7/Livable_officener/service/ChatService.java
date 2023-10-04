@@ -144,12 +144,32 @@ public class ChatService {
     public void completeDelivery(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
 
+        NotificationType notificationType = NotificationType.DELIVERED;
         RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
-        validateIfRoomParticipantIsHost(roomParticipant.getRole(), "배달완료");
-
+        validateIfRoomParticipantIsHost(roomParticipant.getRole(), notificationType.getName());
         room.completeDelivery();
 
+        saveAndPushNotificationToAllGuests(room, notificationType);
+
         sendFixedSystemMessage(room, COMPLETE_DELIVERY, user);
+    }
+
+    private void saveAndPushNotificationToAllGuests(Room room, NotificationType notificationType) {
+        List<Long> guestIds = roomParticipantRepository.findUserIdsByRoomIdAndRole(room.getId(), Role.GUEST);
+        // TODO 이미지 추후에 음식 사진 링크로 변경해야 함
+        FCMNotificationDTO dto = new FCMNotificationDTO(notificationType.getContent().getName(), null);
+        for (Long guestId : guestIds) {
+            User guest = getUser(guestId);
+            saveNotification(guest, room, notificationType);
+
+            dto.setReceiverId(guestId);
+            fcmService.sendFcmNotification(dto);
+        }
+    }
+
+    private User getUser(Long hostId) {
+        return userRepository.findById(hostId)
+                .orElseThrow(NotFoundUserException::new);
     }
 
     @Transactional
