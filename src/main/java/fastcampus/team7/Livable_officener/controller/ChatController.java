@@ -33,6 +33,15 @@ public class ChatController {
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
+    @PostMapping("/enter")
+    public ResponseEntity<?> enterChatroom(
+            @PathVariable Long roomId,
+            @AuthenticationPrincipal User user) throws IOException {
+
+        chatService.enterChatroom(roomId, user);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @PostMapping("/closed")
     public ResponseEntity<?> closeParticipation(
             @PathVariable Long roomId,
