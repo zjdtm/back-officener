@@ -27,7 +27,7 @@ public class FCMService {
 
     @Transactional
     public void sendFcmNotification(FCMNotificationDTO dto) {
-        String fcmToken = getFcmToken(dto.getReceiverId());
+        String fcmToken = getFcmToken(dto.getReceiverEmail());
 
         Notification notification = dto.makeNotification();
         Message message = Message.builder()
@@ -37,24 +37,24 @@ public class FCMService {
 
         try {
             String messageId = firebaseMessaging.send(message);
-            log.info("웹푸시 전송 to {}: {}", dto.getReceiverId(), messageId);
+            log.info("웹푸시 전송 to {}: {}", dto.getReceiverEmail(), messageId);
         } catch (FirebaseMessagingException e) {
             throw new RuntimeException("웹푸시 전송 실패", e);
         }
     }
 
-    private String getFcmToken(Long userId) {
-        return fcmTokenRepository.find(userId)
+    private String getFcmToken(String email) {
+        return fcmTokenRepository.find(email)
                 .orElseThrow(() -> new IllegalArgumentException("해당 id를 가진 회원의 FCM 토큰이 존재하지 않습니다."));
     }
 
     @Transactional
-    public void unsubscribe(Long userId) {
-        fcmTokenRepository.delete(userId);
+    public void unsubscribe(String email) {
+        fcmTokenRepository.delete(email);
     }
 
     @Transactional(readOnly = true)
-    public boolean isSubscribed(Long userId) {
-        return fcmTokenRepository.contains(userId);
+    public boolean isSubscribed(String email) {
+        return fcmTokenRepository.contains(email);
     }
 }

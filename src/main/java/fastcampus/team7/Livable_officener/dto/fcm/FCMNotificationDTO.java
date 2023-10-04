@@ -8,7 +8,7 @@ public class FCMNotificationDTO {
 
     private static final String TITLE = "함께배달";
 
-    private Long receiverId;
+    private String receiverEmail;
     private final String title;
     private final String body;
     private final String image;
@@ -17,19 +17,19 @@ public class FCMNotificationDTO {
         this(null, TITLE, body, image);
     }
 
-    public FCMNotificationDTO(Long receiverId, String body, String image) {
-        this(receiverId, TITLE, body, image);
+    public FCMNotificationDTO(String receiverEmail, String body, String image) {
+        this(receiverEmail, TITLE, body, image);
     }
 
-    public FCMNotificationDTO(Long receiverId, String title, String body, String image) {
-        this.receiverId = receiverId;
+    public FCMNotificationDTO(String receiverEmail, String title, String body, String image) {
+        this.receiverEmail = receiverEmail;
         this.title = title;
         this.body = body;
         this.image = image;
     }
 
-    public void setReceiverId(Long receiverId) {
-        this.receiverId = receiverId;
+    public void setReceiverEmail(String receiverEmail) {
+        this.receiverEmail = receiverEmail;
     }
 
     public Notification makeNotification() {

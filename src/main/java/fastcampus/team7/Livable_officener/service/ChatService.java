@@ -135,7 +135,7 @@ public class ChatService {
         roomParticipant.completeRemit();
 
         saveNotification(user, room, notificationType);
-        if (fcmService.isSubscribed(user.getId())) {
+        if (fcmService.isSubscribed(user.getEmail())) {
             pushNotificationToHost(room, notificationType);
         }
 
@@ -164,9 +164,9 @@ public class ChatService {
             User guest = getUser(guestId);
             saveNotification(guest, room, notificationType);
 
-            boolean isSubscribed = fcmService.isSubscribed(guestId);
+            boolean isSubscribed = fcmService.isSubscribed(guest.getEmail());
             if (isSubscribed) {
-                dto.setReceiverId(guestId);
+                dto.setReceiverEmail(guest.getEmail());
                 fcmService.sendFcmNotification(dto);
             }
         }
@@ -188,7 +188,7 @@ public class ChatService {
         roomParticipant.completeReceive();
 
         saveNotification(user, room, notificationType);
-        if (fcmService.isSubscribed(user.getId())) {
+        if (fcmService.isSubscribed(user.getEmail())) {
             pushNotificationToHost(room, notificationType);
         }
 
@@ -204,7 +204,7 @@ public class ChatService {
         validateIfRoomParticipantIsGuest(roomParticipant.getRole(), notificationType.getName());
 
         saveNotification(user, room, notificationType);
-        if (fcmService.isSubscribed(user.getId())) {
+        if (fcmService.isSubscribed(user.getEmail())) {
             pushNotificationToHost(room, notificationType);
         }
 
@@ -225,9 +225,10 @@ public class ChatService {
             throw new IllegalStateException("해당 함께배달에 호스트가 둘 이상 존재합니다.");
         }
         Long hostId = hostIds.get(0);
+        User host = getUser(hostId);
 
         // TODO 이미지 추후에 음식 사진 링크로 변경해야 함
-        FCMNotificationDTO dto = new FCMNotificationDTO(hostId, notificationType.getContent().getName(), null);
+        FCMNotificationDTO dto = new FCMNotificationDTO(host.getEmail(), notificationType.getContent().getName(), null);
         fcmService.sendFcmNotification(dto);
     }
 

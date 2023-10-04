@@ -12,23 +12,23 @@ import java.util.Optional;
 @Repository
 public class FCMTokenRepository {
 
-    private final RedisTemplate<Long, String> fcmTokenRedisTemplate;
+    private final StringRedisTemplate fcmTokenRedisTemplate;
 
     public void save(FCMRegistrationDTO dto) {
         fcmTokenRedisTemplate.opsForValue()
-                .set(dto.getUserId(), dto.getFcmToken());
+                .set(dto.getEmail(), dto.getFcmToken());
     }
 
-    public Optional<String> find(Long userId) {
-        String fcmToken = fcmTokenRedisTemplate.opsForValue().get(userId);
+    public Optional<String> find(String email) {
+        String fcmToken = fcmTokenRedisTemplate.opsForValue().get(email);
         return Optional.ofNullable(fcmToken);
     }
 
-    public void delete(Long userId) {
-        fcmTokenRedisTemplate.delete(userId);
+    public void delete(String email) {
+        fcmTokenRedisTemplate.delete(email);
     }
 
-    public boolean contains(Long userId) {
-        return Boolean.TRUE.equals(fcmTokenRedisTemplate.hasKey(userId));
+    public boolean contains(String email) {
+        return Boolean.TRUE.equals(fcmTokenRedisTemplate.hasKey(email));
     }
 }

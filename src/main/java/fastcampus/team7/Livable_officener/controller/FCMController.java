@@ -21,7 +21,7 @@ public class FCMController {
             @RequestBody String fcmToken,
             @AuthenticationPrincipal User user) {
 
-        FCMRegistrationDTO dto = new FCMRegistrationDTO(user.getId(), fcmToken);
+        FCMRegistrationDTO dto = new FCMRegistrationDTO(user.getEmail(), fcmToken);
         fcmService.registerFcmToken(dto);
 
         return new ResponseEntity<>(HttpStatus.CREATED);
@@ -31,7 +31,7 @@ public class FCMController {
     public ResponseEntity<?> unsubscribe(
             @AuthenticationPrincipal User user) {
 
-        fcmService.unsubscribe(user.getId());
+        fcmService.unsubscribe(user.getEmail());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
