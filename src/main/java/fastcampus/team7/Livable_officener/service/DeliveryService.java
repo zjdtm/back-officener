@@ -1,7 +1,6 @@
 package fastcampus.team7.Livable_officener.service;
 
 import fastcampus.team7.Livable_officener.domain.*;
-import fastcampus.team7.Livable_officener.dto.*;
 import fastcampus.team7.Livable_officener.dto.delivery.*;
 import fastcampus.team7.Livable_officener.dto.delivery.RoomDetailDTO;
 import fastcampus.team7.Livable_officener.dto.delivery.UpdateStoreDetailDTO;

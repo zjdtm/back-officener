@@ -2,7 +2,6 @@ package fastcampus.team7.Livable_officener.controller;
 
 
 import fastcampus.team7.Livable_officener.domain.User;
-import fastcampus.team7.Livable_officener.dto.*;
 import fastcampus.team7.Livable_officener.dto.delivery.BankListResponseDTO;
 import fastcampus.team7.Livable_officener.dto.delivery.CreateDTO;
 import fastcampus.team7.Livable_officener.dto.delivery.PagedRoomListResponseDTO;
@@ -20,8 +19,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
