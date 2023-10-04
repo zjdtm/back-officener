@@ -55,7 +55,7 @@ public class ChatService {
         User sender = sendChatDTO.getSender();
         SendPayloadDTO payloadDto = getSendPayloadDTO(sender, sendChatDTO.getMessage());
 
-        sendMessage(room, sender, payloadDto);
+        sendFixedMessage(room, sender, payloadDto);
     }
 
     private SendPayloadDTO getSendPayloadDTO(User sender, TextMessage message) throws JsonProcessingException {
@@ -243,10 +243,10 @@ public class ChatService {
         String content = messageType.getSystemMessageContent(args);
         User sender = args[0];
         SendPayloadDTO payloadDto = new SendPayloadDTO(messageType, content, sender.getId());
-        sendMessage(room, sender, payloadDto);
+        sendFixedMessage(room, sender, payloadDto);
     }
 
-    private void sendMessage(Room room, User sender, SendPayloadDTO payloadDto) throws IOException {
+    private void sendFixedMessage(Room room, User sender, SendPayloadDTO payloadDto) throws IOException {
         TextMessage message = convertPayloadDtoToJsonTextMessage(payloadDto);
 
         webSocketSessionManager.sendFixedMessage(room.getId(), message);
