@@ -135,9 +135,7 @@ public class ChatService {
         roomParticipant.completeRemit();
 
         saveNotification(user, room, notificationType);
-        if (fcmService.isSubscribed(user.getEmail())) {
-            pushNotificationToHost(room, notificationType);
-        }
+        pushNotificationToHostIfSubscribed(room, notificationType);
 
         sendFixedSystemMessage(room, COMPLETE_REMITTANCE, user);
     }
@@ -151,12 +149,12 @@ public class ChatService {
         validateIfRoomParticipantIsHost(roomParticipant.getRole(), notificationType.getName());
         room.completeDelivery();
 
-        saveAndPushNotificationToAllGuests(room, notificationType);
+        saveNotificationAndPushToSubscribedGuests(room, notificationType);
 
         sendFixedSystemMessage(room, COMPLETE_DELIVERY, user);
     }
 
-    private void saveAndPushNotificationToAllGuests(Room room, NotificationType notificationType) {
+    private void saveNotificationAndPushToSubscribedGuests(Room room, NotificationType notificationType) {
         List<Long> guestIds = roomParticipantRepository.findUserIdsByRoomIdAndRole(room.getId(), Role.GUEST);
         // TODO 이미지 추후에 음식 사진 링크로 변경해야 함
         FCMNotificationDTO dto = new FCMNotificationDTO(notificationType.getContent().getName(), null);
@@ -172,11 +170,6 @@ public class ChatService {
         }
     }
 
-    private User getUser(Long hostId) {
-        return userRepository.findById(hostId)
-                .orElseThrow(NotFoundUserException::new);
-    }
-
     @Transactional
     public void completeReceive(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
@@ -188,11 +181,17 @@ public class ChatService {
         roomParticipant.completeReceive();
 
         saveNotification(user, room, notificationType);
-        if (fcmService.isSubscribed(user.getEmail())) {
-            pushNotificationToHost(room, notificationType);
-        }
+        pushNotificationToHostIfSubscribed(room, notificationType);
 
         sendFixedSystemMessage(room, COMPLETE_RECEIPT, user);
+    }
+
+    private void pushNotificationToHostIfSubscribed(Room room, NotificationType notificationType) {
+        User host = getHost(room);
+        boolean subscribed = fcmService.isSubscribed(host.getEmail());
+        if (subscribed) {
+            pushNotificationToHost(host, notificationType);
+        }
     }
 
     @Transactional
@@ -204,9 +203,7 @@ public class ChatService {
         validateIfRoomParticipantIsGuest(roomParticipant.getRole(), notificationType.getName());
 
         saveNotification(user, room, notificationType);
-        if (fcmService.isSubscribed(user.getEmail())) {
-            pushNotificationToHost(room, notificationType);
-        }
+        pushNotificationToHostIfSubscribed(room, notificationType);
 
         sendFixedSystemMessage(room, REQUEST_EXIT, user);
     }
@@ -216,20 +213,24 @@ public class ChatService {
         notificationRepository.save(notification);
     }
 
-    private void pushNotificationToHost(Room room, NotificationType notificationType) {
-        List<Long> hostIds = roomParticipantRepository.findUserIdsByRoomIdAndRole(room.getId(), Role.HOST);
-        if (hostIds.isEmpty()) {
-            throw new IllegalStateException("해당 함께배달에 호스트가 존재하지 않습니다.");
-        }
-        if (hostIds.size() > 1) {
-            throw new IllegalStateException("해당 함께배달에 호스트가 둘 이상 존재합니다.");
-        }
-        Long hostId = hostIds.get(0);
-        User host = getUser(hostId);
-
+    private void pushNotificationToHost(User host, NotificationType notificationType) {
         // TODO 이미지 추후에 음식 사진 링크로 변경해야 함
         FCMNotificationDTO dto = new FCMNotificationDTO(host.getEmail(), notificationType.getContent().getName(), null);
         fcmService.sendFcmNotification(dto);
+    }
+
+    private User getHost(Room room) {
+        List<Long> hostIds = roomParticipantRepository.findUserIdsByRoomIdAndRole(room.getId(), Role.HOST);
+        if (hostIds.size() != 1) {
+            throw new IllegalStateException("해당 함께배달에 호스트가 존재하지 않거나 둘 이상 존재합니다.");
+        }
+        Long hostId = hostIds.get(0);
+        return getUser(hostId);
+    }
+
+    private User getUser(Long hostId) {
+        return userRepository.findById(hostId)
+                .orElseThrow(NotFoundUserException::new);
     }
 
     public void kick(Long roomId, User user, KickDTO kickDTO) throws IOException {
