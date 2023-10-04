@@ -27,6 +27,8 @@ import java.util.Optional;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
+import static fastcampus.team7.Livable_officener.global.constant.ChatType.*;
+
 @RequiredArgsConstructor
 @Service
 public class ChatService {
@@ -53,7 +55,7 @@ public class ChatService {
         User sender = sendChatDTO.getSender();
         SendPayloadDTO payloadDto = getSendPayloadDTO(sender, sendChatDTO.getMessage());
 
-        sendMessage(room, sender, payloadDto);
+        sendFixedMessage(room, sender, payloadDto);
     }
 
     private SendPayloadDTO getSendPayloadDTO(User sender, TextMessage message) throws JsonProcessingException {
@@ -69,12 +71,32 @@ public class ChatService {
     public void closeParticipation(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
 
-        RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
-        validateIfRoomParticipantIsHost(roomParticipant.getRole(), "참여마감하기");
+        RoomParticipant participant = getRoomParticipant(roomId, user.getId());
+        validateIfRoomParticipantIsHost(participant.getRole(), "참여마감하기");
 
         room.closeParticipation();
 
-        sendSystemMessage(room, user, ChatType.CLOSE_PARTICIPATION);
+        sendDynamicSystemMessage(room, CLOSE_PARTICIPATION, user);
+    }
+
+    private void sendDynamicSystemMessage(Room room, ChatType messageType, User sender) throws IOException {
+        // 빈 content의 SendPayloadDTO 생성
+        SendPayloadDTO payloadDto = new SendPayloadDTO(messageType, sender.getId());
+
+        // 채팅 메시지 DB에 저장
+        chatRepository.save(Chat.from(room, sender, payloadDto));
+
+        // 웹소켓 연결되지 않은 참여자의 읽지 않은 메시지 수 갱신
+        roomParticipantRepository.findAllByRoomId(room.getId()).stream()
+                .filter(participant -> webSocketSessionManager.nonexistent(room.getId(), participant.getUser()))
+                .forEach(RoomParticipant::incrementUnreadCount);
+
+        // 웹소켓 연결된 각 회원에 대하여 시스템 메시지 내용 생성
+        // SendPayloadDTO의 content 갱신
+        // SendPayloadDTO 직렬화
+        // TextMessage로 변환
+        // 송신
+        webSocketSessionManager.sendDynamicMessageToAll(room.getId(), payloadDto);
     }
 
     @Transactional
@@ -86,7 +108,7 @@ public class ChatService {
         isRemitCompleted(roomParticipant);
         roomParticipant.completeRemit();
 
-        sendSystemMessage(room, user, ChatType.COMPLETE_REMITTANCE);
+        sendFixedSystemMessage(room, COMPLETE_REMITTANCE, user);
     }
 
     @Transactional
@@ -98,7 +120,7 @@ public class ChatService {
 
         room.completeDelivery();
 
-        sendSystemMessage(room, user, ChatType.COMPLETE_DELIVERY);
+        sendFixedSystemMessage(room, COMPLETE_DELIVERY, user);
     }
 
     @Transactional
@@ -109,7 +131,7 @@ public class ChatService {
         isReceiveCompleted(roomParticipant);
         roomParticipant.completeReceive();
 
-        sendSystemMessage(room, user, ChatType.COMPLETE_RECEIPT);
+        sendFixedSystemMessage(room, COMPLETE_RECEIPT, user);
     }
 
     @Transactional
@@ -118,7 +140,7 @@ public class ChatService {
         RoomParticipant roomParticipant = getRoomParticipant(room.getId(), user.getId());
         validateIfRoomParticipantIsGuest(roomParticipant.getRole(), "나가기요청");
 
-        sendSystemMessage(room, user, ChatType.REQUEST_EXIT);
+        sendFixedSystemMessage(room, REQUEST_EXIT, user);
     }
 
     public void kick(Long roomId, User user, KickDTO kickDTO) throws IOException {
@@ -135,7 +157,7 @@ public class ChatService {
         webSocketSessionManager.closeSessionForUser(roomId, kickedUser);
         roomParticipantRepository.delete(pointedRoomParticipant);
 
-        sendSystemMessage(room,user,kickedUser,ChatType.KICK);
+        sendFixedSystemMessage(room, KICK, user, kickedUser);
     }
 
     @Transactional
@@ -148,7 +170,7 @@ public class ChatService {
             roomRepository.deleteById(roomId);
         } else if (roomParticipant.getRole() == Role.GUEST) {
             roomParticipant.guestExit();
-            sendSystemMessage(room, user, ChatType.EXIT);
+            sendFixedSystemMessage(room, EXIT, user);
         }
     }
 
@@ -237,50 +259,17 @@ public class ChatService {
         }
     }
 
-    private void sendSystemMessage(Room room, User sender, ChatType messageType) throws IOException {
-        SendPayloadDTO payloadDto = createSystemMessagePayloadDTO(sender, messageType);
-
-        sendMessage(room, sender, payloadDto);
+    private void sendFixedSystemMessage(Room room, ChatType messageType, User... args) throws IOException {
+        String content = messageType.getSystemMessageContent(args);
+        User sender = args[0];
+        SendPayloadDTO payloadDto = new SendPayloadDTO(messageType, content, sender.getId());
+        sendFixedMessage(room, sender, payloadDto);
     }
 
-    private void sendSystemMessage(Room room, User sender, User pointedUser, ChatType messageType) throws IOException {
-        SendPayloadDTO payloadDto = createSystemMessagePayloadDTO(sender, pointedUser, messageType);
-        sendMessage(room, sender, payloadDto);
-    }
-
-    private static SendPayloadDTO createSystemMessagePayloadDTO(User sender, ChatType messageType) {
-        String content = getSystemMessageContent(sender, messageType);
-        return new SendPayloadDTO(messageType, content, LocalDateTime.now(), sender.getId());
-    }
-
-    private SendPayloadDTO createSystemMessagePayloadDTO(User sender, User pointedUser, ChatType messageType) {
-        String content = getSystemMessageContent(sender, pointedUser, messageType);
-        return new SendPayloadDTO(messageType, content, LocalDateTime.now(), sender.getId());
-    }
-
-    private static String getSystemMessageContent(User sender, ChatType messageType) {
-        Object[] systemMessageArgs = getSystemMessageArgs(messageType, sender);
-        return messageType.getSystemMessageContent(systemMessageArgs);
-    }
-
-    private String getSystemMessageContent(User sender, User pointedUser, ChatType messageType) {
-        return messageType.getSystemMessageContent(sender.getName(), pointedUser.getName());
-    }
-
-    private static Object[] getSystemMessageArgs(ChatType messageType, User user) {
-        Object[] systemMessageArgs;
-        if (messageType == ChatType.COMPLETE_DELIVERY) {
-            systemMessageArgs = null;
-        } else {
-            systemMessageArgs = new Object[]{user.getName()};
-        }
-        return systemMessageArgs;
-    }
-
-    private void sendMessage(Room room, User sender, SendPayloadDTO payloadDto) throws IOException {
+    private void sendFixedMessage(Room room, User sender, SendPayloadDTO payloadDto) throws IOException {
         TextMessage message = convertPayloadDtoToJsonTextMessage(payloadDto);
 
-        webSocketSessionManager.send(room.getId(), message);
+        webSocketSessionManager.sendToAll(room.getId(), message);
         chatRepository.save(Chat.from(room, sender, payloadDto));
 
         // 함께배달 참여자 중 웹소켓세션이 연결되어있지 않은(=채팅 페이지를 벗어난) 참여자들의 unreadCount 증가

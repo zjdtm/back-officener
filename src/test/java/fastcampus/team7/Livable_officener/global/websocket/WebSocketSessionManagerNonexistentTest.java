@@ -1,9 +1,9 @@
 package fastcampus.team7.Livable_officener.global.websocket;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fastcampus.team7.Livable_officener.domain.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.socket.WebSocketSession;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -12,7 +12,7 @@ import static org.mockito.Mockito.mock;
 
 class WebSocketSessionManagerNonexistentTest {
 
-    private final WebSocketSessionManager sut = new WebSocketSessionManager();
+    private final WebSocketSessionManager sut = new WebSocketSessionManager(new ObjectMapper());
 
     @DisplayName("특정 방에 주어진 유저의 세션이 존재하지 않으면 true")
     @Test

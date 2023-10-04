@@ -1,10 +1,10 @@
 package fastcampus.team7.Livable_officener.global.websocket;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -17,9 +17,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
-class WebSocketSessionManagerSendTest {
+class WebSocketSessionManagerSendToAllTest {
 
-    private final WebSocketSessionManager sut = new WebSocketSessionManager();
+    private final WebSocketSessionManager sut = new WebSocketSessionManager(new ObjectMapper());
 
     @DisplayName("roomId에 해당하는 세션 Collection 없으면 예외")
     @Test
@@ -28,7 +28,7 @@ class WebSocketSessionManagerSendTest {
         // 빈 객체이므로 어떤 roomId 든지 해당하는 세션 Collection 없음
 
         // when, then
-        assertThatThrownBy(() -> sut.send(1L, new TextMessage("payload")))
+        assertThatThrownBy(() -> sut.sendToAll(1L, new TextMessage("payload")))
                 .isInstanceOf(NotFoundRoomException.class);
     }
 
@@ -48,7 +48,7 @@ class WebSocketSessionManagerSendTest {
         }
 
         // when
-        sut.send(roomId, message);
+        sut.sendToAll(roomId, message);
 
         // then
         sessions.forEach(session -> {

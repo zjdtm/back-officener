@@ -154,7 +154,7 @@ class ChatServiceCompleteDeliveryTest {
         // then
         ArgumentCaptor<TextMessage> messageCaptor = ArgumentCaptor.forClass(TextMessage.class);
         verify(room, times(1)).completeDelivery();
-        verify(webSocketSessionManager, times(1)).send(eq(roomId), messageCaptor.capture());
+        verify(webSocketSessionManager, times(1)).sendToAll(eq(roomId), messageCaptor.capture());
         verify(chatRepository, times(1)).save(any(Chat.class));
     }
 }

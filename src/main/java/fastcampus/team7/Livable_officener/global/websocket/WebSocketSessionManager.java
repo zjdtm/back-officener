@@ -1,7 +1,11 @@
 package fastcampus.team7.Livable_officener.global.websocket;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fastcampus.team7.Livable_officener.domain.User;
+import fastcampus.team7.Livable_officener.dto.chat.SendPayloadDTO;
+import fastcampus.team7.Livable_officener.global.constant.ChatType;
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -10,10 +14,12 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+@RequiredArgsConstructor
 @Component
 public class WebSocketSessionManager {
 
     private final Map<Long, Collection<WebSocketSession>> roomIdToSessions = new ConcurrentHashMap<>();
+    private final ObjectMapper objectMapper;
 
     public static User getSessionUser(WebSocketSession session) {
         return (User) session.getPrincipal();
@@ -59,7 +65,7 @@ public class WebSocketSessionManager {
         }
     }
 
-    public void send(Long roomId, TextMessage message) throws IOException {
+    public void sendToAll(Long roomId, TextMessage message) throws IOException {
         Collection<WebSocketSession> webSocketSessions = getWebSocketSessions(roomId);
         for (WebSocketSession webSocketSession : webSocketSessions) {
             webSocketSession.sendMessage(message);
@@ -81,5 +87,17 @@ public class WebSocketSessionManager {
             throw new NotFoundRoomException();
         }
         return ret;
+    }
+
+    public void sendDynamicMessageToAll(Long roomId, SendPayloadDTO payloadDto) throws IOException {
+        ChatType messageType = payloadDto.getMessageType();
+        for (WebSocketSession session : getWebSocketSessions(roomId)) {
+            User user = getSessionUser(session);
+            String content = messageType.getSystemMessageContent(user);
+            payloadDto.setContent(content);
+            String payload = objectMapper.writeValueAsString(payloadDto);
+            TextMessage message = new TextMessage(payload);
+            session.sendMessage(message);
+        }
     }
 }
