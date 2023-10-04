@@ -18,10 +18,14 @@ public class GetParticipantDTO {
     private final String companyName;
     private final String profileImage;
     private final boolean amI;
-    @JsonProperty("isHost")
     private final boolean isHost;
     private final boolean hasRemitted;
     private final boolean hasReceived;
+
+    @JsonProperty("isHost")
+    public boolean isHost() {
+        return isHost;
+    }
 
     public static GetParticipantDTO from(Long userId, RoomParticipant participant) {
         User user = participant.getUser();
