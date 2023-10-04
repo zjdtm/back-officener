@@ -1,8 +1,7 @@
 package fastcampus.team7.Livable_officener.domain;
 
+import fastcampus.team7.Livable_officener.global.constant.ChatType;
 import fastcampus.team7.Livable_officener.global.constant.FoodTag;
-import fastcampus.team7.Livable_officener.global.constant.NotificationContent;
-import fastcampus.team7.Livable_officener.global.constant.NotificationType;
 import lombok.*;
 
 import javax.persistence.*;
@@ -27,7 +26,7 @@ public class Notification {
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
-    private NotificationType notificationType;
+    private ChatType type;
 
     @Column
     private boolean isRead;
@@ -40,15 +39,14 @@ public class Notification {
     private Timestamp createdAt;
 
     @Column(nullable = false)
-    @Enumerated(value = EnumType.STRING)
-    private NotificationContent notificationContent;
+    private String content;
 
-    public Notification(User user, Room room, NotificationType type) {
+    public Notification(Room room, ChatType type, User user) {
         this.user = user;
         this.room = room;
-        this.notificationType = type;
+        this.type = type;
         foodTag = room.getTag();
         createdAt = Timestamp.valueOf(LocalDateTime.now());
-        notificationContent = type.getContent();
+        content = type.getSystemMessageContent(user);
     }
 }

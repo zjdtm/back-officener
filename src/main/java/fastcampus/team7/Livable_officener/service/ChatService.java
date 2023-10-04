@@ -7,7 +7,6 @@ import fastcampus.team7.Livable_officener.domain.*;
 import fastcampus.team7.Livable_officener.dto.chat.*;
 import fastcampus.team7.Livable_officener.dto.fcm.FCMNotificationDTO;
 import fastcampus.team7.Livable_officener.global.constant.ChatType;
-import fastcampus.team7.Livable_officener.global.constant.NotificationType;
 import fastcampus.team7.Livable_officener.global.constant.Role;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
 import fastcampus.team7.Livable_officener.global.exception.*;
@@ -128,14 +127,14 @@ public class ChatService {
     public void completeRemit(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
 
-        NotificationType notificationType = NotificationType.TRANSFERRED;
+        ChatType messageType = COMPLETE_REMITTANCE;
         RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
-        validateIfRoomParticipantIsGuest(roomParticipant.getRole(), notificationType.getName());
+        validateIfRoomParticipantIsGuest(roomParticipant.getRole(), messageType.getDescription());
         isRemitCompleted(roomParticipant);
         roomParticipant.completeRemit();
 
-        saveNotification(user, room, notificationType);
-        pushNotificationToHostIfSubscribed(room, notificationType);
+        saveNotification(user, room, messageType);
+        pushNotificationToHostIfSubscribed(room, messageType);
 
         sendFixedSystemMessage(room, COMPLETE_REMITTANCE, user);
     }
@@ -144,26 +143,28 @@ public class ChatService {
     public void completeDelivery(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
 
-        NotificationType notificationType = NotificationType.DELIVERED;
+        ChatType messageType = COMPLETE_DELIVERY;
         RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
-        validateIfRoomParticipantIsHost(roomParticipant.getRole(), notificationType.getName());
+        validateIfRoomParticipantIsHost(roomParticipant.getRole(), messageType.getDescription());
         room.completeDelivery();
 
-        saveNotificationAndPushToSubscribedGuests(room, notificationType);
+        saveNotificationAndPushToSubscribedGuests(room, messageType);
 
         sendFixedSystemMessage(room, COMPLETE_DELIVERY, user);
     }
 
-    private void saveNotificationAndPushToSubscribedGuests(Room room, NotificationType notificationType) {
+    private void saveNotificationAndPushToSubscribedGuests(Room room, ChatType messageType) {
         List<Long> guestIds = roomParticipantRepository.findUserIdsByRoomIdAndRole(room.getId(), Role.GUEST);
         // TODO 이미지 추후에 음식 사진 링크로 변경해야 함
-        FCMNotificationDTO dto = new FCMNotificationDTO(notificationType.getContent().getName(), null);
+        FCMNotificationDTO dto = new FCMNotificationDTO(null);
         for (Long guestId : guestIds) {
             User guest = getUser(guestId);
-            saveNotification(guest, room, notificationType);
+            saveNotification(guest, room, messageType);
 
             boolean isSubscribed = fcmService.isSubscribed(guest.getEmail());
             if (isSubscribed) {
+                String body = messageType.getSystemMessageContent(guest);
+                dto.setBody(body);
                 dto.setReceiverEmail(guest.getEmail());
                 fcmService.sendFcmNotification(dto);
             }
@@ -174,23 +175,23 @@ public class ChatService {
     public void completeReceive(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
 
-        NotificationType notificationType = NotificationType.COMPLETE_RECEIPT;
+        ChatType messageType = ChatType.COMPLETE_RECEIPT;
         RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
-        validateIfRoomParticipantIsGuest(roomParticipant.getRole(), notificationType.getName());
+        validateIfRoomParticipantIsGuest(roomParticipant.getRole(), messageType.getDescription());
         isReceiveCompleted(roomParticipant);
         roomParticipant.completeReceive();
 
-        saveNotification(user, room, notificationType);
-        pushNotificationToHostIfSubscribed(room, notificationType);
+        saveNotification(user, room, messageType);
+        pushNotificationToHostIfSubscribed(room, messageType);
 
         sendFixedSystemMessage(room, COMPLETE_RECEIPT, user);
     }
 
-    private void pushNotificationToHostIfSubscribed(Room room, NotificationType notificationType) {
+    private void pushNotificationToHostIfSubscribed(Room room, ChatType messageType) {
         User host = getHost(room);
         boolean subscribed = fcmService.isSubscribed(host.getEmail());
         if (subscribed) {
-            pushNotificationToHost(host, notificationType);
+            pushNotificationToHost(host, messageType);
         }
     }
 
@@ -198,24 +199,25 @@ public class ChatService {
     public void kickRequest(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
 
-        NotificationType notificationType = NotificationType.REQUEST_EXIT;
+        ChatType messageType = ChatType.REQUEST_EXIT;
         RoomParticipant roomParticipant = getRoomParticipant(room.getId(), user.getId());
-        validateIfRoomParticipantIsGuest(roomParticipant.getRole(), notificationType.getName());
+        validateIfRoomParticipantIsGuest(roomParticipant.getRole(), messageType.getDescription());
 
-        saveNotification(user, room, notificationType);
-        pushNotificationToHostIfSubscribed(room, notificationType);
+        saveNotification(user, room, messageType);
+        pushNotificationToHostIfSubscribed(room, messageType);
 
         sendFixedSystemMessage(room, REQUEST_EXIT, user);
     }
 
-    private void saveNotification(User user, Room room, NotificationType type) {
-        Notification notification = new Notification(user, room, type);
+    private void saveNotification(User user, Room room, ChatType type) {
+        Notification notification = new Notification(room, type, user);
         notificationRepository.save(notification);
     }
 
-    private void pushNotificationToHost(User host, NotificationType notificationType) {
+    private void pushNotificationToHost(User host, ChatType messageType) {
+        String body = messageType.getSystemMessageContent(host);
         // TODO 이미지 추후에 음식 사진 링크로 변경해야 함
-        FCMNotificationDTO dto = new FCMNotificationDTO(host.getEmail(), notificationType.getContent().getName(), null);
+        FCMNotificationDTO dto = new FCMNotificationDTO(host.getEmail(), body, null);
         fcmService.sendFcmNotification(dto);
     }
 

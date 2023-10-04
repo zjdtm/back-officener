@@ -10,11 +10,11 @@ public class FCMNotificationDTO {
 
     private String receiverEmail;
     private final String title;
-    private final String body;
+    private String body;
     private final String image;
 
-    public FCMNotificationDTO(String body, String image) {
-        this(null, TITLE, body, image);
+    public FCMNotificationDTO(String image) {
+        this(null, TITLE, null, image);
     }
 
     public FCMNotificationDTO(String receiverEmail, String body, String image) {
@@ -30,6 +30,10 @@ public class FCMNotificationDTO {
 
     public void setReceiverEmail(String receiverEmail) {
         this.receiverEmail = receiverEmail;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 
     public Notification makeNotification() {

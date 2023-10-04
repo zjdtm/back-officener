@@ -97,8 +97,8 @@ public class NotificationService {
             DTO.setId(entity.getId());
             DTO.setReceiverId(entity.getUser().getId());
             DTO.setRoomId(entity.getRoom().getId());
-            DTO.setContent(entity.getNotificationContent().getName());
-            DTO.setType(entity.getNotificationType().getName());
+            DTO.setContent(entity.getContent());
+            DTO.setType(entity.getType().getDescription());
             DTO.setRead(entity.isRead());
             DTO.setMenuTag(entity.getFoodTag().toString());
             DTO.setCreatedAt(entity.getCreatedAt());
