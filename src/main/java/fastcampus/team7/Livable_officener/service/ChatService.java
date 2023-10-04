@@ -2,14 +2,13 @@ package fastcampus.team7.Livable_officener.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import fastcampus.team7.Livable_officener.domain.*;
 import fastcampus.team7.Livable_officener.dto.chat.*;
 import fastcampus.team7.Livable_officener.global.constant.ChatType;
 import fastcampus.team7.Livable_officener.global.constant.Role;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
 import fastcampus.team7.Livable_officener.global.exception.*;
-import fastcampus.team7.Livable_officener.global.util.LocalDateTimeDeserializer;
 import fastcampus.team7.Livable_officener.global.websocket.WebSocketSessionManager;
 import fastcampus.team7.Livable_officener.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -43,9 +42,11 @@ public class ChatService {
 
     @PostConstruct
     public void setup() {
-        SimpleModule module = new SimpleModule();
-        module.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer());
-        objectMapper.registerModule(module);
+//        SimpleModule module = new SimpleModule();
+//        module.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer());
+//        objectMapper.registerModule(module);
+
+        objectMapper.registerModule(new JavaTimeModule());
         objectMapper.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
     }
 
