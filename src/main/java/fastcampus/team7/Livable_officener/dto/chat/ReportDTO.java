@@ -2,9 +2,11 @@ package fastcampus.team7.Livable_officener.dto.chat;
 
 import fastcampus.team7.Livable_officener.global.constant.ReportType;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import javax.validation.constraints.Size;
 
+@RequiredArgsConstructor
 @Getter
 public class ReportDTO {
 
