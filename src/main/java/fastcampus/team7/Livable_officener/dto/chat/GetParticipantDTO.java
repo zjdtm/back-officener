@@ -1,5 +1,6 @@
 package fastcampus.team7.Livable_officener.dto.chat;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import fastcampus.team7.Livable_officener.domain.RoomParticipant;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.global.constant.Role;
@@ -16,6 +17,7 @@ public class GetParticipantDTO {
     private final String name;
     private final String companyName;
     private final String profileImage;
+    @JsonProperty("isHost")
     private final boolean amI;
     private final boolean isHost;
     private final boolean hasRemitted;
