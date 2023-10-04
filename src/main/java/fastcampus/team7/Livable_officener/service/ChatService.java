@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import fastcampus.team7.Livable_officener.domain.*;
 import fastcampus.team7.Livable_officener.dto.chat.*;
+import fastcampus.team7.Livable_officener.dto.fcm.FCMNotificationDTO;
 import fastcampus.team7.Livable_officener.global.constant.ChatType;
+import fastcampus.team7.Livable_officener.global.constant.NotificationType;
 import fastcampus.team7.Livable_officener.global.constant.Role;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
 import fastcampus.team7.Livable_officener.global.exception.*;
@@ -38,6 +40,8 @@ public class ChatService {
     private final ReportRepository reportRepository;
     private final DeliveryRepository roomRepository;
     private final DeliveryParticipantRepository roomParticipantRepository;
+    private final NotificationRepository notificationRepository;
+    private final FCMService fcmService;
     private final WebSocketSessionManager webSocketSessionManager;
 
     @PostConstruct
@@ -124,10 +128,14 @@ public class ChatService {
     public void completeRemit(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
 
+        NotificationType notificationType = NotificationType.TRANSFERRED;
         RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
-        validateIfRoomParticipantIsGuest(roomParticipant.getRole(), "송금완료");
+        validateIfRoomParticipantIsGuest(roomParticipant.getRole(), notificationType.getName());
         isRemitCompleted(roomParticipant);
         roomParticipant.completeRemit();
+
+        saveNotification(user, room, notificationType);
+        pushNotificationToHost(room, notificationType);
 
         sendFixedSystemMessage(room, COMPLETE_REMITTANCE, user);
     }
@@ -147,10 +155,15 @@ public class ChatService {
     @Transactional
     public void completeReceive(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
+
+        NotificationType notificationType = NotificationType.COMPLETE_RECEIPT;
         RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
-        validateIfRoomParticipantIsGuest(roomParticipant.getRole(), "수령완료");
+        validateIfRoomParticipantIsGuest(roomParticipant.getRole(), notificationType.getName());
         isReceiveCompleted(roomParticipant);
         roomParticipant.completeReceive();
+
+        saveNotification(user, room, notificationType);
+        pushNotificationToHost(room, notificationType);
 
         sendFixedSystemMessage(room, COMPLETE_RECEIPT, user);
     }
@@ -158,10 +171,35 @@ public class ChatService {
     @Transactional
     public void kickRequest(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
+
+        NotificationType notificationType = NotificationType.REQUEST_EXIT;
         RoomParticipant roomParticipant = getRoomParticipant(room.getId(), user.getId());
-        validateIfRoomParticipantIsGuest(roomParticipant.getRole(), "나가기요청");
+        validateIfRoomParticipantIsGuest(roomParticipant.getRole(), notificationType.getName());
+
+        saveNotification(user, room, notificationType);
+        pushNotificationToHost(room, notificationType);
 
         sendFixedSystemMessage(room, REQUEST_EXIT, user);
+    }
+
+    private void saveNotification(User user, Room room, NotificationType type) {
+        Notification notification = new Notification(user, room, type);
+        notificationRepository.save(notification);
+    }
+
+    private void pushNotificationToHost(Room room, NotificationType notificationType) {
+        List<Long> hostIds = roomParticipantRepository.findUserIdsByRoomIdAndRole(room.getId(), Role.HOST);
+        if (hostIds.isEmpty()) {
+            throw new IllegalStateException("해당 함께배달에 호스트가 존재하지 않습니다.");
+        }
+        if (hostIds.size() > 1) {
+            throw new IllegalStateException("해당 함께배달에 호스트가 둘 이상 존재합니다.");
+        }
+        Long hostId = hostIds.get(0);
+
+        // TODO 이미지 추후에 음식 사진 링크로 변경해야 함
+        FCMNotificationDTO dto = new FCMNotificationDTO(hostId, notificationType.getContent().getName(), null);
+        fcmService.sendFcmNotification(dto);
     }
 
     public void kick(Long roomId, User user, KickDTO kickDTO) throws IOException {
