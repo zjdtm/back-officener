@@ -59,7 +59,7 @@ public class WebSocketSessionManager {
         }
     }
 
-    public void sendFixedMessage(Long roomId, TextMessage message) throws IOException {
+    public void sendToAll(Long roomId, TextMessage message) throws IOException {
         Collection<WebSocketSession> webSocketSessions = getWebSocketSessions(roomId);
         for (WebSocketSession webSocketSession : webSocketSessions) {
             webSocketSession.sendMessage(message);

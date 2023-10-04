@@ -249,7 +249,7 @@ public class ChatService {
     private void sendFixedMessage(Room room, User sender, SendPayloadDTO payloadDto) throws IOException {
         TextMessage message = convertPayloadDtoToJsonTextMessage(payloadDto);
 
-        webSocketSessionManager.sendFixedMessage(room.getId(), message);
+        webSocketSessionManager.sendToAll(room.getId(), message);
         chatRepository.save(Chat.from(room, sender, payloadDto));
 
         // 함께배달 참여자 중 웹소켓세션이 연결되어있지 않은(=채팅 페이지를 벗어난) 참여자들의 unreadCount 증가

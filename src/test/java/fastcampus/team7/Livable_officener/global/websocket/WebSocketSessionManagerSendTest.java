@@ -27,7 +27,7 @@ class WebSocketSessionManagerSendTest {
         // 빈 객체이므로 어떤 roomId 든지 해당하는 세션 Collection 없음
 
         // when, then
-        assertThatThrownBy(() -> sut.sendFixedMessage(1L, new TextMessage("payload")))
+        assertThatThrownBy(() -> sut.sendToAll(1L, new TextMessage("payload")))
                 .isInstanceOf(NotFoundRoomException.class);
     }
 
@@ -47,7 +47,7 @@ class WebSocketSessionManagerSendTest {
         }
 
         // when
-        sut.sendFixedMessage(roomId, message);
+        sut.sendToAll(roomId, message);
 
         // then
         sessions.forEach(session -> {
