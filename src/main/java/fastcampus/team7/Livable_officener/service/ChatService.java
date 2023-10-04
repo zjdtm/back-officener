@@ -69,6 +69,28 @@ public class ChatService {
     }
 
     @Transactional
+    public void enterChatroom(Long roomId, User user) throws IOException {
+        Room room = getRoom(roomId);
+        RoomParticipant newParticipant = getRoomParticipant(roomId, user.getId());
+
+        // 고정 페이로드 생성
+        String content = ENTER.getSystemMessageContent(user);
+        SendPayloadDTO.Enter enterPayloadDto = new SendPayloadDTO.Enter(content, newParticipant);
+
+        // DB에 저장
+        chatRepository.save(Chat.from(room, user, enterPayloadDto));
+
+        // 웹소켓 연결되지 않은 참여자의 읽지 않은 메시지 수 갱신
+        incrementUnreadCountOfUnconnectedParticipant(room);
+
+        // 수신자별로 amI 변경
+        // 직렬화
+        // TextMessage로 변환
+        // 송신
+        webSocketSessionManager.sendEnterMessageToAll(roomId, user, enterPayloadDto);
+    }
+
+    @Transactional
     public void closeParticipation(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
 

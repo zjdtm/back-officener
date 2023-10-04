@@ -2,6 +2,7 @@ package fastcampus.team7.Livable_officener.global.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fastcampus.team7.Livable_officener.domain.User;
+import fastcampus.team7.Livable_officener.dto.chat.GetParticipantDTO;
 import fastcampus.team7.Livable_officener.dto.chat.SendPayloadDTO;
 import fastcampus.team7.Livable_officener.global.constant.ChatType;
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
@@ -96,6 +97,22 @@ public class WebSocketSessionManager {
             String content = messageType.getSystemMessageContent(user);
             payloadDto.setContent(content);
             String payload = objectMapper.writeValueAsString(payloadDto);
+            TextMessage message = new TextMessage(payload);
+            session.sendMessage(message);
+        }
+    }
+
+    public void sendEnterMessageToAll(
+            Long roomId,
+            User enteringUser,
+            SendPayloadDTO.Enter enterPayloadDto) throws IOException {
+
+        GetParticipantDTO newParticipantDto = enterPayloadDto.getNewParticipant();
+        Collection<WebSocketSession> sessions = getWebSocketSessions(roomId);
+        for (WebSocketSession session : sessions) {
+            User receiver = getSessionUser(session);
+            newParticipantDto.setAmI(enteringUser.equals(receiver));
+            String payload = objectMapper.writeValueAsString(enterPayloadDto);
             TextMessage message = new TextMessage(payload);
             session.sendMessage(message);
         }
