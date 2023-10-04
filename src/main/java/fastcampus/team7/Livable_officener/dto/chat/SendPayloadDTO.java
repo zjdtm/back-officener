@@ -1,6 +1,9 @@
 package fastcampus.team7.Livable_officener.dto.chat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import fastcampus.team7.Livable_officener.domain.RoomParticipant;
 import fastcampus.team7.Livable_officener.global.constant.ChatType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,6 +14,24 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.EXISTING_PROPERTY,
+        property = "messageType",
+        visible = true)
+@JsonSubTypes({
+        @JsonSubTypes.Type(
+                value = SendPayloadDTO.Normal.class,
+                names = {"TALK",
+                        "CLOSE_PARTICIPATION",
+                        "COMPLETE_REMITTANCE",
+                        "COMPLETE_DELIVERY",
+                        "COMPLETE_RECEIPT",
+                        "REQUEST_EXIT",
+                        "EXIT",
+                        "KICK"}),
+        @JsonSubTypes.Type(
+                value = SendPayloadDTO.Enter.class,
+                name = "ENTER")})
 public class SendPayloadDTO {
 
     private ChatType messageType;
@@ -34,5 +55,19 @@ public class SendPayloadDTO {
 
     public void setSenderId(Long senderId) {
         this.senderId = senderId;
+    }
+
+    public static class Normal extends SendPayloadDTO {
+    }
+
+    @Getter
+    @NoArgsConstructor
+    public static class Enter extends SendPayloadDTO {
+        private GetParticipantDTO newParticipant;
+
+        public Enter(String content, RoomParticipant newParticipant) {
+            super(ChatType.ENTER, content, newParticipant.getUser().getId());
+            this.newParticipant = GetParticipantDTO.from(newParticipant);
+        }
     }
 }
