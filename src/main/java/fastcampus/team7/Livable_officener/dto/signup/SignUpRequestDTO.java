@@ -31,7 +31,7 @@ public class SignUpRequestDTO {
     private String buildingName;
 
     @NotBlank(message = "회사 명을 입력해주세요")
-    private String companyName;
+    private String officeName;
 
     @NotBlank(message = "이름을 입력해주세요")
     private String name;

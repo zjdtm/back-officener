@@ -270,7 +270,7 @@ class SignUpServiceTest {
                 .password(password)
                 .phoneNumber(phoneNumber)
                 .buildingName(building.getName())
-                .companyName(company.getName())
+                .officeName(company.getName())
                 .build());
 
         // then
@@ -301,7 +301,7 @@ class SignUpServiceTest {
                     .password(password)
                     .phoneNumber(phoneNumber)
                     .buildingName(building.getName())
-                    .companyName(company.getName())
+                    .officeName(company.getName())
                     .build());
         });
 
@@ -331,7 +331,7 @@ class SignUpServiceTest {
                     .password(password)
                     .phoneNumber(phoneNumber)
                     .buildingName(building.getName())
-                    .companyName(company.getName())
+                    .officeName(company.getName())
                     .build());
         });
 
@@ -362,7 +362,7 @@ class SignUpServiceTest {
                     .password(password)
                     .phoneNumber(phoneNumber)
                     .buildingName(building.getName())
-                    .companyName(company.getName())
+                    .officeName(company.getName())
                     .build());
         });
 
@@ -394,7 +394,7 @@ class SignUpServiceTest {
                     .password(password)
                     .phoneNumber(phoneNumber)
                     .buildingName(building.getName())
-                    .companyName(company.getName())
+                    .officeName(company.getName())
                     .build());
         });
 
@@ -434,7 +434,7 @@ class SignUpServiceTest {
                 .password(password)
                 .phoneNumber(phoneNumber)
                 .buildingName(building.getName())
-                .companyName(company.getName())
+                .officeName(company.getName())
                 .build());
 
         // then

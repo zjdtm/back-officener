@@ -122,7 +122,7 @@ public class SignUpService {
         Building building = buildingRepository.findByName(request.getBuildingName())
                 .orElseThrow(() -> new NotFoundBuildingException());
 
-        Company company = companyRepository.findByName(request.getCompanyName())
+        Company company = companyRepository.findByName(request.getOfficeName())
                 .orElseThrow(() -> new NotFoundCompanyException());
 
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -183,9 +183,16 @@ public class SignUpService {
     public void logout(User user, String authorization) {
 
         String bearerTokenPrefix = jwtProvider.parseAccessToken(authorization);
-        Long expirationTime = jwtProvider.getExpirationTime(bearerTokenPrefix);
+        long expirationTime = jwtProvider.getExpirationTime(bearerTokenPrefix);
 
-        redisUtil.setBlackList(bearerTokenPrefix, user.getEmail(), expirationTime);
+        // 현재 시간을 milliseconds 단위로 불러온다.
+        long currentTimeMillis = System.currentTimeMillis();
+
+        // JWT 의 만료 시간에서 현재 시간을 뺀 남은 시간을 분 단위로 변환
+        long remainingTime = (expirationTime - currentTimeMillis) / (1000 * 60);
+
+        redisUtil.setBlackList(bearerTokenPrefix, user.getEmail(), remainingTime);
+
 
     }
 

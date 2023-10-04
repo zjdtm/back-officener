@@ -270,7 +270,7 @@ class SignUpControllerTest {
                 .agree(agree)
                 .password(password)
                 .buildingName(buildingName)
-                .companyName(companyName)
+                .officeName(companyName)
                 .name(name)
                 .phoneNumber(phoneNumber)
                 .build();
@@ -305,7 +305,7 @@ class SignUpControllerTest {
                 .agree(agree)
                 .password(password)
                 .buildingName(buildingName)
-                .companyName(companyName)
+                .officeName(companyName)
                 .name(name)
                 .phoneNumber(phoneNumber)
                 .build();
@@ -340,7 +340,7 @@ class SignUpControllerTest {
                 .agree(agree)
                 .password(password)
                 .buildingName(buildingName)
-                .companyName(companyName)
+                .officeName(companyName)
                 .name(name)
                 .phoneNumber(phoneNumber)
                 .build();
@@ -375,7 +375,7 @@ class SignUpControllerTest {
                 .agree(agree)
                 .password(password)
                 .buildingName(buildingName)
-                .companyName(companyName)
+                .officeName(companyName)
                 .name(name)
                 .phoneNumber(phoneNumber)
                 .build();
@@ -410,7 +410,7 @@ class SignUpControllerTest {
                 .agree(agree)
                 .password(password)
                 .buildingName(buildingName)
-                .companyName(companyName)
+                .officeName(companyName)
                 .name(name)
                 .phoneNumber(phoneNumber)
                 .build();
@@ -445,7 +445,7 @@ class SignUpControllerTest {
                 .agree(agree)
                 .password(password)
                 .buildingName(buildingName)
-                .companyName(companyName)
+                .officeName(companyName)
                 .name(name)
                 .phoneNumber(phoneNumber)
                 .build();
@@ -480,7 +480,7 @@ class SignUpControllerTest {
                 .agree(agree)
                 .password(password)
                 .buildingName(buildingName)
-                .companyName(companyName)
+                .officeName(companyName)
                 .name(name)
                 .phoneNumber(phoneNumber)
                 .build();
