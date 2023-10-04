@@ -69,6 +69,7 @@ public class ElevatorService {
     public ResponseEntity<APIDataResponse<String>> setElevator(List<Long> selectedIds, String token) {
         User user = userRepository.findByEmail(jwtProvider.getEmail(token))
                 .orElseThrow(() -> new RuntimeException("토큰에 일치하는 유저가 없습니다"));
+        userElevatorRepository.deleteByUserId(user.getId());
         for (Long id : selectedIds) {
             UserElevator userElevator = new UserElevator();
             userElevator.setUserId(user.getId());
