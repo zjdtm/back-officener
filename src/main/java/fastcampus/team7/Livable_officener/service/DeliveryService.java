@@ -164,10 +164,12 @@ public class DeliveryService {
     }
 
     private Long findHostIdByRoom(Long roomId) {
-        return deliveryParticipantRepository.findUserIdByRoomIdAndRole(roomId, Role.HOST)
-                .orElseThrow(() -> new NotFoundRoomException("해당 roomId로 검색되는 room이 없거나, room이 존재하지 않습니다."));
+        List<Long> userIds = deliveryParticipantRepository.findUserIdsByRoomIdAndRole(roomId, Role.HOST);
+        if (userIds.isEmpty()) {
+            throw new NotFoundRoomException("해당 roomId로 검색되는 room이 없거나, room이 존재하지 않습니다.");
+        }
+        return userIds.get(0);
     }
-
 
     public MyChatListResponseDTO getChatRoomList(User user) {
         List<ChatRoomListDTO> chatRoomListDTO = deliveryRepository.findChatRoomList(user.getId());
