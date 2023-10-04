@@ -1,9 +1,9 @@
 package fastcampus.team7.Livable_officener.dto.chat;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
-@RequiredArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public class KickDTO {
     private Long kickedUserId;
