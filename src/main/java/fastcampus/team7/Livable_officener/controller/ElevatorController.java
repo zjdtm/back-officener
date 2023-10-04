@@ -15,11 +15,16 @@ import java.util.List;
 @RestController
 public class ElevatorController {
 
-    private final ElevatorRepository elevatorRepository;
-
     private final ElevatorService elevatorService;
 
     @GetMapping("/api/elevator")
+    public ResponseEntity<APIDataResponse<List<ElevatorDTO>>> getElevators(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization){
+        String token = authorization.split(" ")[1];
+        return elevatorService.getElevators(token);
+    }
+
+    @GetMapping("/api/elevator/all")
     public ResponseEntity<APIDataResponse<List<ElevatorDTO>>> getAllElevators(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization){
         String token = authorization.split(" ")[1];

@@ -1,6 +1,6 @@
 package fastcampus.team7.Livable_officener.domain;
 
-import fastcampus.team7.Livable_officener.dto.UpdateStoreDetailDTO;
+import fastcampus.team7.Livable_officener.dto.delivery.UpdateStoreDetailDTO;
 import fastcampus.team7.Livable_officener.global.constant.BankName;
 import fastcampus.team7.Livable_officener.global.constant.FoodTag;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;

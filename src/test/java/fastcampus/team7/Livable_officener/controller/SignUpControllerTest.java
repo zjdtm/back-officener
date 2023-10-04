@@ -1,8 +1,8 @@
 package fastcampus.team7.Livable_officener.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fastcampus.team7.Livable_officener.dto.*;
-import fastcampus.team7.Livable_officener.dto.BuildingWithCompaniesDTO;
+import fastcampus.team7.Livable_officener.dto.signup.BuildingWithCompaniesDTO;
+import fastcampus.team7.Livable_officener.dto.signup.SignUpRequestDTO;
 import fastcampus.team7.Livable_officener.global.exception.DuplicatedPhoneNumberException;
 import fastcampus.team7.Livable_officener.global.exception.NotVerifiedPhoneAuthCodeException;
 import fastcampus.team7.Livable_officener.global.exception.NotVerifiedPhoneNumberException;
@@ -20,8 +20,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.*;
 
-import static fastcampus.team7.Livable_officener.dto.BuildingWithCompaniesDTO.BuildingWithCompaniesResponseDTO.CompanyResponseDTO;
-import static fastcampus.team7.Livable_officener.dto.PhoneAuthDTO.*;
+import static fastcampus.team7.Livable_officener.dto.signup.BuildingWithCompaniesDTO.BuildingWithCompaniesResponseDTO.CompanyResponseDTO;
+import static fastcampus.team7.Livable_officener.dto.signup.PhoneAuthDTO.*;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;

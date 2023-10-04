@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -32,14 +33,14 @@ public class ElevatorService {
 
     private final UserElevatorRepository userElevatorRepository;
 
-    public ResponseEntity<APIDataResponse<List<ElevatorDTO>>> getAllElevators(String token) {
+    public ResponseEntity<APIDataResponse<List<ElevatorDTO>>> getElevators(String token) {
         User user = userRepository.findByEmail(jwtProvider.getEmail(token))
                 .orElse(null);
         List<UserElevator> userElevators = userElevatorRepository.findByUserId(user.getId()).orElse(null);
         List<ElevatorDTO> elevatorDTOs = new ArrayList<>();
 
         if (userElevators.isEmpty()) {
-            List<Elevator> elevators = elevatorRepository.findAll();
+            List<Elevator> elevators = Collections.emptyList();
             for (Elevator elevator : elevators) {
                 elevatorDTOs.add(convertToDTO(elevator));
             }
@@ -54,15 +55,25 @@ public class ElevatorService {
         return APIDataResponse.of(HttpStatus.OK, elevatorDTOs);
     }
 
+    public ResponseEntity<APIDataResponse<List<ElevatorDTO>>> getAllElevators(String token) {
+        List<ElevatorDTO> elevatorDTOs = new ArrayList<>();
+
+        List<Elevator> elevators = elevatorRepository.findAll();
+        for (Elevator elevator : elevators) {
+             elevatorDTOs.add(convertToDTO(elevator));
+         }
+
+        return APIDataResponse.of(HttpStatus.OK, elevatorDTOs);
+    }
+
     public ResponseEntity<APIDataResponse<String>> setElevator(List<Long> selectedIds, String token) {
         User user = userRepository.findByEmail(jwtProvider.getEmail(token))
                 .orElseThrow(() -> new RuntimeException("토큰에 일치하는 유저가 없습니다"));
-        List<UserElevator> userElevators = new ArrayList<>();
         for (Long id : selectedIds) {
             UserElevator userElevator = new UserElevator();
             userElevator.setUserId(user.getId());
             userElevator.setElevatorId(id);
-            userElevators.add(userElevator);
+            userElevatorRepository.save(userElevator);
         }
         return APIDataResponse.empty(HttpStatus.OK);
     }

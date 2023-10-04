@@ -1,4 +1,4 @@
-package fastcampus.team7.Livable_officener.dto;
+package fastcampus.team7.Livable_officener.dto.login;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
@@ -7,8 +7,8 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
-import static fastcampus.team7.Livable_officener.dto.BuildingWithCompaniesDTO.*;
-import static fastcampus.team7.Livable_officener.dto.BuildingWithCompaniesDTO.BuildingWithCompaniesResponseDTO.*;
+import static fastcampus.team7.Livable_officener.dto.signup.BuildingWithCompaniesDTO.*;
+import static fastcampus.team7.Livable_officener.dto.signup.BuildingWithCompaniesDTO.BuildingWithCompaniesResponseDTO.*;
 
 @Getter
 @Setter

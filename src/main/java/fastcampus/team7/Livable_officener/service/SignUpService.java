@@ -3,10 +3,11 @@ package fastcampus.team7.Livable_officener.service;
 import fastcampus.team7.Livable_officener.domain.Building;
 import fastcampus.team7.Livable_officener.domain.Company;
 import fastcampus.team7.Livable_officener.domain.User;
-import fastcampus.team7.Livable_officener.dto.*;
-import fastcampus.team7.Livable_officener.dto.BuildingWithCompaniesDTO;
-import fastcampus.team7.Livable_officener.dto.LoginDTO.LoginRequestDTO;
-import fastcampus.team7.Livable_officener.dto.LoginDTO.LoginResponseDTO;
+import fastcampus.team7.Livable_officener.dto.signup.BuildingWithCompaniesDTO;
+import fastcampus.team7.Livable_officener.dto.login.LoginDTO;
+import fastcampus.team7.Livable_officener.dto.login.LoginDTO.LoginRequestDTO;
+import fastcampus.team7.Livable_officener.dto.login.LoginDTO.LoginResponseDTO;
+import fastcampus.team7.Livable_officener.dto.signup.SignUpRequestDTO;
 import fastcampus.team7.Livable_officener.global.exception.*;
 import fastcampus.team7.Livable_officener.global.sercurity.JwtProvider;
 import fastcampus.team7.Livable_officener.global.util.RedisUtil;
@@ -23,9 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-import static fastcampus.team7.Livable_officener.dto.BuildingWithCompaniesDTO.*;
-import static fastcampus.team7.Livable_officener.dto.BuildingWithCompaniesDTO.BuildingWithCompaniesResponseDTO.CompanyResponseDTO;
-import static fastcampus.team7.Livable_officener.dto.PhoneAuthDTO.*;
+import static fastcampus.team7.Livable_officener.dto.signup.BuildingWithCompaniesDTO.BuildingResponseDTO;
+import static fastcampus.team7.Livable_officener.dto.signup.BuildingWithCompaniesDTO.BuildingWithCompaniesResponseDTO;
+import static fastcampus.team7.Livable_officener.dto.signup.BuildingWithCompaniesDTO.BuildingWithCompaniesResponseDTO.CompanyResponseDTO;
+import static fastcampus.team7.Livable_officener.dto.signup.PhoneAuthDTO.*;
 
 @Service
 @RequiredArgsConstructor
