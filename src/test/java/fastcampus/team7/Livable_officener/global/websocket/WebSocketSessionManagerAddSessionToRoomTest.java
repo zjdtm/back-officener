@@ -1,9 +1,9 @@
 package fastcampus.team7.Livable_officener.global.websocket;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fastcampus.team7.Livable_officener.domain.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.socket.WebSocketSession;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -13,7 +13,7 @@ import static org.mockito.Mockito.mock;
 
 class WebSocketSessionManagerAddSessionToRoomTest {
 
-    private final WebSocketSessionManager sut = new WebSocketSessionManager();
+    private final WebSocketSessionManager sut = new WebSocketSessionManager(new ObjectMapper());
 
     @DisplayName("roomId에 해당하는 세션 Collection 없어도 패스")
     @Test

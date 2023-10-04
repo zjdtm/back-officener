@@ -1,5 +1,6 @@
 package fastcampus.team7.Livable_officener.global.websocket;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.global.exception.NotFoundRoomException;
 import org.junit.jupiter.api.DisplayName;
@@ -16,9 +17,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
-class WebSocketSessionManagerSendTest {
+class WebSocketSessionManagerSendToAllTest {
 
-    private final WebSocketSessionManager sut = new WebSocketSessionManager();
+    private final WebSocketSessionManager sut = new WebSocketSessionManager(new ObjectMapper());
 
     @DisplayName("roomId에 해당하는 세션 Collection 없으면 예외")
     @Test
