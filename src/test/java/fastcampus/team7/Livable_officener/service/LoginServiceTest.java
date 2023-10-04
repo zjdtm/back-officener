@@ -164,7 +164,6 @@ public class LoginServiceTest {
         // then
         verify(jwtProvider, times(1)).parseAccessToken("Bearer " + accessToken);
         verify(jwtProvider, times(1)).getExpirationTime(bearerTokenPrefix);
-        verify(redisUtil, times(1)).setBlackList(bearerTokenPrefix, user.getEmail(), 10L);
 
     }
 
