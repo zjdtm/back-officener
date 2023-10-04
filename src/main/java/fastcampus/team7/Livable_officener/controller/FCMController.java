@@ -7,10 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/notify")
@@ -28,5 +25,14 @@ public class FCMController {
         fcmService.registerFcmToken(dto);
 
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/fcm-token")
+    public ResponseEntity<?> unsubscribe(
+            @AuthenticationPrincipal User user) {
+
+        fcmService.unsubscribe(user.getId());
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
