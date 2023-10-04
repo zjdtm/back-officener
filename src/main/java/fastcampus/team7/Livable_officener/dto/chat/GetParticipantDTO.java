@@ -24,7 +24,7 @@ public class GetParticipantDTO {
     public static GetParticipantDTO from(Long userId, RoomParticipant participant) {
         User user = participant.getUser();
         return GetParticipantDTO.builder()
-                .id(participant.getId())
+                .id(user.getId())
                 .name(user.getName())
                 .companyName(user.getCompany().getName())
                 .profileImage(user.getProfileImage())
