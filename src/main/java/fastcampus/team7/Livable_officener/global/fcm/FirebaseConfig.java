@@ -1,4 +1,4 @@
-package fastcampus.team7.Livable_officener.global.config;
+package fastcampus.team7.Livable_officener.global.fcm;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
