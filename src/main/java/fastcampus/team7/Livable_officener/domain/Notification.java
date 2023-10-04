@@ -3,12 +3,13 @@ package fastcampus.team7.Livable_officener.domain;
 import fastcampus.team7.Livable_officener.global.constant.FoodTag;
 import fastcampus.team7.Livable_officener.global.constant.NotificationContent;
 import fastcampus.team7.Livable_officener.global.constant.NotificationType;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Getter
 @Setter
@@ -41,4 +42,13 @@ public class Notification {
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
     private NotificationContent notificationContent;
+
+    public Notification(User user, Room room, NotificationType type) {
+        this.user = user;
+        this.room = room;
+        this.notificationType = type;
+        foodTag = room.getTag();
+        createdAt = Timestamp.valueOf(LocalDateTime.now());
+        notificationContent = type.getContent();
+    }
 }
