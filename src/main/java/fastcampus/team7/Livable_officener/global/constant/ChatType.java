@@ -9,6 +9,7 @@ import org.springframework.lang.Nullable;
 public enum ChatType {
 
     TALK(false, null, 0),
+    ENTER(true, "%s님이 함께배달에 입장했습니다.", 1),
     CLOSE_PARTICIPATION(true, "%s님이 참여한 배달의 모집이 완료되었습니다.", 1),
     COMPLETE_REMITTANCE(true, "%s님이 송금을 완료했어요! 호스트님 확인해주세요.", 1),
     COMPLETE_DELIVERY(true, "배달이 완료되었어요. 음식을 수령해주세요.", 0),

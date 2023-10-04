@@ -17,7 +17,7 @@ public class GetParticipantDTO {
     private final String name;
     private final String companyName;
     private final String profileImage;
-    private final boolean amI;
+    private boolean amI;
     private final boolean isHost;
     private final boolean hasRemitted;
     private final boolean hasReceived;
@@ -25,6 +25,10 @@ public class GetParticipantDTO {
     @JsonProperty("isHost")
     public boolean isHost() {
         return isHost;
+    }
+
+    public void setAmI(boolean amI) {
+        this.amI = amI;
     }
 
     public static GetParticipantDTO from(Long userId, RoomParticipant participant) {
@@ -38,6 +42,19 @@ public class GetParticipantDTO {
                 .isHost(participant.getRole() == Role.HOST)
                 .hasRemitted(participant.getRemittedAt() != null)
                 .hasReceived(participant.getReceivedAt() != null)
+                .build();
+    }
+
+    public static GetParticipantDTO from(RoomParticipant newParticipant) {
+        User enteringUser = newParticipant.getUser();
+        return GetParticipantDTO.builder()
+                .id(enteringUser.getId())
+                .name(enteringUser.getName())
+                .companyName(enteringUser.getCompany().getName())
+                .profileImage(enteringUser.getProfileImage())
+                .isHost(newParticipant.getRole() == Role.HOST)
+                .hasRemitted(newParticipant.getRemittedAt() != null)
+                .hasReceived(newParticipant.getReceivedAt() != null)
                 .build();
     }
 }
