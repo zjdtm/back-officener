@@ -52,4 +52,9 @@ public class FCMService {
     public void unsubscribe(Long userId) {
         fcmTokenRepository.delete(userId);
     }
+
+    @Transactional(readOnly = true)
+    public boolean isSubscribed(Long userId) {
+        return fcmTokenRepository.contains(userId);
+    }
 }
