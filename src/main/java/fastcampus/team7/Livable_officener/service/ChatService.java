@@ -292,10 +292,10 @@ public class ChatService {
         Room room = getRoom(roomId);
         validateIfRoomIsActive(room);
 
-        RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
-        roomParticipant.resetUnreadCount();
+        RoomParticipant participant = getRoomParticipant(roomId, user.getId());
+        participant.resetUnreadCount();
 
-        return createChatRoomInfoDTO(roomId, user.getId());
+        return createChatRoomInfoDTO(roomId, user.getId(), participant.getCreatedAt());
     }
 
     private static void validateIfRoomIsActive(Room room) {
@@ -304,8 +304,8 @@ public class ChatService {
         }
     }
 
-    private ChatroomInfoDTO createChatRoomInfoDTO(Long roomId, Long userId) {
-        List<GetMessageDTO> messages = chatRepository.findByRoomIdOrderByCreatedAtDesc(roomId).stream()
+    private ChatroomInfoDTO createChatRoomInfoDTO(Long roomId, Long userId, LocalDateTime joinedAt) {
+        List<GetMessageDTO> messages = chatRepository.findByRoomIdAndJoinedAtAfterOrderByCreatedAtDesc(roomId, joinedAt).stream()
                 .map(GetMessageDTO::from)
                 .collect(Collectors.toList());
         List<GetParticipantDTO> members = roomParticipantRepository.findAllByRoomId(roomId).stream()
