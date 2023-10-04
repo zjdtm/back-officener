@@ -47,4 +47,9 @@ public class FCMService {
         return fcmTokenRepository.find(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 id를 가진 회원의 FCM 토큰이 존재하지 않습니다."));
     }
+
+    @Transactional
+    public void unsubscribe(Long userId) {
+        fcmTokenRepository.delete(userId);
+    }
 }
