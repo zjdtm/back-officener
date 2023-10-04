@@ -5,8 +5,8 @@ import lombok.*;
 
 import javax.validation.constraints.Size;
 
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 public class ReportDTO {
 
