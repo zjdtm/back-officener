@@ -3,6 +3,9 @@ package fastcampus.team7.Livable_officener.controller;
 
 import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.*;
+import fastcampus.team7.Livable_officener.dto.delivery.BankListResponseDTO;
+import fastcampus.team7.Livable_officener.dto.delivery.CreateDTO;
+import fastcampus.team7.Livable_officener.dto.delivery.PagedRoomListResponseDTO;
 import fastcampus.team7.Livable_officener.dto.delivery.ChatRoomListResponseDTO;
 import fastcampus.team7.Livable_officener.dto.delivery.RoomDetailDTO;
 import fastcampus.team7.Livable_officener.dto.delivery.UpdateStoreDetailDTO;
@@ -35,14 +38,14 @@ public class DeliveryController {
     }
 
     @GetMapping("/bankList")
-    public ResponseEntity<APIDataResponse<DeliveryResponseDTO.BankListResponseDTO>> bankList() {
-        DeliveryResponseDTO.BankListResponseDTO response = deliveryService.loadBankList();
+    public ResponseEntity<APIDataResponse<BankListResponseDTO>> bankList() {
+        BankListResponseDTO response = deliveryService.loadBankList();
         return APIDataResponse.of(HttpStatus.OK, response);
     }
 
     @PostMapping("/create")
     public ResponseEntity<APIDataResponse<String>> create(
-            @RequestBody DeliveryRequestDTO.createDTO createDTO,
+            @RequestBody CreateDTO createDTO,
             @AuthenticationPrincipal User user) {
 
         deliveryService.registerRoom(createDTO, user);
@@ -70,18 +73,18 @@ public class DeliveryController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<APIDataResponse<DeliveryResponseDTO.PagedRoomListResponseDTO>> list(@RequestParam(defaultValue = "0") int page,
-                                                                                              @RequestParam(defaultValue = "10") int size) {
-        DeliveryResponseDTO.PagedRoomListResponseDTO response = deliveryService.getRoomList(PageRequest.of(page, size));
+    public ResponseEntity<APIDataResponse<PagedRoomListResponseDTO>> list(@RequestParam(defaultValue = "0") int page,
+                                                                          @RequestParam(defaultValue = "10") int size) {
+        PagedRoomListResponseDTO response = deliveryService.getRoomList(PageRequest.of(page, size));
         return APIDataResponse.of(HttpStatus.CREATED, response);
     }
 
     @GetMapping("/joinedRoom")
-    public ResponseEntity<APIDataResponse<DeliveryResponseDTO.PagedRoomListResponseDTO>> joinedRoom(@RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<APIDataResponse<PagedRoomListResponseDTO>> joinedRoom(@RequestParam(defaultValue = "0") int page,
                                                                                                     @RequestParam(defaultValue = "10") int size,
                                                                                                     @AuthenticationPrincipal User user) {
 
-        DeliveryResponseDTO.PagedRoomListResponseDTO response = deliveryService.getFilteredRoomList(PageRequest.of(page, size), user);
+        PagedRoomListResponseDTO response = deliveryService.getFilteredRoomList(PageRequest.of(page, size), user);
         return APIDataResponse.of(HttpStatus.CREATED, response);
     }
 
