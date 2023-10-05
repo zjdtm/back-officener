@@ -66,7 +66,7 @@ public class SchedulingConfig {
     }
 
     private void pushNotificationToGuestIfSubscribed(ChatType messageType, FCMNotificationDTO dto, User guest) {
-        if (fcmService.isSubscribed(dto.getReceiverEmail())) {
+        if (fcmService.isSubscribed(guest.getEmail())) {
             dto.setReceiverEmailAndBody(messageType, guest);
             fcmService.sendFcmNotification(dto);
         }
