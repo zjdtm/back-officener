@@ -10,11 +10,13 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface DeliveryRepository extends JpaRepository<Room, Long>, DeliveryRepositoryCustom{
+public interface DeliveryRepository extends JpaRepository<Room, Long>, DeliveryRepositoryCustom {
 
     @Query("SELECT r FROM Room r JOIN RoomParticipant rp ON r.id = rp.room.id WHERE rp.user.id = :userId")
     Page<Room> findRoomsByUserId(@Param("userId") Long userId, Pageable pageable);
 
     @Query("SELECT r FROM Room r WHERE r.deadline > CURRENT_TIMESTAMP")
     List<Room> findByDeadlineAfterNow();
+
+    List<Room> findByDeadlineBefore(LocalDateTime afterLimitTime);
 }
