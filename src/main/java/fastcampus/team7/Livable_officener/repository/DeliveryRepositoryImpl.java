@@ -86,6 +86,7 @@ public class DeliveryRepositoryImpl implements DeliveryRepositoryCustom {
                 .leftJoin(chat).on(room.id.eq(chat.room.id), chat.id.eq(
                         JPAExpressions.select(chat.id.max()).from(chat).where(chat.room.id.eq(room.id))
                 ))
+                .orderBy(room.id.desc())
                 .fetch();
     }
 }
