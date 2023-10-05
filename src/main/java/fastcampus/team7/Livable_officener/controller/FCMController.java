@@ -28,10 +28,10 @@ public class FCMController {
     }
 
     @DeleteMapping("/fcm-token")
-    public ResponseEntity<?> unsubscribe(
+    public ResponseEntity<?> logout(
             @AuthenticationPrincipal User user) {
 
-        fcmService.unsubscribe(user.getEmail());
+        fcmService.delete(user.getEmail());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

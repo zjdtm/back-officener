@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -71,7 +70,7 @@ public class FCMService {
     }
 
     @Transactional
-    public void unsubscribe(String email) {
+    public void delete(String email) {
         fcmTokenRepository.delete(email);
     }
 
