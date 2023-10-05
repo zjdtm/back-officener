@@ -17,6 +17,7 @@ import fastcampus.team7.Livable_officener.global.websocket.WebSocketSessionManag
 import fastcampus.team7.Livable_officener.repository.ChatRepository;
 import fastcampus.team7.Livable_officener.repository.DeliveryParticipantRepository;
 import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
+import fastcampus.team7.Livable_officener.repository.NotificationRepository;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -47,6 +48,11 @@ class ChatServiceSendTest {
     private static DeliveryRepository roomRepository;
     @Mock
     private static DeliveryParticipantRepository roomParticipantRepository;
+
+    @Mock
+    private static NotificationRepository notificationRepository;
+    @Mock
+    private static FCMService fcmService;
     @Mock
     private static WebSocketSessionManager webSocketSessionManager;
 
@@ -65,6 +71,7 @@ class ChatServiceSendTest {
     void beforeEach() {
         sut = new ChatService(mapper, chatRepository, null, null,
                 roomRepository, roomParticipantRepository,
+                notificationRepository, fcmService,
                 webSocketSessionManager);
     }
 
@@ -81,7 +88,7 @@ class ChatServiceSendTest {
         map.put("content", content);
         map.put("sendTime", sendTime);
         String payload = new JSONObject(map).toString();
-        System.out.println("payload = " + payload);
+//        System.out.println("payload = " + payload);
 //        LocalDateTime parsedSendTimeLocal = LocalDateTime.parse(sendTimeLocal);
 //        System.out.println("parsedSendTimeLocal = " + parsedSendTimeLocal);
 
@@ -94,8 +101,8 @@ class ChatServiceSendTest {
 //        assertThat(payloadDto.getSendTime()).isEqualTo(ZonedDateTime.parse(sendTimeLocal).toOffsetDateTime().toString());
         assertThat(payloadDto.getSendTime()).isEqualTo(LocalDateTime.parse(sendTimeLocal));
 
-        String payloadWritten = mapper.writeValueAsString(payloadDto);
-        System.out.println("payloadWritten = " + payloadWritten);
+//        String payloadWritten = mapper.writeValueAsString(payloadDto);
+//        System.out.println("payloadWritten = " + payloadWritten);
     }
 
     @DisplayName("송신 및 저장되는 Chat에 senderId 포함")

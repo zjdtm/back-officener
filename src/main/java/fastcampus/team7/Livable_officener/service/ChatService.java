@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import fastcampus.team7.Livable_officener.domain.*;
 import fastcampus.team7.Livable_officener.dto.chat.*;
+import fastcampus.team7.Livable_officener.dto.fcm.FCMNotificationDTO;
 import fastcampus.team7.Livable_officener.global.constant.ChatType;
 import fastcampus.team7.Livable_officener.global.constant.Role;
 import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
@@ -38,6 +39,8 @@ public class ChatService {
     private final ReportRepository reportRepository;
     private final DeliveryRepository roomRepository;
     private final DeliveryParticipantRepository roomParticipantRepository;
+    private final NotificationRepository notificationRepository;
+    private final FCMService fcmService;
     private final WebSocketSessionManager webSocketSessionManager;
 
     @PostConstruct
@@ -124,10 +127,14 @@ public class ChatService {
     public void completeRemit(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
 
+        ChatType messageType = COMPLETE_REMITTANCE;
         RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
-        validateIfRoomParticipantIsGuest(roomParticipant.getRole(), "송금완료");
+        validateIfRoomParticipantIsGuest(roomParticipant.getRole(), messageType.getDescription());
         isRemitCompleted(roomParticipant);
         roomParticipant.completeRemit();
+
+        saveNotification(user, room, messageType);
+        pushNotificationToHostIfSubscribed(room, messageType);
 
         sendFixedSystemMessage(room, COMPLETE_REMITTANCE, user);
     }
@@ -136,32 +143,96 @@ public class ChatService {
     public void completeDelivery(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
 
+        ChatType messageType = COMPLETE_DELIVERY;
         RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
-        validateIfRoomParticipantIsHost(roomParticipant.getRole(), "배달완료");
-
+        validateIfRoomParticipantIsHost(roomParticipant.getRole(), messageType.getDescription());
         room.completeDelivery();
 
+        saveNotificationAndPushToSubscribedGuests(room, messageType);
+
         sendFixedSystemMessage(room, COMPLETE_DELIVERY, user);
+    }
+
+    private void saveNotificationAndPushToSubscribedGuests(Room room, ChatType messageType) {
+        List<Long> guestIds = roomParticipantRepository.findUserIdsByRoomIdAndRole(room.getId(), Role.GUEST);
+        // TODO 이미지 추후에 음식 사진 링크로 변경해야 함
+        FCMNotificationDTO dto = new FCMNotificationDTO(null);
+        for (Long guestId : guestIds) {
+            User guest = getUser(guestId);
+            saveNotification(guest, room, messageType);
+
+            boolean isSubscribed = fcmService.isSubscribed(guest.getEmail());
+            if (isSubscribed) {
+                String body = messageType.getSystemMessageContent(guest);
+                dto.setBody(body);
+                dto.setReceiverEmail(guest.getEmail());
+                fcmService.sendFcmNotification(dto);
+            }
+        }
     }
 
     @Transactional
     public void completeReceive(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
+
+        ChatType messageType = ChatType.COMPLETE_RECEIPT;
         RoomParticipant roomParticipant = getRoomParticipant(roomId, user.getId());
-        validateIfRoomParticipantIsGuest(roomParticipant.getRole(), "수령완료");
+        validateIfRoomParticipantIsGuest(roomParticipant.getRole(), messageType.getDescription());
         isReceiveCompleted(roomParticipant);
         roomParticipant.completeReceive();
 
+        saveNotification(user, room, messageType);
+        pushNotificationToHostIfSubscribed(room, messageType);
+
         sendFixedSystemMessage(room, COMPLETE_RECEIPT, user);
+    }
+
+    private void pushNotificationToHostIfSubscribed(Room room, ChatType messageType) {
+        User host = getHost(room);
+        boolean subscribed = fcmService.isSubscribed(host.getEmail());
+        if (subscribed) {
+            pushNotificationToHost(host, messageType);
+        }
     }
 
     @Transactional
     public void kickRequest(Long roomId, User user) throws IOException {
         Room room = getRoom(roomId);
+
+        ChatType messageType = ChatType.REQUEST_EXIT;
         RoomParticipant roomParticipant = getRoomParticipant(room.getId(), user.getId());
-        validateIfRoomParticipantIsGuest(roomParticipant.getRole(), "나가기요청");
+        validateIfRoomParticipantIsGuest(roomParticipant.getRole(), messageType.getDescription());
+
+        saveNotification(user, room, messageType);
+        pushNotificationToHostIfSubscribed(room, messageType);
 
         sendFixedSystemMessage(room, REQUEST_EXIT, user);
+    }
+
+    private void saveNotification(User user, Room room, ChatType type) {
+        Notification notification = new Notification(room, type, user);
+        notificationRepository.save(notification);
+    }
+
+    private void pushNotificationToHost(User host, ChatType messageType) {
+        String body = messageType.getSystemMessageContent(host);
+        // TODO 이미지 추후에 음식 사진 링크로 변경해야 함
+        FCMNotificationDTO dto = new FCMNotificationDTO(host.getEmail(), body, null);
+        fcmService.sendFcmNotification(dto);
+    }
+
+    private User getHost(Room room) {
+        List<Long> hostIds = roomParticipantRepository.findUserIdsByRoomIdAndRole(room.getId(), Role.HOST);
+        if (hostIds.size() != 1) {
+            throw new IllegalStateException("해당 함께배달에 호스트가 존재하지 않거나 둘 이상 존재합니다.");
+        }
+        Long hostId = hostIds.get(0);
+        return getUser(hostId);
+    }
+
+    private User getUser(Long hostId) {
+        return userRepository.findById(hostId)
+                .orElseThrow(NotFoundUserException::new);
     }
 
     public void kick(Long roomId, User user, KickDTO kickDTO) throws IOException {
