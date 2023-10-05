@@ -74,7 +74,8 @@ public class DeliveryService {
     }
 
     public RoomDetailDTO selectRoomDetail(Long id) {
-        // TODO : 예외처리 로직 추가
+        deliveryRepository.findById(id).orElseThrow(NotFoundRoomException::new);
+
         return deliveryRepository.findRoomById(id);
     }
 

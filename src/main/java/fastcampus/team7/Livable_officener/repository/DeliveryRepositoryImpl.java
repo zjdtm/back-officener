@@ -39,6 +39,7 @@ public class DeliveryRepositoryImpl implements DeliveryRepositoryCustom {
                                 room.attendees,
                                 room.maxAttendees,
                                 room.description,
+                                room.status,
                                 ExpressionUtils.as(
                                         Expressions.asBoolean(
                                                 findRoomHostById(id)
