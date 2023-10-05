@@ -114,7 +114,10 @@ public class DeliveryService {
     }
 
     public PagedRoomListResponseDTO getRoomList(Pageable pageable) {
-        Page<Room> rooms = deliveryRepository.findAll(pageable);
+        LocalDateTime startTime = LocalDateTime.now().toLocalDate().atStartOfDay();
+        LocalDateTime endTime = LocalDateTime.now().toLocalDate().atTime(23, 59, 59);
+
+        Page<Room> rooms = deliveryRepository.findByDeadlineBetween(startTime, endTime, pageable);
 
         PagedRoomListResponseDTO response = new PagedRoomListResponseDTO();
         response.setCurrentPage(rooms.getNumber());
