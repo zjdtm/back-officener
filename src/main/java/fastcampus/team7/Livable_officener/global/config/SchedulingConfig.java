@@ -1,4 +1,4 @@
-package fastcampus.team7.Livable_officener.service;
+package fastcampus.team7.Livable_officener.global.config;
 
 import fastcampus.team7.Livable_officener.domain.Notification;
 import fastcampus.team7.Livable_officener.domain.Room;
@@ -11,17 +11,20 @@ import fastcampus.team7.Livable_officener.repository.DeliveryParticipantReposito
 import fastcampus.team7.Livable_officener.repository.DeliveryRepository;
 import fastcampus.team7.Livable_officener.repository.NotificationRepository;
 import fastcampus.team7.Livable_officener.repository.UserRepository;
+import fastcampus.team7.Livable_officener.service.FCMService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
-@Service
-public class DeliveryScheduleService {
+@Configuration
+@EnableScheduling
+public class SchedulingConfig {
 
     private final DeliveryRepository deliveryRepository;
     private final DeliveryParticipantRepository participantRepository;
