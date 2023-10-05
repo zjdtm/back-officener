@@ -1,6 +1,7 @@
 package fastcampus.team7.Livable_officener.dto.delivery;
 
 import fastcampus.team7.Livable_officener.global.constant.FoodTag;
+import fastcampus.team7.Livable_officener.global.constant.RoomStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,10 +20,11 @@ public class ChatRoomListResponseDTO {
         private String recentMessage;
         private Integer numUnreadMessages;
         private FoodTag foodTag;
+        private RoomStatus roomStatus;
 
         public static ChatRoomListDTO of(ChatRoomListDTO chat) {
-            return new ChatRoomListDTO(chat.getChatRoomId(), chat.getStoreName(),
-                    chat.recentMessage, chat.numUnreadMessages, chat.getFoodTag());
+            return new ChatRoomListDTO(chat.getChatRoomId(), chat.getStoreName(), chat.getRecentMessage(),
+                    chat.getNumUnreadMessages(), chat.getFoodTag(), chat.getRoomStatus());
         }
     }
 

@@ -72,7 +72,8 @@ public class DeliveryRepositoryImpl implements DeliveryRepositoryCustom {
                                 room.storeName,
                                 chat.content,
                                 roomParticipant.unreadCount.as("numUnreadMessages"),
-                                room.tag
+                                room.tag,
+                                room.status
                         ))
                 .from(room)
                 .innerJoin(roomParticipant).on(
