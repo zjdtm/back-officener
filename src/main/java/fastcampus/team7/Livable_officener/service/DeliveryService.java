@@ -73,10 +73,10 @@ public class DeliveryService {
         deliveryParticipantRepository.save(roomParticipantSaveDTO.toEntity(room, user));
     }
 
-    public RoomDetailDTO selectRoomDetail(Long id) {
+    public RoomDetailDTO selectRoomDetail(Long id, User user) {
         deliveryRepository.findById(id).orElseThrow(NotFoundRoomException::new);
 
-        return deliveryRepository.findRoomById(id);
+        return deliveryRepository.findRoomById(id, user.getId());
     }
 
     @Transactional
