@@ -19,4 +19,6 @@ public interface DeliveryRepository extends JpaRepository<Room, Long>, DeliveryR
     List<Room> findByDeadlineAfterNow();
 
     List<Room> findByDeadlineBefore(LocalDateTime afterLimitTime);
+
+    Page<Room> findByDeadlineBetween(LocalDateTime startTime, LocalDateTime endTime, Pageable pageable);
 }
