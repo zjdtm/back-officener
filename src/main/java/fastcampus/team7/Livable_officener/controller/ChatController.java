@@ -5,6 +5,7 @@ import fastcampus.team7.Livable_officener.domain.User;
 import fastcampus.team7.Livable_officener.dto.chat.ChatroomInfoDTO;
 import fastcampus.team7.Livable_officener.dto.chat.KickDTO;
 import fastcampus.team7.Livable_officener.dto.chat.ReportDTO;
+import fastcampus.team7.Livable_officener.dto.chat.ReportResponseDTO;
 import fastcampus.team7.Livable_officener.global.util.APIDataResponse;
 import fastcampus.team7.Livable_officener.global.util.APIErrorResponse;
 import fastcampus.team7.Livable_officener.service.ChatService;
@@ -117,6 +118,7 @@ public class ChatController {
         }
 
         Report report = chatService.createReport(roomId, user, reportDTO);
-        return APIDataResponse.of(HttpStatus.CREATED, report);
+        ReportResponseDTO responseDTO = ReportResponseDTO.fromEntity(report);
+        return APIDataResponse.of(HttpStatus.CREATED, responseDTO);
     }
 }
