@@ -110,7 +110,7 @@ public class ChatController {
     public ResponseEntity<?> createReport(
             @PathVariable Long roomId,
             @AuthenticationPrincipal User user,
-            @Valid @RequestBody ReportDTO reportDTO) {
+            @RequestBody ReportDTO reportDTO) {
 
         if (reportDTO.getReportedUserId().equals(user.getId())) {
             return APIErrorResponse.of(HttpStatus.BAD_REQUEST, "자기 자신을 신고할 수는 없습니다.");

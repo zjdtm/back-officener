@@ -111,11 +111,11 @@ public class ChatService {
 
         // 채팅 메시지 DB에 저장
         chatRepository.save(Chat.from(room, sender, payloadDto));
-
-        // 웹소켓 연결되지 않은 참여자의 읽지 않은 메시지 수 갱신
-        incrementUnreadCountOfUnconnectedParticipant(room);
-
-        // 웹소켓 연결된 각 회원에 대하여 시스템 메시지 내용 생성
+        //
+        //        // 웹소켓 연결되지 않은 참여자의 읽지 않은 메시지 수 갱신
+        //        incrementUnreadCountOfUnconnectedParticipant(room);
+        //
+        //        // 웹소켓 연결된 각 회원에 대하여 시스템 메시지 내용 생성
         // SendPayloadDTO의 content 갱신
         // SendPayloadDTO 직렬화
         // TextMessage로 변환
@@ -268,13 +268,13 @@ public class ChatService {
 
     @Transactional
     public Report createReport(Long roomId, User user, ReportDTO reportDTO) {
-        getRoom(roomId);
+        Room room = getRoom(roomId);
         getRoomParticipant(roomId, user.getId());
 
         User reportedUser = validateReportedUser(reportDTO.getReportedUserId());
 
         validateReportFrequency(user, reportedUser);
-        Report report = Report.createReport(reportDTO, reportedUser, user);
+        Report report = Report.createReport(reportDTO, reportedUser, user, room);
 
         return reportRepository.save(report);
     }

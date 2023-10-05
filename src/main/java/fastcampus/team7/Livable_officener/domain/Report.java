@@ -30,8 +30,9 @@ public class Report extends BaseEntity {
     @Lob
     private String reportMessage;
 
-    public static Report createReport(ReportDTO reportDTO, User reportedUser, User reporter) {
+    public static Report createReport(ReportDTO reportDTO, User reportedUser, User reporter, Room room) {
         return Report.builder()
+                .room(room)
                 .reportedUser(reportedUser)
                 .reporter(reporter)
                 .type(reportDTO.getReportType())
