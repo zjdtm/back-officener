@@ -89,4 +89,8 @@ public class Room extends BaseEntity {
     public void updateRoomStatus(){
         this.status = RoomStatus.TERMINATED;
     }
+
+    public void terminate() {
+        this.status = RoomStatus.TERMINATED;
+    }
 }
