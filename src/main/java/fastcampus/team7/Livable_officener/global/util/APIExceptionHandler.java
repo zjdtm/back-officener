@@ -122,4 +122,9 @@ public class APIExceptionHandler {
     public ResponseEntity<?> handleInvalidPasswordException(InvalidPasswordException e) {
         return handleExceptionInternal(e, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler
+    public ResponseEntity<?> handleAlreadyReportSameUserException(AlreadyReportSameUserException e) {
+        return handleExceptionInternal(e, "오늘 이미 해당 사용자를 신고하셨습니다.", HttpStatus.BAD_REQUEST);
+    }
 }
