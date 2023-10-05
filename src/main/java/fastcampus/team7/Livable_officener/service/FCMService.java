@@ -76,6 +76,10 @@ public class FCMService {
 
     @Transactional(readOnly = true)
     public boolean isSubscribed(String email) {
-        return fcmTokenRepository.contains(email);
+        boolean tokenExists = fcmTokenRepository.contains(email);
+        if (!tokenExists) {
+            return false;
+        }
+        return fcmNotificationStatusRepository.isActive(email);
     }
 }
