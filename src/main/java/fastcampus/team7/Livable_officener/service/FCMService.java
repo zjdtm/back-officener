@@ -5,12 +5,15 @@ import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import fastcampus.team7.Livable_officener.dto.fcm.FCMNotificationDTO;
-import fastcampus.team7.Livable_officener.dto.fcm.FCMSubscribeDTO;
+import fastcampus.team7.Livable_officener.dto.fcm.FCMUpdateRequestDTO;
+import fastcampus.team7.Livable_officener.global.constant.FCMNotificationStatusUpdateType;
+import fastcampus.team7.Livable_officener.global.fcm.FCMNotificationStatusRepository;
 import fastcampus.team7.Livable_officener.global.fcm.FCMTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -18,11 +21,30 @@ import org.springframework.transaction.annotation.Transactional;
 public class FCMService {
 
     private final FCMTokenRepository fcmTokenRepository;
+    private final FCMNotificationStatusRepository fcmNotificationStatusRepository;
     private final FirebaseMessaging firebaseMessaging;
 
     @Transactional
-    public void registerFcmToken(FCMSubscribeDTO dto) {
+    public void update(FCMUpdateRequestDTO dto) {
+        FCMNotificationStatusUpdateType status = dto.getStatus();
+        if (status == FCMNotificationStatusUpdateType.ACTIVATE) {
+            turnOnNotificationPushing(dto);
+        } else if (status == FCMNotificationStatusUpdateType.DEACTIVATE) {
+            turnOffNotificationPushing(dto);
+        } else if (status == FCMNotificationStatusUpdateType.KEEP) {
+            // 로그인
+            fcmTokenRepository.save(dto);
+        }
+    }
+
+    private void turnOnNotificationPushing(FCMUpdateRequestDTO dto) {
         fcmTokenRepository.save(dto);
+        fcmNotificationStatusRepository.save(dto);
+    }
+
+    private void turnOffNotificationPushing(FCMUpdateRequestDTO dto) {
+        fcmTokenRepository.delete(dto.getEmail());
+        fcmNotificationStatusRepository.save(dto);
     }
 
     @Transactional
