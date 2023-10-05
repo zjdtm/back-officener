@@ -7,9 +7,7 @@ import java.util.List;
 import static fastcampus.team7.Livable_officener.dto.delivery.ChatRoomListResponseDTO.ChatRoomListDTO;
 
 public interface DeliveryRepositoryCustom {
-    RoomDetailDTO findRoomById(Long id);
-
-    Boolean findRoomHostById(Long roomId);
+    RoomDetailDTO findRoomById(Long roomId, Long userId);
 
     List<ChatRoomListDTO> findChatRoomList(Long userId);
 }

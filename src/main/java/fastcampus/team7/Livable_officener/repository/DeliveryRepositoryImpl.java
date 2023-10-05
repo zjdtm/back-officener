@@ -22,7 +22,7 @@ public class DeliveryRepositoryImpl implements DeliveryRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public RoomDetailDTO findRoomById(Long id) {
+    public RoomDetailDTO findRoomById(Long roomId, Long userId) {
         return queryFactory
                 .select(
                         Projections.constructor(RoomDetailDTO.class,
@@ -42,7 +42,7 @@ public class DeliveryRepositoryImpl implements DeliveryRepositoryCustom {
                                 room.status,
                                 ExpressionUtils.as(
                                         Expressions.asBoolean(
-                                                findRoomHostById(id)
+                                                findRoomHostById(roomId, userId)
                                         ), "isJoin"
                                 ),
                                 room.createdAt,
@@ -50,16 +50,19 @@ public class DeliveryRepositoryImpl implements DeliveryRepositoryCustom {
                 .from(room)
                 .innerJoin(roomParticipant).on(room.id.eq(roomParticipant.room.id))
                 .where(
-                        roomParticipant.room.id.eq(id),
+                        roomParticipant.room.id.eq(roomId),
                         roomParticipant.role.eq(Role.HOST)
                 )
                 .fetchOne();
     }
 
-    public Boolean findRoomHostById(Long roomId) {
+    public Boolean findRoomHostById(Long roomId, Long userId) {
         return queryFactory
                 .selectFrom(roomParticipant)
-                .where(roomParticipant.room.id.eq(roomId))
+                .where(
+                        roomParticipant.room.id.eq(roomId),
+                        roomParticipant.user.id.eq(userId)
+                )
                 .fetchFirst() != null;
     }
 

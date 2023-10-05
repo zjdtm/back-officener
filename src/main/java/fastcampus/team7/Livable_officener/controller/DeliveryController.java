@@ -29,8 +29,9 @@ public class DeliveryController {
     private final DeliveryService deliveryService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> findRoomDetail(@PathVariable Long id) {
-        final RoomDetailDTO response = deliveryService.selectRoomDetail(id);
+    public ResponseEntity<?> findRoomDetail(@PathVariable Long id,
+                                            @AuthenticationPrincipal User user) {
+        final RoomDetailDTO response = deliveryService.selectRoomDetail(id, user);
         return APIDataResponse.of(HttpStatus.OK, response);
     }
 
