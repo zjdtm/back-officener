@@ -32,8 +32,11 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeRequests(authorizationRequest -> authorizationRequest
-                    .antMatchers("/**")
-                    .permitAll())
+                    .antMatchers("/", "/api/building", "/api/auth", "/api/confirm", "/api/signup", "/api/login")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated()
+            )
             .cors(cors -> cors
                     .configurationSource(corsConfigurationSource()))
             .formLogin(AbstractHttpConfigurer::disable)

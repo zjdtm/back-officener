@@ -26,7 +26,7 @@ import java.util.Date;
 @Slf4j
 public class JwtProvider {
 
-    private static final long exp = 1000L * 60 * 5;
+    private static final long exp = 1000L * 60 * 60;
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_TOKEN_PREFIX = "Bearer ";
 
@@ -80,10 +80,6 @@ public class JwtProvider {
                 .getTime();
     }
 
-    /**
-     * @param request HttpServletRequest
-     * @return "Authorization" 헤더에서 "Bearer {token} 형식으로 추출
-     */
     public String resolveToken(HttpServletRequest request) {
         return request.getHeader(AUTHORIZATION_HEADER);
     }
@@ -102,10 +98,6 @@ public class JwtProvider {
         return getClaimsJwsByAccessToken(accessToken);
     }
 
-    /**
-     * @param bearerToken "Bearer {token}" 형식
-     * @return accessToken 을 추출
-     */
     public String parseAccessToken(String bearerToken) {
         if (!bearerToken.startsWith(BEARER_TOKEN_PREFIX)) {
             throw new IllegalArgumentException("Bearer 토큰이 아닙니다.");
