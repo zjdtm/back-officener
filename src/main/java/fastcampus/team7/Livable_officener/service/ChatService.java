@@ -257,7 +257,7 @@ public class ChatService {
 
         if (roomParticipant.getRole() == Role.HOST) {
             validateAllParticipantsCompletedRemitAndReceive(roomId);
-            roomRepository.deleteById(roomId);
+            room.terminate();
         } else if (roomParticipant.getRole() == Role.GUEST) {
             roomParticipant.guestExit();
             sendFixedSystemMessage(room, EXIT, user);
