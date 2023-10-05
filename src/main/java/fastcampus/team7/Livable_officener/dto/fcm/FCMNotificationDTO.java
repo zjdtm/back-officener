@@ -1,6 +1,8 @@
 package fastcampus.team7.Livable_officener.dto.fcm;
 
 import com.google.firebase.messaging.Notification;
+import fastcampus.team7.Livable_officener.domain.User;
+import fastcampus.team7.Livable_officener.global.constant.ChatType;
 import lombok.Getter;
 
 @Getter
@@ -28,12 +30,9 @@ public class FCMNotificationDTO {
         this.image = image;
     }
 
-    public void setReceiverEmail(String receiverEmail) {
-        this.receiverEmail = receiverEmail;
-    }
-
-    public void setBody(String body) {
-        this.body = body;
+    public void setReceiverEmailAndBody(ChatType type, User guest) {
+        receiverEmail = guest.getEmail();
+        body = type.getSystemMessageContent(guest);
     }
 
     public Notification makeNotification() {

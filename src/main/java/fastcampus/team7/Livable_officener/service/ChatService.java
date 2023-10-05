@@ -163,9 +163,7 @@ public class ChatService {
 
             boolean isSubscribed = fcmService.isSubscribed(guest.getEmail());
             if (isSubscribed) {
-                String body = messageType.getSystemMessageContent(guest);
-                dto.setBody(body);
-                dto.setReceiverEmail(guest.getEmail());
+                dto.setReceiverEmailAndBody(messageType, guest);
                 fcmService.sendFcmNotification(dto);
             }
         }
