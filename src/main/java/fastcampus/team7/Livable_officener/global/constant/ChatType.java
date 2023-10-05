@@ -11,6 +11,7 @@ public enum ChatType {
     TALK("채팅", false, null, 0),
     ENTER("입장", true, "%s님이 함께배달에 입장했습니다.", 1),
     CLOSE_PARTICIPATION("참여마감", true, "%s님이 참여한 배달의 모집이 완료되었습니다.", 1),
+    CLOSE_TO_DEADLINE("이체마감임박", true, "이체마감시간이 임박했어요. 빠른 송금 부탁드려요~", 0),
     COMPLETE_REMITTANCE("송금완료", true, "%s님이 송금을 완료했어요! 호스트님 확인해주세요.", 1),
     COMPLETE_DELIVERY("배달완료", true, "배달이 완료되었어요. 음식을 수령해주세요.", 0),
     COMPLETE_RECEIPT("수령완료", true, "%s님이 수령을 완료했어요!", 1),
